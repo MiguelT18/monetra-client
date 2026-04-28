@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
       <Link
         href="/"
-        className="flex items-center gap-1 text-md absolute top-5 left-5 border rounded-md border-slate-500/30 text-white/70 px-2 py-1 hover:bg-slate-500/10 transition-colors"
+        className="flex items-center gap-1 text-sm absolute top-5 left-5 border rounded-md border-slate-500/70 text-black/70 hover:bg-slate-500/10 dark:border-slate-500/30 dark:text-white/70 px-2 py-1 dark:hover:bg-slate-500/10 transition-colors"
       >
         <IoIosArrowBack />
         Inicio

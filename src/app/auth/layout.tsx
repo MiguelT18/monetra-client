@@ -1,12 +1,15 @@
-"use client";
-
+import { Metadata } from "next";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 
+export const metadata: Metadata = {
+  title: "Autenticación del usuario",
+};
+
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="min-h-dvh h-dvh flex flex-col items-center justify-center px-4 relative">
+    <main className="min-h-dvh h-dvh flex flex-col items-center justify-center relative">
       {children}
 
       <Link

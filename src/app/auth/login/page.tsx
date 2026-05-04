@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import LogoIcon from "@/icons/Logo";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNotification } from "@/components/NotificationContainer";
@@ -13,6 +14,8 @@ interface LoginUserProps {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
 
   const { notify } = useNotification();
@@ -26,11 +29,9 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginUserProps) => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
@@ -43,7 +44,7 @@ export default function LoginPage() {
       }
 
       notify("success", result.message);
-      setLoading(false);
+      router.push("/user/dashboard");
     } catch (error) {
       console.error("[ERROR]:", error);
       setLoading(false);
@@ -59,7 +60,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl p-8 shadow-xl dark:shadow-black/30"
+        className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl max-md:mx-5 max-md:p-4 p-8 shadow-xl dark:shadow-black/30"
       >
         <div className="flex items-center gap-3 mb-6">
           <motion.div

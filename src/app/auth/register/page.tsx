@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { useForm } from "react-hook-form";
 import LogoIcon from "@/icons/Logo";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useNotification } from "@/components/NotificationContainer";
 
@@ -14,6 +15,8 @@ interface RegisterUserProps {
 }
 
 export default function RegisterPage() {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
 
   const { notify } = useNotification();
@@ -26,13 +29,10 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterUserProps) => {
     setLoading(true);
-
     try {
-      const res = await fetch("http://localhost:8000/api/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
@@ -45,15 +45,16 @@ export default function RegisterPage() {
       }
 
       notify("success", result.message);
-      setLoading(false);
+      router.push("/auth/login");
     } catch (error) {
       console.error("[ERROR]:", error);
+      notify("error", "Error registrando al usuario");
       setLoading(false);
     }
   };
 
   return (
-    <section className="relative size-full flex items-center justify-center bg-gray-50 dark:bg-[#0B0F14]">
+    <section className="relative size-full flex items-center justify-center bg-gray-50 dark:bg-[#0B0F14] py-10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#7C3AED20,transparent_60%)] dark:bg-[radial-gradient(circle_at_top,#7C3AED40,transparent_60%)] backdrop-blur-2xl pointer-events-none" />
 
       <motion.form
@@ -61,7 +62,7 @@ export default function RegisterPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl p-8 shadow-xl dark:shadow-black/30"
+        className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl max-md:p-4 p-8 shadow-xl dark:shadow-black/30 max-md:mx-5"
       >
         <div className="flex items-center gap-3 mb-6">
           <motion.div

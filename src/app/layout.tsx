@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NotificationProvider } from "@/hooks/useNotification";
 import "./globals.css";
-import { NotificationProvider } from "@/components/NotificationContainer";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

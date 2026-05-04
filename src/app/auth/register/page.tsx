@@ -6,7 +6,7 @@ import LogoIcon from "@/icons/Logo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useNotification } from "@/components/NotificationContainer";
+import { useNotification } from "@/hooks/useNotification";
 
 interface RegisterUserProps {
   username: string;

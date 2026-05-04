@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { useNotification } from "@/components/NotificationContainer";
+import { useNotification } from "@/hooks/useNotification";
 
 interface LoginUserProps {
   email: string;

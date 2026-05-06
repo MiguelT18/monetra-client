@@ -43,8 +43,8 @@ export default function LoginPage() {
         return;
       }
 
-      notify("success", result.message);
       router.push("/user/dashboard");
+      notify("success", result.message);
     } catch (error) {
       console.error("[ERROR]:", error);
       setLoading(false);

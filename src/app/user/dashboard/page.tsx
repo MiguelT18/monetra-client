@@ -31,8 +31,8 @@ export default function UserDashboard() {
       const result = await res.json();
 
       if (res.ok) {
+        router.push("/auth/login");
         notify("success", result.message);
-        setTimeout(() => router.push("/auth/login"), 1000);
       } else {
         notify("error", result.message);
       }

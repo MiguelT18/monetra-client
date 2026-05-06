@@ -160,7 +160,7 @@ function RoleSelect({ currentRole }: { currentRole: Role }) {
                 onClick={() => {
                   handleSelect(role.value);
                 }}
-                className="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-left cursor-pointer group"
+                className="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-primary/10 transition-colors text-left cursor-pointer group"
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">

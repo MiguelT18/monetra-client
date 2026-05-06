@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/contexts/themeContext";
 import { NotificationProvider } from "@/hooks/useNotification";
 import "./globals.css";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -30,7 +31,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <NotificationProvider>{children}</NotificationProvider>
+        <ThemeProvider>
+          <NotificationProvider>{children}</NotificationProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

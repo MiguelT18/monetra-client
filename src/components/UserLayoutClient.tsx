@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ReactNode } from "react";
-import { UserNavbar } from "@/components/UI/UserNavbar";
+import { UserNavbar } from "@/components/UI/navbar/UserNavbar";
 import { UserAside } from "@/components/UI/UserAside";
 import { ProfileProvider } from "@/hooks/useProfile";
 
@@ -29,7 +29,7 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
 
   return (
     <ProfileProvider>
-      <main className="min-h-dvh h-full w-full md:grid md:grid-cols-[auto_1fr] grid-rows-[auto_1fr] gap-2 p-2 max-md:space-y-2">
+      <main className="min-h-dvh h-full w-full md:grid md:grid-cols-[auto_1fr] grid-rows-[auto_1fr] gap-2 p-2 max-md:space-y-2 bg-white dark:bg-[#171717]">
         <UserNavbar
           isOpen={isOpen}
           onToggle={() => setIsOpen((prev) => !prev)} // 👈 toggle limpio

@@ -22,6 +22,8 @@
       "@/*": ["./src/*"],
       "@/icons/*": ["./src/icons/*"],
       "@/components/*": ["./src/components/*"],
+      "@/contexts/*": ["./src/contexts/*"],
+      "@/hooks/*": ["./src/hooks/*"],
     }
   },
   "include": [

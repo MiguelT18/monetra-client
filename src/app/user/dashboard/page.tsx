@@ -4,11 +4,25 @@ import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useNotification } from "@/hooks/useNotification";
+import { useProfile } from "@/hooks/useProfile";
+import type { Role } from "@/types/user";
+
+const DASHBOARD_TITLE: Record<Role, string> = {
+  STUDENT: "Dashboard del estudiante",
+  PRODUCER: "Dashboard del productor",
+  AFFILIATE: "Dashboard del afiliado",
+};
 
 export default function UserDashboard() {
   const router = useRouter();
+
   const [loading, setLoading] = useState(false);
+
   const { notify } = useNotification();
+  const { user } = useProfile();
+
+  const role = (user?.role ?? "STUDENT") as Role;
+  const title = DASHBOARD_TITLE[role];
 
   const handleLogout = async () => {
     setLoading(true);
@@ -18,7 +32,7 @@ export default function UserDashboard() {
 
       if (res.ok) {
         notify("success", result.message);
-        router.push("/auth/login");
+        setTimeout(() => router.push("/auth/login"), 1000);
       } else {
         notify("error", result.message);
       }
@@ -33,12 +47,13 @@ export default function UserDashboard() {
   return (
     <div className="grid place-content-center h-full">
       <motion.h2
-        className="text-2xl"
+        key={title} // 👈 re-anima cuando cambia el rol
+        className="text-2xl text-gray-900 dark:text-white text-center"
         initial={{ opacity: 0, y: 40 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
         animate={{ opacity: 1, y: 0 }}
       >
-        Dashboard del usuario
+        {title}
       </motion.h2>
 
       <motion.button

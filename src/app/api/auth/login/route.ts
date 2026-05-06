@@ -17,12 +17,16 @@ export async function POST(request: NextRequest) {
 
   const response = NextResponse.json(result, { status: 200 });
 
-  // 👇 Reenviar las cookies que el backend seteó al browser
+  // reenviar las cookies del backend
   const setCookieHeader = res.headers.getSetCookie();
-
   setCookieHeader.forEach((cookie) => {
     response.headers.append("Set-Cookie", cookie);
   });
+
+  // 👇 agregar user_role con el mismo mecanismo
+  const isProduction = process.env.NODE_ENV === "production";
+  const roleCookie = `user_role=${result.data.user.role}; Path=/; Max-Age=${60 * 60}; SameSite=Lax${isProduction ? "; Secure" : ""}`;
+  response.headers.append("Set-Cookie", roleCookie);
 
   return response;
 }

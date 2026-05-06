@@ -6,6 +6,7 @@ import MenuButton from "@/components/UI/MenuButton";
 import { useProfile } from "@/hooks/useProfile";
 import { FaUserAlt } from "react-icons/fa";
 import { FiBell, FiChevronDown, FiCheck } from "react-icons/fi";
+import { useNotification } from "@/hooks/useNotification";
 
 interface UserNavbarProps {
   isOpen: boolean;
@@ -35,35 +36,104 @@ const ROLES: { value: Role; label: string; description: string }[] = [
 function RoleSelect({ currentRole }: { currentRole: Role }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Role>(currentRole ?? "STUDENT");
+  const [updating, setUpdating] = useState<Role | null>(null);
+
+  const { notify } = useNotification();
+  const { changeRole } = useProfile();
+
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        if (!updating) setOpen(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [updating]);
 
   const selectedRole = ROLES.find((r) => r.value === selected)!;
+
+  const handleSelect = async (role: Role) => {
+    if (role === selected || updating) return;
+
+    setUpdating(role);
+
+    try {
+      const { ok, message } = await changeRole(role);
+
+      if (!ok) {
+        notify("error", message);
+        return;
+      }
+
+      setSelected(role);
+      setOpen(false);
+    } catch {
+      notify("error", "Error al actualizar el rol");
+    } finally {
+      setUpdating(null);
+    }
+  };
 
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 transition-all text-sm text-gray-700 dark:text-white/80 cursor-pointer group"
+        onClick={() => {
+          if (!updating) setOpen(!open);
+        }}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 transition-all text-sm text-gray-700 dark:text-white/80 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <span className="group-hover:text-primary">{selectedRole.label}</span>
-        <motion.span
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <FiChevronDown
-            size={14}
-            className="text-gray-400 dark:text-white/40 group-hover:text-primary"
-          />
-        </motion.span>
+
+        <AnimatePresence mode="wait" initial={false}>
+          {updating ? (
+            <motion.span
+              key="spinner"
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.15 }}
+            >
+              <motion.span
+                animate={{ rotate: 360 }}
+                transition={{ duration: 0.7, repeat: Infinity, ease: "linear" }}
+                className="block"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle
+                    cx="7"
+                    cy="7"
+                    r="5.5"
+                    stroke="currentColor"
+                    strokeOpacity="0.2"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M7 1.5A5.5 5.5 0 0 1 12.5 7"
+                    stroke="#7C3AED"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </motion.span>
+            </motion.span>
+          ) : (
+            <motion.span
+              key="chevron"
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1, rotate: open ? 180 : 0 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.15 }}
+            >
+              <FiChevronDown
+                size={14}
+                className="text-gray-400 dark:text-white/40 group-hover:text-primary"
+              />
+            </motion.span>
+          )}
+        </AnimatePresence>
       </button>
 
       <AnimatePresence>
@@ -88,8 +158,7 @@ function RoleSelect({ currentRole }: { currentRole: Role }) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.06, duration: 0.2, ease: "easeOut" }}
                 onClick={() => {
-                  setSelected(role.value);
-                  setOpen(false);
+                  handleSelect(role.value);
                 }}
                 className="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-left cursor-pointer group"
               >
@@ -196,8 +265,8 @@ export function UserNavbar({ isOpen, onToggle }: UserNavbarProps) {
       {/* Mobile navbar */}
       <div className="md:hidden">
         <div className="flex items-center justify-between w-full">
-          <MenuButton isOpen={isOpen} onToggle={onToggle} />
           <NotificationButton />
+          <MenuButton isOpen={isOpen} onToggle={onToggle} />
         </div>
       </div>
     </nav>

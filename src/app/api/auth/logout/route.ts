@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
   // Limpiar las cookies en el browser
   response.cookies.delete("access_token");
   response.cookies.delete("refresh_token");
+  response.cookies.delete("user_role");
 
   return response;
 }

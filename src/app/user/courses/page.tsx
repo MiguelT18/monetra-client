@@ -19,7 +19,7 @@ export default function UserCourses() {
         {username ? (
           username
         ) : (
-          <div className="block w-40 h-8 rounded-md bg-gray-300 dark:bg-white/10" />
+          <div className="block w-40 h-8 rounded-md bg-gray-300 dark:bg-white/10 animate-pulse" />
         )}
       </motion.h2>
     </div>

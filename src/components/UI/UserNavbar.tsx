@@ -10,7 +10,8 @@ import { useNotification } from "@/hooks/useNotification";
 
 interface UserNavbarProps {
   isOpen: boolean;
-  onToggle: (value: boolean) => void;
+  onToggle: () => void;
+  buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 type Role = "STUDENT" | "PRODUCER" | "AFFILIATE";
@@ -207,14 +208,14 @@ function NotificationButton() {
   );
 }
 
-export function UserNavbar({ isOpen, onToggle }: UserNavbarProps) {
+export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
   const { user, loading } = useProfile();
 
   return (
-    <nav className="col-span-3 bg-gray-200/60 dark:bg-[#101826]/30 mb-2 rounded-lg p-3">
+    <nav className="col-start-2 bg-gray-200/60 dark:bg-[#101826]/30 rounded-lg p-3">
       {/* Desktop navbar */}
       <div className="max-md:hidden flex items-center justify-between">
-        <MenuButton isOpen={isOpen} onToggle={onToggle} />
+        <MenuButton isOpen={isOpen} onToggle={onToggle} buttonRef={buttonRef} />
 
         <div className="flex items-center gap-3">
           {/* Role select */}
@@ -266,7 +267,11 @@ export function UserNavbar({ isOpen, onToggle }: UserNavbarProps) {
       <div className="md:hidden">
         <div className="flex items-center justify-between w-full">
           <NotificationButton />
-          <MenuButton isOpen={isOpen} onToggle={onToggle} />
+          <MenuButton
+            isOpen={isOpen}
+            onToggle={onToggle}
+            buttonRef={buttonRef}
+          />
         </div>
       </div>
     </nav>

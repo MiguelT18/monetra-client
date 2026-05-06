@@ -1,29 +1,18 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useEffect, useRef } from "react";
 
 interface MenuButtonProps {
   isOpen: boolean;
   onToggle: (value: boolean) => void;
+  buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
-export default function MenuButton({ isOpen, onToggle }: MenuButtonProps) {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
-        onToggle(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onToggle]);
-
+export default function MenuButton({
+  isOpen,
+  onToggle,
+  buttonRef,
+}: MenuButtonProps) {
   return (
     <button
       ref={buttonRef}

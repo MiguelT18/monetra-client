@@ -7,9 +7,11 @@ import { IconType } from "react-icons";
 import { useProfile } from "@/hooks/useProfile";
 import { CiSettings } from "react-icons/ci";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface UserAsideProps {
   isOpen: boolean;
+  asideRef: React.RefObject<HTMLElement | null>;
 }
 
 interface NavItem {
@@ -40,8 +42,10 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-export function UserAside({ isOpen }: UserAsideProps) {
+export function UserAside({ isOpen, asideRef }: UserAsideProps) {
   const { user, loading } = useProfile();
+  const pathname = usePathname();
+
   const role = (user?.role ?? "STUDENT") as Role;
 
   const visibleItems = loading
@@ -50,25 +54,60 @@ export function UserAside({ isOpen }: UserAsideProps) {
 
   return (
     <motion.aside
-      animate={{ width: isOpen ? 220 : 56 }}
+      ref={asideRef}
+      animate={{ width: isOpen ? 256 : 56 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="max-md:hidden bg-gray-200/60 dark:bg-[#101826]/30 rounded-lg p-2 overflow-hidden"
+      className="row-start-1 row-span-2 max-md:hidden bg-gray-200/60 dark:bg-[#101826]/30 rounded-lg p-2 overflow-hidden"
     >
       <ul className="space-y-1">
         {visibleItems.map((item) => {
           const Icon = item.icon;
+
+          const isActive =
+            pathname === item.href || pathname.startsWith(item.href + "/");
+
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
                 className={`
-            flex items-center text-gray-400 dark:hover:text-primary dark:hover:bg-primary/15
-            p-2 rounded-md transition-all cursor-pointer
-            ${isOpen ? "gap-2 justify-start" : "justify-center"}
-          `}
+                  relative flex items-center p-3 rounded-md transition-all
+                  ${isOpen ? "gap-2 justify-start" : "justify-center"}
+                  
+                  ${
+                    isActive
+                      ? "text-primary cursor-not-allowed"
+                      : "text-gray-400 dark:hover:text-primary dark:hover:bg-primary/15 cursor-pointer"
+                  }
+                `}
               >
-                <Icon size={20} className="shrink-0" />
+                {/* 🔥 Barra izquierda activa */}
+                {isActive && (
+                  <motion.div
+                    layoutId="active-bar"
+                    className="absolute left-0 top-0 bottom-1 w-1 h-full bg-primary rounded-l-md"
+                  />
+                )}
 
+                {/* Background pill */}
+                {isActive && (
+                  <motion.div
+                    layoutId="active-pill"
+                    className={`absolute inset-0 ${
+                      isOpen ? "bg-primary/5" : "bg-primary/15"
+                    } rounded-md`}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 30,
+                    }}
+                  />
+                )}
+
+                {/* Icon */}
+                <Icon size={20} className="shrink-0 relative z-10" />
+
+                {/* Label */}
                 <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.span
@@ -80,7 +119,7 @@ export function UserAside({ isOpen }: UserAsideProps) {
                         stiffness: 300,
                         damping: 20,
                       }}
-                      className="whitespace-nowrap overflow-hidden"
+                      className="whitespace-nowrap overflow-hidden relative z-10"
                     >
                       {item.label}
                     </motion.span>

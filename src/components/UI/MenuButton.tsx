@@ -28,22 +28,22 @@ export default function MenuButton({ isOpen, onToggle }: MenuButtonProps) {
     <button
       ref={buttonRef}
       onClick={() => onToggle(!isOpen)}
-      className="flex flex-col justify-center items-center w-8 h-8 cursor-pointer space-y-1.25 text-gray-400 hover:text-gray-200 p-2 rounded-lg hover:bg-gray-800 transition-colors outline-none"
+      className="flex flex-col justify-center items-center w-8 h-8 cursor-pointer space-y-1.25 p-2 rounded-lg dark:hover:bg-primary/15 transition-colors outline-none group"
     >
       <motion.span
         animate={isOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
-        className="block h-0.5 w-5 bg-gray-400 rounded-full origin-center"
+        className="block h-0.5 w-5 bg-gray-800 dark:bg-gray-400 dark:group-hover:bg-primary rounded-full origin-center"
       />
       <motion.span
         animate={isOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
         transition={{ duration: 0.1 }}
-        className="block h-0.5 w-5 bg-gray-400 rounded-full"
+        className="block h-0.5 w-5 bg-gray-800 dark:bg-gray-400 dark:group-hover:bg-primary rounded-full"
       />
       <motion.span
         animate={isOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
-        className="block h-0.5 w-5 bg-gray-400 rounded-full origin-center"
+        className="block h-0.5 w-5 bg-gray-800 dark:bg-gray-400 dark:group-hover:bg-primary rounded-full origin-center"
       />
     </button>
   );

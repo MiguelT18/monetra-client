@@ -10,15 +10,23 @@ import { useNotification } from "@/hooks/useNotification";
 
 interface RegisterUserProps {
   username: string;
+  firstname: string;
+  lastname: string;
   email: string;
   password: string;
 }
 
+const inputClass =
+  "w-full rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition hover:border-[#7C3AED] hover:ring-1 hover:ring-[#7C3AED]";
+
+const fieldVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0 },
+};
+
 export default function RegisterPage() {
   const router = useRouter();
-
   const [loading, setLoading] = useState(false);
-
   const { notify } = useNotification();
 
   const {
@@ -33,7 +41,10 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          fullname: `${data.firstname} ${data.lastname}`.trim(),
+        }),
       });
 
       const result = await res.json();
@@ -85,19 +96,69 @@ export default function RegisterPage() {
             animate="visible"
             variants={{
               hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: 0.07,
-                },
-              },
+              visible: { transition: { staggerChildren: 0.07 } },
             }}
             className="space-y-4"
           >
+            {/* Nombres y apellidos en la misma fila */}
+            <div className="grid grid-cols-2 gap-3">
+              <motion.div
+                variants={fieldVariants}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col gap-1"
+              >
+                <label
+                  htmlFor="firstname"
+                  className="text-sm text-gray-600 dark:text-white/70"
+                >
+                  Nombres
+                </label>
+                <input
+                  {...register("firstname", {
+                    required: "El nombre es obligatorio",
+                  })}
+                  className={inputClass}
+                  type="text"
+                  id="firstname"
+                  placeholder="John"
+                />
+                {errors?.firstname && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.firstname.message}
+                  </span>
+                )}
+              </motion.div>
+
+              <motion.div
+                variants={fieldVariants}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col gap-1"
+              >
+                <label
+                  htmlFor="lastname"
+                  className="text-sm text-gray-600 dark:text-white/70"
+                >
+                  Apellidos
+                </label>
+                <input
+                  {...register("lastname", {
+                    required: "El apellido es obligatorio",
+                  })}
+                  className={inputClass}
+                  type="text"
+                  id="lastname"
+                  placeholder="Doe"
+                />
+                {errors?.lastname && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.lastname.message}
+                  </span>
+                )}
+              </motion.div>
+            </div>
+
             <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 8 },
-                visible: { opacity: 1, y: 0 },
-              }}
+              variants={fieldVariants}
               transition={{ duration: 0.3 }}
               className="flex flex-col gap-1"
             >
@@ -107,17 +168,15 @@ export default function RegisterPage() {
               >
                 Nombre de usuario
               </label>
-
               <input
                 {...register("username", {
                   required: "El nombre de usuario es obligatorio",
                 })}
-                className="w-full rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition hover:border-[#7C3AED] hover:ring-1 hover:ring-[#7C3AED]"
+                className={inputClass}
                 type="text"
                 id="username"
                 placeholder="john_doe"
               />
-
               {errors?.username && (
                 <span className="text-red-500 text-sm mt-1">
                   {errors.username.message}
@@ -126,10 +185,7 @@ export default function RegisterPage() {
             </motion.div>
 
             <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 8 },
-                visible: { opacity: 1, y: 0 },
-              }}
+              variants={fieldVariants}
               transition={{ duration: 0.3 }}
               className="flex flex-col gap-1"
             >
@@ -139,17 +195,15 @@ export default function RegisterPage() {
               >
                 Email
               </label>
-
               <input
                 {...register("email", {
                   required: "El correo electrónico es obligatorio",
                 })}
-                className="w-full rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition hover:border-[#7C3AED] hover:ring-1 hover:ring-[#7C3AED]"
+                className={inputClass}
                 type="email"
                 id="email"
                 placeholder="john_doe@gmail.com"
               />
-
               {errors?.email && (
                 <span className="text-red-500 text-sm mt-1">
                   {errors.email.message}
@@ -158,10 +212,7 @@ export default function RegisterPage() {
             </motion.div>
 
             <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 8 },
-                visible: { opacity: 1, y: 0 },
-              }}
+              variants={fieldVariants}
               transition={{ duration: 0.3 }}
               className="flex flex-col gap-1"
             >
@@ -171,17 +222,15 @@ export default function RegisterPage() {
               >
                 Contraseña
               </label>
-
               <input
                 {...register("password", {
                   required: "La contraseña es obligatoria",
                 })}
-                className="w-full rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition hover:border-[#7C3AED] hover:ring-1 hover:ring-[#7C3AED]"
+                className={inputClass}
                 type="password"
                 id="password"
                 placeholder="••••••••"
               />
-
               {errors?.password && (
                 <span className="text-red-500 text-sm mt-1">
                   {errors.password.message}

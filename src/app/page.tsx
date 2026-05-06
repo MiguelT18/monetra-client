@@ -8,13 +8,13 @@ export default function Home() {
       <div className="w-full flex gap-4 pt-4">
         <Link
           href="/auth/register"
-          className="bg-white text-black w-full inline-block text-center rounded-md py-2 hover:bg-white/70 transition-all"
+          className="bg-black text-white dark:bg-white dark:text-black w-full inline-block text-center rounded-md py-2 hover:bg-black/70 dark:hover:bg-white/70 transition-all"
         >
           Registrarse
         </Link>
         <Link
           href="/auth/login"
-          className="bg-white text-black w-full inline-block text-center rounded-md py-2 hover:bg-white/70 transition-all"
+          className="bg-black text-white dark:bg-white dark:text-black w-full inline-block text-center rounded-md py-2 hover:bg-black/70 dark:hover:bg-white/70 transition-all"
         >
           Iniciar sesión
         </Link>

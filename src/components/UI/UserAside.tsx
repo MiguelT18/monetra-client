@@ -10,12 +10,18 @@ interface UserAsideProps {
 export function UserAside({ isOpen }: UserAsideProps) {
   return (
     <motion.aside
-      animate={{ width: isOpen ? 192 : 56 }}
+      animate={{ width: isOpen ? 220 : 56 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="max-md:hidden bg-[#101826]/30 rounded-lg p-4 overflow-hidden"
+      className="max-md:hidden bg-gray-200/60 dark:bg-[#101826]/30 rounded-lg p-2 overflow-hidden"
     >
-      <ul className="space-y-4">
-        <li className="flex items-center space-x-2 text-gray-400 hover:text-gray-200 cursor-pointer">
+      <ul className="space-y-1">
+        <li
+          className={`
+            flex items-center text-gray-400 dark:hover:text-primary dark:hover:bg-primary/15
+            p-2 rounded-md transition-all cursor-pointer
+            ${isOpen ? "gap-2 justify-start" : "justify-center"}
+          `}
+        >
           <MdOutlineDashboard size={20} className="shrink-0" />
 
           <AnimatePresence initial={false}>

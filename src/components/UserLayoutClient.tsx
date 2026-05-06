@@ -12,7 +12,7 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
     <main className="min-h-dvh h-full w-full md:grid md:grid-cols-[auto_1fr] grid-rows-[auto_1fr] p-2">
       <UserNavbar isOpen={isOpen} onToggle={setIsOpen} />
       <UserAside isOpen={isOpen} />
-      <section className="bg-[#101826]/30 md:ml-2 rounded-lg p-4">
+      <section className="bg-gray-200/60 dark:bg-[#101826]/30 md:ml-2 rounded-lg p-4">
         {children}
       </section>
     </main>

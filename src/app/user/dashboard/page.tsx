@@ -44,7 +44,7 @@ export default function UserDashboard() {
       <motion.button
         onClick={handleLogout}
         disabled={loading}
-        className="bg-white text-black mt-6 cursor-pointer py-2 rounded-md hover:bg-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-black text-white dark:bg-white dark:text-black mt-6 cursor-pointer py-2 rounded-md hover:bg-black/70 dark:hover:bg-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         whileHover={{ scale: 1.05 }}

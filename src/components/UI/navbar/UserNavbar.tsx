@@ -1,6 +1,6 @@
 "use client";
 
-import MenuButton from "@/components/UI/MenuButton";
+import MenuButton from "@/components/MenuButton";
 import { useProfile } from "@/hooks/useProfile";
 import { FaUserAlt } from "react-icons/fa";
 import { RoleSelect } from "./desktop/RoleSelect";

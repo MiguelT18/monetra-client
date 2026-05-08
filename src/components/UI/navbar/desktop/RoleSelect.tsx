@@ -3,9 +3,10 @@
 import { motion, AnimatePresence } from "motion/react";
 import { useNotification } from "@/hooks/useNotification";
 import { useProfile } from "@/hooks/useProfile";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { FiChevronDown, FiCheck } from "react-icons/fi";
 import type { Role } from "@/types/user";
+import { DropdownMenu } from "@/components/DropdownMenu";
 
 const ROLES: { value: Role; label: string; description: string }[] = [
   {
@@ -33,17 +34,7 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
   const { notify } = useNotification();
   const { changeRole } = useProfile();
 
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        if (!updating) setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [updating]);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const selectedRole = ROLES.find((r) => r.value === selected)!;
 
@@ -70,10 +61,11 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
   };
 
   return (
-    <div ref={ref} className="relative">
+    <>
       <button
+        ref={buttonRef}
         onClick={() => {
-          if (!updating) setOpen(!open);
+          if (!updating) setOpen((prev) => !prev);
         }}
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 transition-all text-sm text-gray-700 dark:text-white/80 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed"
       >
@@ -128,57 +120,45 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
         </AnimatePresence>
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scaleY: 0.85, scaleX: 0.96 }}
-            animate={{ opacity: 1, y: 0, scaleY: 1, scaleX: 1 }}
-            exit={{ opacity: 0, y: -4, scaleY: 0.9, scaleX: 0.98 }}
-            transition={{
-              type: "spring",
-              stiffness: 400,
-              damping: 28,
-              mass: 0.8,
-            }}
-            style={{ originY: 0, originX: 1 }}
-            className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-surface shadow-xl dark:shadow-black/40 overflow-hidden z-50"
+      <DropdownMenu
+        isOpen={open}
+        onClose={() => {
+          if (!updating) setOpen(false);
+        }}
+        anchorRef={buttonRef}
+        align="left"
+        offset={8}
+        className="w-60"
+      >
+        {ROLES.map((role, i) => (
+          <motion.button
+            key={role.value}
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.06, duration: 0.2, ease: "easeOut" }}
+            onClick={() => handleSelect(role.value)}
+            className="w-full flex items-start gap-3 px-4 py-3 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors text-left cursor-pointer group"
           >
-            {ROLES.map((role, i) => (
-              <motion.button
-                key={role.value}
-                initial={{ opacity: 0, x: -6 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.06, duration: 0.2, ease: "easeOut" }}
-                onClick={() => {
-                  handleSelect(role.value);
-                }}
-                className="w-full flex items-start gap-3 px-4 py-3 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors text-left cursor-pointer group"
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {role.label}
+              </p>
+              <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">
+                {role.description}
+              </p>
+            </div>
+            {selected === role.value && (
+              <motion.span
+                initial={{ scale: 0, rotate: -90 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {role.label}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">
-                    {role.description}
-                  </p>
-                </div>
-                {selected === role.value && (
-                  <motion.span
-                    initial={{ scale: 0, rotate: -90 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                  >
-                    <FiCheck
-                      size={14}
-                      className="text-[#7C3AED] mt-0.5 shrink-0"
-                    />
-                  </motion.span>
-                )}
-              </motion.button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+                <FiCheck size={14} className="text-[#7C3AED] mt-0.5 shrink-0" />
+              </motion.span>
+            )}
+          </motion.button>
+        ))}
+      </DropdownMenu>
+    </>
   );
 }

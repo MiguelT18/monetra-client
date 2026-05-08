@@ -17,7 +17,6 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
       const clickedAside = asideRef.current?.contains(target);
       const clickedButton = buttonRef.current?.contains(target);
 
-      // cerrar solo si el click fue fuera del aside Y fuera del botón
       if (!clickedAside && !clickedButton) {
         setIsOpen(false);
       }

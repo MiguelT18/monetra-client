@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 
 interface MenuButtonProps {
   isOpen: boolean;
-  onToggle: (value: boolean) => void;
+  onToggle: () => void;
   buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -16,7 +16,10 @@ export default function MenuButton({
   return (
     <button
       ref={buttonRef}
-      onClick={() => onToggle(!isOpen)}
+      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation();
+        onToggle();
+      }}
       className="flex flex-col justify-center items-center w-8 h-8 cursor-pointer space-y-1.25 p-2 rounded-lg hover:bg-primary/15 transition-colors outline-none group"
     >
       <motion.span

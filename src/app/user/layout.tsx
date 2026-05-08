@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { UserLayoutClient } from "@/components/UserLayoutClient";
+import { UserLayoutClient } from "@/components/UI/UserLayoutClient";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

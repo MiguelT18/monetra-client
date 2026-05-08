@@ -29,15 +29,15 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
 
   return (
     <ProfileProvider>
-      <main className="min-h-dvh h-full w-full md:grid md:grid-cols-[auto_1fr] grid-rows-[auto_1fr] gap-2 p-2 max-md:space-y-2 bg-white dark:bg-[#171717]">
+      <main className="min-h-dvh h-full w-full md:grid md:grid-cols-[auto_1fr] grid-rows-[auto_1fr] gap-2 p-2 max-md:space-y-2 bg-background">
         <UserNavbar
           isOpen={isOpen}
-          onToggle={() => setIsOpen((prev) => !prev)} // 👈 toggle limpio
+          onToggle={() => setIsOpen((prev) => !prev)}
           buttonRef={buttonRef}
         />
         <UserAside isOpen={isOpen} asideRef={asideRef} />
 
-        <section className="row-start-2 col-start-2 bg-gray-200/60 dark:bg-[#101826]/30 rounded-lg p-4">
+        <section className="row-start-2 col-start-2 bg-surface rounded-lg p-4">
           {children}
         </section>
       </main>

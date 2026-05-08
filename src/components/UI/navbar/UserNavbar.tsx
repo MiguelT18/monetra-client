@@ -21,7 +21,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
   const { theme, toggle } = useThemeContext();
 
   return (
-    <nav className="col-start-2 bg-gray-200/60 dark:bg-[#101826]/30 rounded-lg p-3">
+    <nav className="col-start-2 bg-surface rounded-lg p-3">
       {/* Desktop navbar */}
       <div className="max-md:hidden flex items-center justify-between">
         <MenuButton isOpen={isOpen} onToggle={onToggle} buttonRef={buttonRef} />
@@ -47,10 +47,10 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
               {theme === "dark" ? (
                 <motion.span
                   key="moon"
-                  initial={{ opacity: 0, scale: 0.7, rotate: -30 }}
+                  initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  exit={{ opacity: 0, scale: 0.7, rotate: 30 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  exit={{ opacity: 0, scale: 0.5, rotate: 45 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25 }} // Ajuste de velocidad
                   className="block"
                 >
                   <FiMoon
@@ -61,10 +61,10 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
               ) : (
                 <motion.span
                   key="sun"
-                  initial={{ opacity: 0, scale: 0.7, rotate: 30 }}
+                  initial={{ opacity: 0, scale: 0.5, rotate: 45 }}
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  exit={{ opacity: 0, scale: 0.7, rotate: -30 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  exit={{ opacity: 0, scale: 0.5, rotate: -45 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25 }} // Ajuste de velocidad
                   className="block"
                 >
                   <FiSun

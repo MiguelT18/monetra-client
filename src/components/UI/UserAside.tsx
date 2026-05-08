@@ -57,7 +57,7 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
       ref={asideRef}
       animate={{ width: isOpen ? 256 : 56 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="row-start-1 row-span-2 max-md:hidden bg-gray-200/60 dark:bg-[#101826]/30 rounded-lg p-2 overflow-hidden"
+      className="row-start-1 row-span-2 max-md:hidden bg-surface rounded-lg p-2 overflow-hidden"
     >
       <ul className="space-y-1">
         {visibleItems.map((item) => {

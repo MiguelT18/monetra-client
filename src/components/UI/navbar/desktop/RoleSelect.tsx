@@ -141,7 +141,7 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
               mass: 0.8,
             }}
             style={{ originY: 0, originX: 1 }}
-            className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#0d1520] shadow-xl dark:shadow-black/40 overflow-hidden z-50"
+            className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-surface shadow-xl dark:shadow-black/40 overflow-hidden z-50"
           >
             {ROLES.map((role, i) => (
               <motion.button
@@ -152,7 +152,7 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
                 onClick={() => {
                   handleSelect(role.value);
                 }}
-                className="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-primary/10 transition-colors text-left cursor-pointer group"
+                className="w-full flex items-start gap-3 px-4 py-3 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors text-left cursor-pointer group"
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">

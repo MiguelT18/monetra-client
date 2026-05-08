@@ -80,7 +80,7 @@ export default function RegisterPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1, duration: 0.35 }}
-            className="p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10"
+            className="p-2 rounded-lg text-black dark:text-white bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10"
           >
             <LogoIcon width={32} height={32} />
           </motion.div>

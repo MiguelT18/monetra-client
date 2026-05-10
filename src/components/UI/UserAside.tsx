@@ -13,6 +13,7 @@ import { FiLogOut, FiBookOpen, FiTrendingUp, FiUsers } from "react-icons/fi";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaUserAlt } from "react-icons/fa";
+import { BsBoxSeam } from "react-icons/bs";
 
 interface UserAsideProps {
   isOpen: boolean;
@@ -38,6 +39,24 @@ const NAV_ITEMS: NavItem[] = [
     icon: MdOutlineSchool,
     href: "/user/courses",
     roles: ["STUDENT"],
+  },
+  {
+    label: "Explorar",
+    icon: FiBookOpen,
+    href: "/user/explore",
+    roles: ["STUDENT", "PRODUCER", "AFFILIATE"],
+  },
+  {
+    label: "Mis productos",
+    icon: BsBoxSeam,
+    href: "/user/products",
+    roles: ["PRODUCER"],
+  },
+  {
+    label: "Mis afiliaciones",
+    icon: FiUsers,
+    href: "/user/affiliations",
+    roles: ["AFFILIATE"],
   },
   {
     label: "Configuración",

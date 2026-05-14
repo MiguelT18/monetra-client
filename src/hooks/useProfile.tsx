@@ -10,18 +10,9 @@ import {
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { UserProfile } from "@/types/user";
+import { ROLE_ROUTES } from "@/lib/user";
 
 // mismo ROLE_ROUTES que en el middleware
-const ROLE_ROUTES: Record<string, string[]> = {
-  "/user/courses": ["STUDENT"],
-  "/user/publications": ["PRODUCER"],
-  "/user/sales": ["PRODUCER", "AFFILIATE"],
-  "/user/links": ["AFFILIATE"],
-  "/user/stats": ["PRODUCER", "AFFILIATE"],
-  "/user/community": ["STUDENT", "PRODUCER"],
-  "/user/performance": ["PRODUCER"],
-};
-
 type Role = "STUDENT" | "PRODUCER" | "AFFILIATE";
 
 interface ProfileContextType {

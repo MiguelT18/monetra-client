@@ -32,7 +32,7 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
   const [updating, setUpdating] = useState<Role | null>(null);
 
   const { notify } = useNotification();
-  const { changeRole } = useProfile();
+  const { changeRole, refetch } = useProfile();
 
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -51,6 +51,7 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
         return;
       }
 
+      refetch();
       setSelected(role);
       setOpen(false);
     } catch {

@@ -9,7 +9,13 @@ import { useProfile } from "@/hooks/useProfile";
 import { CiSettings } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/hooks/useNotification";
-import { FiLogOut, FiBookOpen, FiTrendingUp, FiUsers } from "react-icons/fi";
+import {
+  FiLogOut,
+  FiBookOpen,
+  FiTrendingUp,
+  FiUsers,
+  FiAward,
+} from "react-icons/fi";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaUserAlt } from "react-icons/fa";
@@ -57,6 +63,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: FiUsers,
     href: "/user/affiliations",
     roles: ["AFFILIATE"],
+  },
+  {
+    label: "Logros",
+    icon: FiAward,
+    href: "/user/achievements",
+    roles: ["STUDENT", "AFFILIATE", "PRODUCER"],
   },
   {
     label: "Configuración",

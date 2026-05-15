@@ -28,7 +28,7 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
 
   return (
     <ProfileProvider>
-      <main className="min-h-dvh h-full w-full md:grid md:grid-cols-[auto_1fr] grid-rows-[auto_1fr] gap-2 p-2 max-md:space-y-2 bg-background">
+      <main className="min-h-dvh h-full w-full bg-background p-2 max-md:space-y-2 md:grid md:h-dvh md:min-h-0 md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr] md:gap-2 md:overflow-hidden">
         <UserNavbar
           isOpen={isOpen}
           onToggle={() => setIsOpen((prev) => !prev)}
@@ -36,7 +36,7 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
         />
         <UserAside isOpen={isOpen} asideRef={asideRef} />
 
-        <section className="row-start-2 col-start-2 bg-surface rounded-lg p-4">
+        <section className="row-start-2 col-start-2 min-h-0 overflow-y-auto bg-surface rounded-lg p-3 sm:p-5">
           {children}
         </section>
       </main>

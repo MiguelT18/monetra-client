@@ -3,6 +3,7 @@ export const ROLE_ROUTES: Record<string, string[]> = {
   "/user/dashboard": ["STUDENT", "AFFILIATE", "PRODUCER"],
   "/user/explore": ["STUDENT", "AFFILIATE", "PRODUCER"],
   "/user/courses": ["STUDENT"],
+  "/user/achievements": ["STUDENT", "AFFILIATE", "PRODUCER"],
   "/user/affiliations": ["AFFILIATE"],
   "/user/products": ["PRODUCER"],
 };

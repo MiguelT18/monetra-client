@@ -36,7 +36,7 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
         />
         <UserAside isOpen={isOpen} asideRef={asideRef} />
 
-        <section className="row-start-2 col-start-2 min-h-0 overflow-y-auto bg-surface rounded-lg p-3 sm:p-5">
+        <section className="app-scrollbar row-start-2 col-start-2 min-h-0 overflow-y-auto bg-surface rounded-lg p-3 sm:p-5">
           {children}
         </section>
       </main>

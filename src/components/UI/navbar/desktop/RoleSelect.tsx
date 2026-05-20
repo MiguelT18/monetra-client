@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import { useNotification } from "@/hooks/useNotification";
 import { useProfile } from "@/hooks/useProfile";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { FiChevronDown, FiCheck } from "react-icons/fi";
 import type { Role } from "@/types/user";
 import { DropdownMenu } from "@/components/DropdownMenu";
@@ -35,6 +35,14 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
   const { changeRole, refetch } = useProfile();
 
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const selectedRole = ROLES.find((r) => r.value === selected)!;
 
@@ -46,6 +54,8 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
     try {
       const { ok, message } = await changeRole(role);
 
+      if (!mountedRef.current) return;
+
       if (!ok) {
         notify("error", message);
         return;
@@ -55,9 +65,13 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
       setSelected(role);
       setOpen(false);
     } catch {
-      notify("error", "Error al actualizar el rol");
+      if (mountedRef.current) {
+        notify("error", "Error al actualizar el rol");
+      }
     } finally {
-      setUpdating(null);
+      if (mountedRef.current) {
+        setUpdating(null);
+      }
     }
   };
 

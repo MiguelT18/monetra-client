@@ -35,11 +35,15 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchProfile = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("/api/auth/profile");
+        const res = await fetch("/api/auth/profile", {
+          signal: controller.signal,
+        });
         const result = await res.json();
         if (!res.ok) {
           setError(result.message);
@@ -47,13 +51,18 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         }
         setUser(result.data);
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error("[ProfileContext error]:", err);
         setError("Error al obtener el perfil");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
     fetchProfile();
+
+    return () => controller.abort();
   }, [trigger]);
 
   const refetch = useCallback(() => setTrigger((t) => t + 1), []);

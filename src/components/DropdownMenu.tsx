@@ -94,14 +94,16 @@ export function DropdownMenu({
       menuRef.current.style.visibility = "hidden";
     }
 
-    const frame = requestAnimationFrame(() => {
-      requestAnimationFrame(calculatePosition);
+    let innerFrame = 0;
+    const outerFrame = requestAnimationFrame(() => {
+      innerFrame = requestAnimationFrame(calculatePosition);
     });
 
     window.addEventListener("resize", calculatePosition);
     window.addEventListener("scroll", calculatePosition, true);
     return () => {
-      cancelAnimationFrame(frame);
+      cancelAnimationFrame(outerFrame);
+      if (innerFrame) cancelAnimationFrame(innerFrame);
       window.removeEventListener("resize", calculatePosition);
       window.removeEventListener("scroll", calculatePosition, true);
     };

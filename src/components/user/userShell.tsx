@@ -1,6 +1,13 @@
 import type { IconType } from "react-icons";
+import { FiLock } from "react-icons/fi";
 import Link from "next/link";
 import type { ReactNode } from "react";
+
+export function xpForNextLevel(level: number) {
+  return Math.max(level * 500, 1);
+}
+
+export type AchievementStatus = "unlocked" | "in_progress" | "locked";
 
 export function UserPageHeader({
   title,
@@ -261,6 +268,150 @@ export function InfoProductCardSkeleton() {
         </div>
       </div>
     </div>
+  );
+}
+
+export function XpProgressPanel({
+  level,
+  xp,
+  tone = "blue",
+}: {
+  level: number;
+  xp: number;
+  tone?: "blue" | "emerald" | "violet";
+}) {
+  const nextXp = xpForNextLevel(level);
+  const pct = Math.min(100, Math.round((xp / nextXp) * 100));
+  const remaining = Math.max(0, nextXp - xp);
+  const barClass =
+    tone === "blue"
+      ? "bg-blue-500"
+      : tone === "emerald"
+        ? "bg-emerald-500"
+        : "bg-violet-500";
+  const ringClass =
+    tone === "blue"
+      ? "border-blue-200/80 dark:border-blue-500/20 bg-blue-500/[0.04] dark:bg-blue-500/10"
+      : tone === "emerald"
+        ? "border-emerald-200/80 dark:border-emerald-500/20 bg-emerald-500/[0.04] dark:bg-emerald-500/10"
+        : "border-violet-200/80 dark:border-violet-500/20 bg-violet-500/[0.04] dark:bg-violet-500/10";
+
+  return (
+    <div className={`mb-6 rounded-xl border p-5 shadow-sm ${ringClass}`}>
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
+            Tu progreso
+          </p>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+            Nivel {level}
+          </p>
+        </div>
+        <p className="text-sm text-gray-600 dark:text-white/55">
+          <span className="font-semibold text-gray-900 dark:text-white">{xp}</span>
+          {" / "}
+          {nextXp} XP
+        </p>
+      </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${barClass}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-2 text-xs text-gray-500 dark:text-white/40">
+        {remaining === 0
+          ? "¡Listo para subir de nivel! Completa un logro para avanzar."
+          : `Faltan ${remaining} XP para alcanzar el nivel ${level + 1}`}
+      </p>
+    </div>
+  );
+}
+
+export function AchievementBadgeCard({
+  title,
+  description,
+  icon: Icon,
+  status,
+  progress = 0,
+  xpReward,
+  accent = "violet",
+  unlockedLabel,
+}: {
+  title: string;
+  description: string;
+  icon: IconType;
+  status: AchievementStatus;
+  progress?: number;
+  xpReward?: number;
+  accent?: InfoProductAccent;
+  unlockedLabel?: string;
+}) {
+  const thumb = accentThumbnail[accent];
+  const isLocked = status === "locked";
+  const isUnlocked = status === "unlocked";
+
+  return (
+    <article
+      className={`relative flex flex-col rounded-xl border p-4 transition ${
+        isLocked
+          ? "border-border bg-background/30 dark:bg-white/2"
+          : isUnlocked
+            ? "border-primary/30 bg-primary/[0.04] shadow-sm dark:bg-primary/8"
+            : "border-border bg-surface"
+      } ${isLocked ? "opacity-75" : ""}`}
+    >
+      {isLocked ? (
+        <FiLock
+          className="absolute right-3 top-3 text-gray-400 dark:text-white/35"
+          size={14}
+          aria-hidden
+        />
+      ) : null}
+      {isUnlocked && unlockedLabel ? (
+        <span className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
+          {unlockedLabel}
+        </span>
+      ) : null}
+
+      <div
+        className={`mb-3 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br shadow-inner ${thumb.gradient} ${isLocked ? "grayscale" : ""}`}
+      >
+        <Icon size={22} className={thumb.iconText} />
+      </div>
+
+      <h3
+        className={`pr-6 text-sm font-semibold leading-snug ${isLocked ? "text-gray-500 dark:text-white/45" : "text-gray-900 dark:text-white"}`}
+      >
+        {title}
+      </h3>
+      <p className="mt-1 flex-1 text-xs leading-relaxed text-gray-500 dark:text-white/45">
+        {description}
+      </p>
+
+      {status === "in_progress" ? (
+        <div className="mt-3">
+          <div className="mb-1 flex justify-between text-[10px] font-medium text-gray-500 dark:text-white/40">
+            <span>Progreso</span>
+            <span>{progress}%</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+            <div
+              className="h-full rounded-full bg-primary transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {xpReward ? (
+        <p
+          className={`mt-2 text-[10px] font-semibold ${isUnlocked ? "text-emerald-600 dark:text-emerald-400" : "text-primary"}`}
+        >
+          {isUnlocked ? `+${xpReward} XP obtenidos` : `+${xpReward} XP al desbloquear`}
+        </p>
+      ) : null}
+    </article>
   );
 }
 

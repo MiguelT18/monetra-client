@@ -9,13 +9,24 @@
   --border: #d4e4ff;
 
   --primary: #7c3aed;
+
+  --scrollbar-track: #e8efff;
+  --scrollbar-thumb: #b8c9ef;
+  --scrollbar-thumb-hover: #9f7aea;
+  --scrollbar-thumb-active: #7c3aed;
 }
 
+html.dark,
 :root.dark {
   --background: #0a0a0f;
   --foreground: #f1f5f9;
   --surface: #121221;
   --border: #2d2d44;
+
+  --scrollbar-track: #1a1a2e;
+  --scrollbar-thumb: #4a4a6a;
+  --scrollbar-thumb-hover: #6d5acd;
+  --scrollbar-thumb-active: #8b5cf6;
 }
 
 @theme inline {
@@ -38,4 +49,59 @@ body {
     color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar — contenedores que hacen scroll (html, body y .app-scrollbar) */
+html,
+body,
+.app-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.app-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  -webkit-appearance: none;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.app-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 9999px;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.app-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 9999px;
+  border: 2px solid var(--scrollbar-track);
+  min-height: 40px;
+  transition: background-color 0.2s ease;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.app-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+html::-webkit-scrollbar-thumb:active,
+body::-webkit-scrollbar-thumb:active,
+.app-scrollbar::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-thumb-active);
+}
+
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner,
+.app-scrollbar::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
+}
+
+html {
+  scrollbar-gutter: stable;
 }

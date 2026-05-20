@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  ReactNode,
+} from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   FiCheckCircle,
@@ -26,18 +33,40 @@ const NotificationContext = createContext<NotificationContextType | null>(null);
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const dismissTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
+
+  useEffect(() => {
+    const timers = dismissTimers.current;
+    return () => {
+      timers.forEach(clearTimeout);
+      timers.clear();
+    };
+  }, []);
+
+  function clearDismissTimer(id: number) {
+    const timer = dismissTimers.current.get(id);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      dismissTimers.current.delete(id);
+    }
+  }
 
   function notify(type: NotificationType, message: string) {
     const id = Date.now();
 
     setNotifications((prev) => [...prev, { id, message, type }]);
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      dismissTimers.current.delete(id);
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     }, 4500);
+    dismissTimers.current.set(id, timer);
   }
 
   function remove(id: number) {
+    clearDismissTimer(id);
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   }
 

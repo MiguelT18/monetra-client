@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ROLE_ROUTES } from "@/lib/user";
 
 const PROTECTED_ROUTES = ["/user"];
-const AUTH_ROUTES = ["/auth/login", "/auth/register"];
+const AUTH_ROUTES_REDIRECT_IF_SESSION = ["/auth/login", "/auth/register"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -13,7 +13,9 @@ export function proxy(request: NextRequest) {
   const isProtected = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route),
   );
-  const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  const isAuthRoute = AUTH_ROUTES_REDIRECT_IF_SESSION.some((route) =>
+    pathname.startsWith(route),
+  );
 
   if (isProtected && !accessToken) {
     if (!refreshToken) {

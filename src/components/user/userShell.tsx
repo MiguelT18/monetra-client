@@ -188,7 +188,7 @@ export function InfoProductCard({
   return (
     <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition hover:border-primary/30 hover:shadow-md">
       <div
-        className={`relative aspect-[16/10] overflow-hidden bg-gradient-to-br ${thumb.gradient}`}
+        className={`relative aspect-16/10 overflow-hidden bg-linear-to-br ${thumb.gradient}`}
       >
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.35]"
@@ -254,7 +254,7 @@ export function InfoProductCard({
 export function InfoProductCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-surface">
-      <div className="aspect-[16/10] animate-pulse bg-gray-200 dark:bg-white/10" />
+      <div className="aspect-16/10 animate-pulse bg-gray-200 dark:bg-white/10" />
       <div className="space-y-3 p-4">
         <div className="h-4 w-4/5 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
         <div className="h-3 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
@@ -308,7 +308,9 @@ export function XpProgressPanel({
           </p>
         </div>
         <p className="text-sm text-gray-600 dark:text-white/55">
-          <span className="font-semibold text-gray-900 dark:text-white">{xp}</span>
+          <span className="font-semibold text-gray-900 dark:text-white">
+            {xp}
+          </span>
           {" / "}
           {nextXp} XP
         </p>
@@ -357,7 +359,7 @@ export function AchievementBadgeCard({
         isLocked
           ? "border-border bg-background/30 dark:bg-white/2"
           : isUnlocked
-            ? "border-primary/30 bg-primary/[0.04] shadow-sm dark:bg-primary/8"
+            ? "border-primary/30 bg-primary/4 shadow-sm dark:bg-primary/8"
             : "border-border bg-surface"
       } ${isLocked ? "opacity-75" : ""}`}
     >
@@ -375,7 +377,7 @@ export function AchievementBadgeCard({
       ) : null}
 
       <div
-        className={`mb-3 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br shadow-inner ${thumb.gradient} ${isLocked ? "grayscale" : ""}`}
+        className={`mb-3 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-linear-to-br shadow-inner ${thumb.gradient} ${isLocked ? "grayscale" : ""}`}
       >
         <Icon size={22} className={thumb.iconText} />
       </div>
@@ -408,7 +410,9 @@ export function AchievementBadgeCard({
         <p
           className={`mt-2 text-[10px] font-semibold ${isUnlocked ? "text-emerald-600 dark:text-emerald-400" : "text-primary"}`}
         >
-          {isUnlocked ? `+${xpReward} XP obtenidos` : `+${xpReward} XP al desbloquear`}
+          {isUnlocked
+            ? `+${xpReward} XP obtenidos`
+            : `+${xpReward} XP al desbloquear`}
         </p>
       ) : null}
     </article>
@@ -433,7 +437,9 @@ export function PlaceholderRow({
         <p className="text-xs text-gray-500 dark:text-white/45">{subtitle}</p>
       </div>
       {meta ? (
-        <span className="shrink-0 text-xs font-medium text-primary">{meta}</span>
+        <span className="shrink-0 text-xs font-medium text-primary">
+          {meta}
+        </span>
       ) : null}
     </div>
   );

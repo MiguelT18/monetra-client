@@ -1,12 +1,21 @@
 "use client";
 
 import { motion } from "motion/react";
-import LogoIcon from "@/icons/Logo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNotification } from "@/hooks/useNotification";
+import {
+  AuthCard,
+  AuthDivider,
+  AUTH_INPUT_CLASS,
+  AUTH_FIELD_VARIANTS,
+  AUTH_STAGGER,
+  AuthSubmitButton,
+  AuthFooterLink,
+  SocialAuthButtons,
+} from "@/components/auth/auth-ui";
 
 interface LoginUserProps {
   email: string;
@@ -15,9 +24,7 @@ interface LoginUserProps {
 
 export default function LoginPage() {
   const router = useRouter();
-
   const [loading, setLoading] = useState(false);
-
   const { notify } = useNotification();
 
   const {
@@ -39,143 +46,113 @@ export default function LoginPage() {
 
       if (!res.ok) {
         notify("error", result.message);
-        setLoading(false);
         return;
       }
 
       router.push("/user/dashboard");
       notify("success", result.message);
     } catch (error) {
-      console.error("[ERROR]:", error);
+      console.error("[login]", error);
+      notify("error", "Error al iniciar sesión");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className="relative size-full flex items-center justify-center bg-gray-50 dark:bg-[#0B0F14]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#7C3AED20,transparent_60%)] dark:bg-[radial-gradient(circle_at_top,#7C3AED40,transparent_60%)] backdrop-blur-2xl pointer-events-none" />
-
+    <AuthCard
+      title="Iniciar sesión"
+      subtitle="Accede con tu correo o con un proveedor social."
+      footer={
+        <AuthFooterLink
+          text="¿No tienes cuenta?"
+          linkText="Crear una cuenta"
+          href="/auth/register"
+        />
+      }
+    >
       <motion.form
         onSubmit={handleSubmit(onSubmit)}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
-        className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl max-md:mx-5 max-md:p-4 p-8 shadow-xl dark:shadow-black/30"
+        initial="hidden"
+        animate="visible"
+        variants={AUTH_STAGGER}
+        className="space-y-4"
       >
-        <div className="flex items-center gap-3 mb-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.35 }}
-            className="p-2 rounded-lg text-black dark:text-white bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10"
+        <motion.div
+          variants={AUTH_FIELD_VARIANTS}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col gap-1"
+        >
+          <label
+            htmlFor="email"
+            className="text-sm text-gray-600 dark:text-white/70"
           >
-            <LogoIcon width={32} height={32} />
-          </motion.div>
-        </div>
+            Correo electrónico
+          </label>
+          <input
+            {...register("email", { required: "El correo es obligatorio" })}
+            className={AUTH_INPUT_CLASS}
+            type="email"
+            id="email"
+            autoComplete="email"
+            placeholder="chobi@email.com"
+          />
+          {errors.email ? (
+            <span className="mt-1 text-sm text-red-500">
+              {errors.email.message}
+            </span>
+          ) : null}
+        </motion.div>
 
-        <div className="space-y-6">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Iniciar sesión
-          </h1>
-
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: 0.07,
-                },
-              },
-            }}
-            className="space-y-4"
-          >
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 8 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col gap-1"
+        <motion.div
+          variants={AUTH_FIELD_VARIANTS}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col gap-1"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <label
+              htmlFor="password"
+              className="text-sm text-gray-600 dark:text-white/70"
             >
-              <label
-                htmlFor="email"
-                className="text-sm text-gray-600 dark:text-white/70"
-              >
-                Correo electrónico
-              </label>
-
-              <input
-                {...register("email", {
-                  required: "El correo es obligatorio",
-                })}
-                className="w-full rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition hover:border-[#7C3AED] hover:ring-1 hover:ring-[#7C3AED]"
-                type="email"
-                id="email"
-                placeholder="chobi@email.com"
-              />
-
-              {errors?.email && (
-                <span className="text-red-500 text-sm mt-1">
-                  {errors.email.message}
-                </span>
-              )}
-            </motion.div>
-
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 8 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col gap-1"
-            >
-              <label
-                htmlFor="password"
-                className="text-sm text-gray-600 dark:text-white/70"
-              >
-                Contraseña
-              </label>
-
-              <input
-                {...register("password", {
-                  required: "La contraseña es obligatoria",
-                })}
-                className="w-full rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition hover:border-[#7C3AED] hover:ring-1 hover:ring-[#7C3AED]"
-                type="password"
-                id="password"
-                placeholder="••••••••"
-              />
-
-              {errors?.password && (
-                <span className="text-red-500 text-sm mt-1">
-                  {errors.password?.message}
-                </span>
-              )}
-            </motion.div>
-          </motion.div>
-
-          <motion.button
-            type="submit"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="w-full rounded-lg bg-[#7C3AED] py-2 font-medium text-white shadow-lg shadow-[#7C3AED]/30 hover:bg-[#6D28D9] cursor-pointer"
-          >
-            {loading ? "Iniciando sesión..." : "Iniciar sesión"}
-          </motion.button>
-
-          <p className="text-sm text-gray-600 dark:text-white/60 text-center">
-            ¿No tienes cuenta?{" "}
+              Contraseña
+            </label>
             <Link
-              href="/auth/register"
-              className="text-[#7C3AED] hover:text-[#9F7AEA] transition"
+              href="/auth/forgot-password"
+              className="text-xs font-medium text-[#7C3AED] transition hover:text-[#9F7AEA]"
             >
-              Crear una cuenta
+              ¿Olvidaste tu contraseña?
             </Link>
-          </p>
-        </div>
+          </div>
+          <input
+            {...register("password", {
+              required: "La contraseña es obligatoria",
+            })}
+            className={AUTH_INPUT_CLASS}
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+          />
+          {errors.password ? (
+            <span className="mt-1 text-sm text-red-500">
+              {errors.password.message}
+            </span>
+          ) : null}
+        </motion.div>
+
+        <motion.div variants={AUTH_FIELD_VARIANTS}>
+          <AuthSubmitButton
+            loading={loading}
+            loadingLabel="Iniciando sesión…"
+            label="Iniciar sesión"
+          />
+        </motion.div>
+
+        <motion.div variants={AUTH_FIELD_VARIANTS} className="space-y-3">
+          <AuthDivider />
+          <SocialAuthButtons />
+        </motion.div>
       </motion.form>
-    </section>
+    </AuthCard>
   );
 }

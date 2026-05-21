@@ -2,11 +2,19 @@
 
 import { motion } from "motion/react";
 import { useForm } from "react-hook-form";
-import LogoIcon from "@/icons/Logo";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useNotification } from "@/hooks/useNotification";
+import {
+  AuthCard,
+  AuthDivider,
+  AUTH_INPUT_CLASS,
+  AUTH_FIELD_VARIANTS,
+  AUTH_STAGGER,
+  AuthSubmitButton,
+  AuthFooterLink,
+  SocialAuthButtons,
+} from "@/components/auth/auth-ui";
 
 interface RegisterUserProps {
   username: string;
@@ -15,14 +23,6 @@ interface RegisterUserProps {
   email: string;
   password: string;
 }
-
-const inputClass =
-  "w-full rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition hover:border-[#7C3AED] hover:ring-1 hover:ring-[#7C3AED]";
-
-const fieldVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0 },
-};
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -51,214 +51,183 @@ export default function RegisterPage() {
 
       if (!res.ok) {
         notify("error", result.message);
-        setLoading(false);
         return;
       }
 
       notify("success", result.message);
       router.push("/auth/login");
     } catch (error) {
-      console.error("[ERROR]:", error);
+      console.error("[register]", error);
       notify("error", "Error registrando al usuario");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className="relative size-full flex items-center justify-center bg-gray-50 dark:bg-[#0B0F14] py-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#7C3AED20,transparent_60%)] dark:bg-[radial-gradient(circle_at_top,#7C3AED40,transparent_60%)] backdrop-blur-2xl pointer-events-none" />
-
+    <AuthCard
+      title="Crea una cuenta"
+      subtitle="Regístrate con email o continúa con Google o GitHub."
+      footer={
+        <AuthFooterLink
+          text="¿Ya tienes una cuenta?"
+          linkText="Inicia sesión"
+          href="/auth/login"
+        />
+      }
+    >
       <motion.form
         onSubmit={handleSubmit(onSubmit)}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
-        className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl max-md:p-4 p-8 shadow-xl dark:shadow-black/30 max-md:mx-5"
+        initial="hidden"
+        animate="visible"
+        variants={AUTH_STAGGER}
+        className="space-y-4"
       >
-        <div className="flex items-center gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.35 }}
-            className="p-2 rounded-lg text-black dark:text-white bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10"
+            variants={AUTH_FIELD_VARIANTS}
+            className="flex flex-col gap-1"
           >
-            <LogoIcon width={32} height={32} />
+            <label
+              htmlFor="firstname"
+              className="text-sm text-gray-600 dark:text-white/70"
+            >
+              Nombres
+            </label>
+            <input
+              {...register("firstname", {
+                required: "El nombre es obligatorio",
+              })}
+              className={AUTH_INPUT_CLASS}
+              type="text"
+              id="firstname"
+              autoComplete="given-name"
+              placeholder="John"
+            />
+            {errors.firstname ? (
+              <span className="mt-1 text-xs text-red-500">
+                {errors.firstname.message}
+              </span>
+            ) : null}
+          </motion.div>
+
+          <motion.div
+            variants={AUTH_FIELD_VARIANTS}
+            className="flex flex-col gap-1"
+          >
+            <label
+              htmlFor="lastname"
+              className="text-sm text-gray-600 dark:text-white/70"
+            >
+              Apellidos
+            </label>
+            <input
+              {...register("lastname", {
+                required: "El apellido es obligatorio",
+              })}
+              className={AUTH_INPUT_CLASS}
+              type="text"
+              id="lastname"
+              autoComplete="family-name"
+              placeholder="Doe"
+            />
+            {errors.lastname ? (
+              <span className="mt-1 text-xs text-red-500">
+                {errors.lastname.message}
+              </span>
+            ) : null}
           </motion.div>
         </div>
 
-        <div className="space-y-6">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Crea una cuenta
-          </h1>
-
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.07 } },
-            }}
-            className="space-y-4"
+        <motion.div variants={AUTH_FIELD_VARIANTS} className="flex flex-col gap-1">
+          <label
+            htmlFor="username"
+            className="text-sm text-gray-600 dark:text-white/70"
           >
-            {/* Nombres y apellidos en la misma fila */}
-            <div className="grid grid-cols-2 gap-3">
-              <motion.div
-                variants={fieldVariants}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col gap-1"
-              >
-                <label
-                  htmlFor="firstname"
-                  className="text-sm text-gray-600 dark:text-white/70"
-                >
-                  Nombres
-                </label>
-                <input
-                  {...register("firstname", {
-                    required: "El nombre es obligatorio",
-                  })}
-                  className={inputClass}
-                  type="text"
-                  id="firstname"
-                  placeholder="John"
-                />
-                {errors?.firstname && (
-                  <span className="text-red-500 text-xs mt-1">
-                    {errors.firstname.message}
-                  </span>
-                )}
-              </motion.div>
+            Nombre de usuario
+          </label>
+          <input
+            {...register("username", {
+              required: "El nombre de usuario es obligatorio",
+            })}
+            className={AUTH_INPUT_CLASS}
+            type="text"
+            id="username"
+            autoComplete="username"
+            placeholder="john_doe"
+          />
+          {errors.username ? (
+            <span className="mt-1 text-sm text-red-500">
+              {errors.username.message}
+            </span>
+          ) : null}
+        </motion.div>
 
-              <motion.div
-                variants={fieldVariants}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col gap-1"
-              >
-                <label
-                  htmlFor="lastname"
-                  className="text-sm text-gray-600 dark:text-white/70"
-                >
-                  Apellidos
-                </label>
-                <input
-                  {...register("lastname", {
-                    required: "El apellido es obligatorio",
-                  })}
-                  className={inputClass}
-                  type="text"
-                  id="lastname"
-                  placeholder="Doe"
-                />
-                {errors?.lastname && (
-                  <span className="text-red-500 text-xs mt-1">
-                    {errors.lastname.message}
-                  </span>
-                )}
-              </motion.div>
-            </div>
-
-            <motion.div
-              variants={fieldVariants}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col gap-1"
-            >
-              <label
-                htmlFor="username"
-                className="text-sm text-gray-600 dark:text-white/70"
-              >
-                Nombre de usuario
-              </label>
-              <input
-                {...register("username", {
-                  required: "El nombre de usuario es obligatorio",
-                })}
-                className={inputClass}
-                type="text"
-                id="username"
-                placeholder="john_doe"
-              />
-              {errors?.username && (
-                <span className="text-red-500 text-sm mt-1">
-                  {errors.username.message}
-                </span>
-              )}
-            </motion.div>
-
-            <motion.div
-              variants={fieldVariants}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col gap-1"
-            >
-              <label
-                htmlFor="email"
-                className="text-sm text-gray-600 dark:text-white/70"
-              >
-                Email
-              </label>
-              <input
-                {...register("email", {
-                  required: "El correo electrónico es obligatorio",
-                })}
-                className={inputClass}
-                type="email"
-                id="email"
-                placeholder="john_doe@gmail.com"
-              />
-              {errors?.email && (
-                <span className="text-red-500 text-sm mt-1">
-                  {errors.email.message}
-                </span>
-              )}
-            </motion.div>
-
-            <motion.div
-              variants={fieldVariants}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col gap-1"
-            >
-              <label
-                htmlFor="password"
-                className="text-sm text-gray-600 dark:text-white/70"
-              >
-                Contraseña
-              </label>
-              <input
-                {...register("password", {
-                  required: "La contraseña es obligatoria",
-                })}
-                className={inputClass}
-                type="password"
-                id="password"
-                placeholder="••••••••"
-              />
-              {errors?.password && (
-                <span className="text-red-500 text-sm mt-1">
-                  {errors.password.message}
-                </span>
-              )}
-            </motion.div>
-          </motion.div>
-
-          <motion.button
-            type="submit"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="w-full rounded-lg bg-[#7C3AED] py-2 font-medium text-white shadow-lg shadow-[#7C3AED]/30 hover:bg-[#6D28D9] cursor-pointer"
+        <motion.div variants={AUTH_FIELD_VARIANTS} className="flex flex-col gap-1">
+          <label
+            htmlFor="email"
+            className="text-sm text-gray-600 dark:text-white/70"
           >
-            {loading ? "Registrando..." : "Registrarse"}
-          </motion.button>
-        </div>
+            Email
+          </label>
+          <input
+            {...register("email", {
+              required: "El correo electrónico es obligatorio",
+            })}
+            className={AUTH_INPUT_CLASS}
+            type="email"
+            id="email"
+            autoComplete="email"
+            placeholder="john_doe@gmail.com"
+          />
+          {errors.email ? (
+            <span className="mt-1 text-sm text-red-500">
+              {errors.email.message}
+            </span>
+          ) : null}
+        </motion.div>
 
-        <p className="text-sm text-gray-600 dark:text-white/60 text-center pt-6">
-          ¿Ya tienes una cuenta?{" "}
-          <Link
-            href="/auth/login"
-            className="text-[#7C3AED] hover:text-[#9F7AEA] transition"
+        <motion.div variants={AUTH_FIELD_VARIANTS} className="flex flex-col gap-1">
+          <label
+            htmlFor="password"
+            className="text-sm text-gray-600 dark:text-white/70"
           >
-            Inicia sesión
-          </Link>
-        </p>
+            Contraseña
+          </label>
+          <input
+            {...register("password", {
+              required: "La contraseña es obligatoria",
+              minLength: {
+                value: 8,
+                message: "Mínimo 8 caracteres",
+              },
+            })}
+            className={AUTH_INPUT_CLASS}
+            type="password"
+            id="password"
+            autoComplete="new-password"
+            placeholder="••••••••"
+          />
+          {errors.password ? (
+            <span className="mt-1 text-sm text-red-500">
+              {errors.password.message}
+            </span>
+          ) : null}
+        </motion.div>
+
+        <motion.div variants={AUTH_FIELD_VARIANTS}>
+          <AuthSubmitButton
+            loading={loading}
+            loadingLabel="Registrando…"
+            label="Registrarse"
+          />
+        </motion.div>
+
+        <motion.div variants={AUTH_FIELD_VARIANTS} className="space-y-3">
+          <AuthDivider label="o regístrate con" />
+          <SocialAuthButtons />
+        </motion.div>
       </motion.form>
-    </section>
+    </AuthCard>
   );
 }

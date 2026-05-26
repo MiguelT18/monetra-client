@@ -15,12 +15,22 @@ import { ROLE_ROUTES } from "@/lib/user";
 // mismo ROLE_ROUTES que en el middleware
 type Role = "STUDENT" | "PRODUCER" | "AFFILIATE";
 
+export type ProfileUpdateInput = {
+  bio?: string | null;
+  avatar?: string | null;
+  fullname?: string;
+  username?: string;
+};
+
 interface ProfileContextType {
   user: UserProfile | null;
   loading: boolean;
   error: string | null;
   refetch: () => void;
   changeRole: (role: Role) => Promise<{ ok: boolean; message: string }>;
+  updateProfile: (
+    data: ProfileUpdateInput,
+  ) => Promise<{ ok: boolean; message: string }>;
 }
 
 const ProfileContext = createContext<ProfileContextType | null>(null);
@@ -67,6 +77,29 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   const refetch = useCallback(() => setTrigger((t) => t + 1), []);
 
+  const updateProfile = useCallback(async (data: ProfileUpdateInput) => {
+    const res = await fetch("/api/auth/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      return { ok: false, message: result.message ?? "No se pudo actualizar el perfil" };
+    }
+
+    const updated = result.data?.user;
+    if (updated) {
+      setUser((prev) => (prev ? { ...prev, ...updated } : updated));
+    } else {
+      setTrigger((t) => t + 1);
+    }
+
+    return { ok: true, message: result.message ?? "Perfil actualizado" };
+  }, []);
+
   const changeRole = useCallback(
     async (role: Role) => {
       const res = await fetch("/api/auth/role", {
@@ -98,7 +131,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   return (
     <ProfileContext.Provider
-      value={{ user, loading, error, refetch, changeRole }}
+      value={{ user, loading, error, refetch, changeRole, updateProfile }}
     >
       {children}
     </ProfileContext.Provider>

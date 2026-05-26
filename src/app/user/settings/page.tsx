@@ -9,7 +9,21 @@ import {
   RoleBadge,
   QuickLink,
 } from "@/components/user/userShell";
-import { FiUser, FiLock, FiBell, FiCreditCard, FiLink2 } from "react-icons/fi";
+import {
+  FiUser,
+  FiLock,
+  FiBell,
+  FiCreditCard,
+  FiLink2,
+  FiCamera,
+  FiAlignLeft,
+} from "react-icons/fi";
+import { FaUserAlt } from "react-icons/fa";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { resizeImageFile } from "@/lib/resizeImage";
+
+const BIO_MAX = 160;
 
 function roleTone(role: Role): "blue" | "emerald" | "violet" {
   if (role === "STUDENT") return "blue";
@@ -32,9 +46,67 @@ function roleSettingsIntro(role: Role) {
 }
 
 export default function UserSettings() {
-  const { user, loading } = useProfile();
+  const { user, loading, updateProfile } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
   const tone = roleTone(role);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [bio, setBio] = useState("");
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    setBio(user.bio ?? "");
+    setAvatar(user.avatar);
+  }, [user]);
+
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setFeedback(null);
+
+    try {
+      const dataUrl = await resizeImageFile(file);
+      setAvatar(dataUrl);
+    } catch (err) {
+      setFeedback({
+        type: "error",
+        message:
+          err instanceof Error ? err.message : "No se pudo procesar la imagen",
+      });
+    } finally {
+      event.target.value = "";
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    setFeedback(null);
+
+    const result = await updateProfile({
+      bio: bio.trim() || null,
+      avatar,
+    });
+
+    setSaving(false);
+
+    if (!result.ok) {
+      setFeedback({ type: "error", message: result.message });
+      return;
+    }
+
+    setFeedback({ type: "success", message: result.message });
+  };
+
+  const profileDirty =
+    user &&
+    (bio !== (user.bio ?? "") || avatar !== (user.avatar ?? null));
 
   if (loading) {
     return (
@@ -60,6 +132,103 @@ export default function UserSettings() {
       />
 
       <div className="space-y-6">
+        <SectionCard title="Perfil público">
+          <p className="mb-5 text-sm text-gray-600 dark:text-white/55">
+            Tu foto y descripción se muestran en la plataforma para cualquier rol.
+          </p>
+
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+            <div className="flex flex-col items-center gap-3 sm:items-start">
+              <div className="relative h-24 w-24 overflow-hidden rounded-full border border-border bg-gray-100 dark:bg-white/5">
+                {avatar ? (
+                  <Image
+                    src={avatar}
+                    alt="Foto de perfil"
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <FaUserAlt
+                      className="text-gray-400 dark:text-white/40"
+                      size={32}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10"
+              >
+                <FiCamera size={14} />
+                Cambiar foto
+              </button>
+
+              {avatar && (
+                <button
+                  type="button"
+                  onClick={() => setAvatar(null)}
+                  className="text-xs text-gray-500 underline-offset-2 hover:underline dark:text-white/45"
+                >
+                  Quitar foto
+                </button>
+              )}
+            </div>
+
+            <label className="block flex-1">
+              <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-white/55">
+                <FiAlignLeft size={14} />
+                Descripción
+              </span>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value.slice(0, BIO_MAX))}
+                rows={4}
+                maxLength={BIO_MAX}
+                placeholder="Cuéntanos sobre ti, tu experiencia o lo que ofreces..."
+                className="w-full resize-y rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:bg-white/4 dark:text-white"
+              />
+              <span className="mt-1 block text-right text-xs text-gray-500 dark:text-white/40">
+                {bio.length}/{BIO_MAX}
+              </span>
+            </label>
+          </div>
+
+          {feedback && (
+            <p
+              className={`mt-4 text-sm ${
+                feedback.type === "success"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-red-500"
+              }`}
+            >
+              {feedback.message}
+            </p>
+          )}
+
+          <div className="mt-5 flex justify-end">
+            <button
+              type="button"
+              onClick={handleSaveProfile}
+              disabled={saving || !profileDirty}
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? "Guardando..." : "Guardar perfil"}
+            </button>
+          </div>
+        </SectionCard>
+
         <SectionCard title="Cuenta">
           <div className="space-y-4">
             <label className="block">
@@ -85,10 +254,6 @@ export default function UserSettings() {
                 className="w-full rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none dark:bg-white/4 dark:text-white"
               />
             </label>
-            <p className="text-xs text-gray-500 dark:text-white/40">
-              Los cambios definitivos de perfil se conectarán al API cuando esté
-              disponible.
-            </p>
           </div>
         </SectionCard>
 

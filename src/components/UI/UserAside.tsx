@@ -20,6 +20,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaUserAlt } from "react-icons/fa";
 import { BsBoxSeam } from "react-icons/bs";
+import Image from "next/image";
 
 interface UserAsideProps {
   isOpen: boolean;
@@ -219,11 +220,10 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                     className={`
                   relative flex items-center p-3 rounded-md transition-all
                   ${isOpen ? "gap-2 justify-start" : "justify-center"}
-                  ${
-                    isActive
-                      ? "text-primary cursor-not-allowed"
-                      : "text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/15 cursor-pointer"
-                  }
+                  ${isActive
+                        ? "text-primary cursor-not-allowed"
+                        : "text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/15 cursor-pointer"
+                      }
                 `}
                   >
                     {isActive && (
@@ -235,9 +235,8 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                     {isActive && (
                       <motion.div
                         layoutId="active-pill"
-                        className={`absolute inset-0 ${
-                          isOpen ? "bg-primary/15" : "bg-primary/25"
-                        } rounded-md`}
+                        className={`absolute inset-0 ${isOpen ? "bg-primary/15" : "bg-primary/25"
+                          } rounded-md`}
                         transition={{
                           type: "spring",
                           stiffness: 300,
@@ -281,13 +280,21 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                 transition={{ duration: 0.15 }}
               >
                 <div className="px-2 py-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 border border-border flex items-center justify-center">
-                      <FaUserAlt
-                        size={16}
-                        className="text-gray-500 dark:text-white/50"
+                  <div className="flex items-center gap-2">
+                    {user?.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        alt={`Foto de perfil de ${user.fullname}`}
+                        width={32}
+                        height={32}
+                        className="rounded-full size-12 object-cover border border-gray-200 dark:border-white/10"
                       />
-                    </div>
+                    ) : (
+                      <div className="bg-gray-300 dark:bg-white/10 rounded-full p-2 border border-gray-200 dark:border-white/10">
+                        <FaUserAlt className="text-gray-500 dark:text-white/50" size={16} />
+                      </div>
+                    )}
+
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate leading-tight mb-1">
                         {user?.fullname ?? user?.username ?? "—"}
@@ -334,10 +341,10 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
             onClick={handleLogout}
             disabled={logoutLoading}
             className={`
-          w-full relative flex items-center p-3 rounded-md transition-all
+          w-full relative flex items-center p-3 rounded-md transition-all bg-red-700/5
           text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400
           hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer
-          ${isOpen ? "gap-2 justify-start" : "justify-center"}
+          ${isOpen ? "gap-2 justify-center" : "justify-center"}
         `}
           >
             <FiLogOut size={20} className="shrink-0" />

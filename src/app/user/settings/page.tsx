@@ -18,7 +18,7 @@ import {
   FiCamera,
   FiAlignLeft,
 } from "react-icons/fi";
-import { FaUserAlt } from "react-icons/fa";
+import { FaRegTrashAlt, FaUserAlt } from "react-icons/fa";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { resizeImageFile } from "@/lib/resizeImage";
@@ -98,10 +98,16 @@ export default function UserSettings() {
 
     if (!result.ok) {
       setFeedback({ type: "error", message: result.message });
-      return;
+      setTimeout(() => {
+        setFeedback(null)
+        return;
+      }, 4000)
     }
 
     setFeedback({ type: "success", message: result.message });
+    setTimeout(() => {
+      setFeedback(null)
+    }, 4000)
   };
 
   const profileDirty =
@@ -169,7 +175,7 @@ export default function UserSettings() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10"
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10 cursor-pointer"
               >
                 <FiCamera size={14} />
                 Cambiar foto
@@ -179,8 +185,9 @@ export default function UserSettings() {
                 <button
                   type="button"
                   onClick={() => setAvatar(null)}
-                  className="text-xs text-gray-500 underline-offset-2 hover:underline dark:text-white/45"
+                  className="text-xs text-gray-500 underline-offset-2 hover:underline dark:text-white/45 cursor-pointer flex items-center gap-1 hover:text-red-500 transition-colors"
                 >
+                  <FaRegTrashAlt />
                   Quitar foto
                 </button>
               )}
@@ -197,35 +204,12 @@ export default function UserSettings() {
                 rows={4}
                 maxLength={BIO_MAX}
                 placeholder="Cuéntanos sobre ti, tu experiencia o lo que ofreces..."
-                className="w-full resize-y rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:bg-white/4 dark:text-white"
+                className="w-full resize-none rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:bg-white/4 dark:text-white"
               />
               <span className="mt-1 block text-right text-xs text-gray-500 dark:text-white/40">
                 {bio.length}/{BIO_MAX}
               </span>
             </label>
-          </div>
-
-          {feedback && (
-            <p
-              className={`mt-4 text-sm ${
-                feedback.type === "success"
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-red-500"
-              }`}
-            >
-              {feedback.message}
-            </p>
-          )}
-
-          <div className="mt-5 flex justify-end">
-            <button
-              type="button"
-              onClick={handleSaveProfile}
-              disabled={saving || !profileDirty}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving ? "Guardando..." : "Guardar perfil"}
-            </button>
           </div>
         </SectionCard>
 
@@ -324,6 +308,28 @@ export default function UserSettings() {
             </div>
           </SectionCard>
         )}
+
+        <div className={`mt-5 flex ${feedback ? "justify-between items-center" : "justify-end"}`}>
+          {feedback && (
+            <p
+              className={`block text-sm ${feedback.type === "success"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-red-500"
+                }`}
+            >
+              {feedback.message}
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSaveProfile}
+            disabled={saving || !profileDirty}
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          >
+            {saving ? "Guardando..." : "Guardar perfil"}
+          </button>
+        </div>
       </div>
     </motion.div>
   );

@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Role } from "@/types/user";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { useThemeContext } from "@/contexts/themeContext";
+import Image from "next/image";
 
 interface UserNavbarProps {
   isOpen: boolean;
@@ -90,12 +91,19 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <div className="bg-gray-300 dark:bg-white/10 rounded-full p-2 border border-gray-200 dark:border-white/10">
-                <FaUserAlt
-                  className="text-gray-500 dark:text-white/50"
-                  size={16}
+              {user.avatar ? (
+                <Image
+                  src={user.avatar}
+                  alt={`Foto de perfil de ${user.fullname}`}
+                  width={32}
+                  height={32}
+                  className="rounded-full size-10 object-cover border border-gray-200 dark:border-white/10"
                 />
-              </div>
+              ) : (
+                <div className="bg-gray-300 dark:bg-white/10 rounded-full p-2 border border-gray-200 dark:border-white/10">
+                  <FaUserAlt className="text-gray-500 dark:text-white/50" size={16} />
+                </div>
+              )}
               <div className="space-y-1">
                 <p className="block text-gray-900 dark:text-white text-sm font-medium leading-tight">
                   Hola, {user.fullname?.split(" ")[0] ?? user.username}

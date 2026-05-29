@@ -83,7 +83,7 @@ export default function RegisterPage() {
         variants={AUTH_STAGGER}
         className="space-y-4"
       >
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid sm:grid-cols-2 gap-3">
           <motion.div
             variants={AUTH_FIELD_VARIANTS}
             className="flex flex-col gap-1"

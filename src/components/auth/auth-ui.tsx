@@ -41,8 +41,9 @@ export function AuthCard({
   footer?: ReactNode;
 }) {
   return (
-    <section className="relative flex size-full items-center justify-center bg-gray-50 py-10 dark:bg-[#0B0F14]">
+    <section className="relative flex w-full min-h-dvh items-center justify-center bg-gray-50 py-10 dark:bg-[#0B0F14]">
       <AuthBackground />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

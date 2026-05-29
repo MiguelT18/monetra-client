@@ -95,7 +95,7 @@ export default function LoginPage() {
             type="email"
             id="email"
             autoComplete="email"
-            placeholder="chobi@email.com"
+            placeholder="john.doe@test.xyz"
           />
           {errors.email ? (
             <span className="mt-1 text-sm text-red-500">

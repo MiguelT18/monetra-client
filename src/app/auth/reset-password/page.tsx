@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/hooks/useNotification";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import {
   establishRecoverySession,
   updatePassword,
@@ -42,6 +43,8 @@ export default function ResetPasswordPage() {
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionError, setSessionError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const {
     register,
@@ -167,20 +170,30 @@ export default function ResetPasswordPage() {
           >
             Nueva contraseña
           </label>
-          <input
-            {...register("password", {
-              required: "La contraseña es obligatoria",
-              minLength: {
-                value: 8,
-                message: "Mínimo 8 caracteres",
-              },
-            })}
-            className={AUTH_INPUT_CLASS}
-            type="password"
-            id="password"
-            autoComplete="new-password"
-            placeholder="••••••••"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              {...register("password", {
+                required: "La contraseña es obligatoria",
+                minLength: {
+                  value: 8,
+                  message: "Mínimo 8 caracteres",
+                },
+              })}
+              className={AUTH_INPUT_CLASS}
+              type={showPassword ? "text" : "password"}
+              id="password"
+              autoComplete="new-password"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="flex h-[42px] min-w-[42px] items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-400 transition-colors hover:text-gray-600 dark:border-white/10 dark:bg-white/5 dark:hover:text-white/70"
+              tabIndex={-1}
+            >
+              {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+            </button>
+          </div>
           {errors.password ? (
             <span className="mt-1 text-sm text-red-500">
               {errors.password.message}
@@ -198,18 +211,28 @@ export default function ResetPasswordPage() {
           >
             Confirmar contraseña
           </label>
-          <input
-            {...register("confirmPassword", {
-              required: "Confirma tu contraseña",
-              validate: (value) =>
-                value === password || "Las contraseñas no coinciden",
-            })}
-            className={AUTH_INPUT_CLASS}
-            type="password"
-            id="confirmPassword"
-            autoComplete="new-password"
-            placeholder="••••••••"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              {...register("confirmPassword", {
+                required: "Confirma la contraseña",
+                validate: (value) =>
+                  value === password || "Las contraseñas no coinciden",
+              })}
+              className={AUTH_INPUT_CLASS}
+              type={showConfirm ? "text" : "password"}
+              id="confirmPassword"
+              autoComplete="new-password"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm((prev) => !prev)}
+              className="flex h-[42px] min-w-[42px] items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-400 transition-colors hover:text-gray-600 dark:border-white/10 dark:bg-white/5 dark:hover:text-white/70"
+              tabIndex={-1}
+            >
+              {showConfirm ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+            </button>
+          </div>
           {errors.confirmPassword ? (
             <span className="mt-1 text-sm text-red-500">
               {errors.confirmPassword.message}

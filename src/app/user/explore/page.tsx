@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useProfile } from "@/hooks/useProfile";
 import type { Role } from "@/types/user";
@@ -19,34 +20,74 @@ import {
   FiBookOpen,
   FiTrendingUp,
   FiUsers,
-  FiFilter,
   FiClock,
-  FiStar,
-  FiAward,
-  FiLayers,
   FiDollarSign,
   FiPercent,
-  FiDownload,
-  FiRepeat,
   FiBarChart2,
   FiZap,
-  FiVideo,
   FiPenTool,
   FiCode,
   FiCpu,
-  FiHeart,
+  FiLayers,
+  FiPackage,
+  FiInbox,
+  FiX,
 } from "react-icons/fi";
+import { listCatalog, type ProductResponse, type CatalogResult } from "@/lib/product-api";
 
-function roleTone(role: Role): "blue" | "emerald" | "violet" {
-  if (role === "STUDENT") return "blue";
-  if (role === "PRODUCER") return "emerald";
-  return "violet";
+const ACCENTS: InfoProductAccent[] = ["blue", "emerald", "violet", "amber", "rose", "cyan"];
+
+const ICONS: IconType[] = [FiBookOpen, FiCode, FiLayers, FiZap, FiCpu, FiPenTool, FiPackage, FiTrendingUp];
+
+function productToExploreItem(product: ProductResponse, index: number): {
+  title: string;
+  category: string;
+  accent: InfoProductAccent;
+  icon: IconType;
+  badge?: string;
+  subtitle?: string;
+  highlights: { icon: IconType; label: string }[];
+  actionLabel?: string;
+} {
+  const daysOld = Math.floor((Date.now() - new Date(product.createdAt).getTime()) / 86400000);
+  const producer = (product as any).producer as { fullname?: string; username?: string } | undefined;
+  const producerName = producer?.username ? `@${producer.username}` : (producer?.fullname ?? "Productor");
+  const isNew = daysOld < 14;
+  const price = `$${Number(product.price).toFixed(2)}`;
+
+  const highlights: { icon: IconType; label: string }[] = [
+    { icon: FiDollarSign, label: price },
+  ];
+
+  if (product.affiliateEnabled) {
+    highlights.push({ icon: FiPercent, label: `${product.commissionRate}% comisión` });
+  }
+
+  highlights.push({
+    icon: isNew ? FiZap : FiClock,
+    label: isNew ? "Nuevo" : `${daysOld} días`,
+  });
+
+  return {
+    title: product.title,
+    category: "Producto digital",
+    accent: ACCENTS[index % ACCENTS.length],
+    icon: ICONS[index % ICONS.length],
+    badge: isNew ? "Nuevo" : price,
+    subtitle: `Por ${producerName}`,
+    highlights,
+    actionLabel: "Ver detalle",
+  };
 }
 
-function roleLabel(role: Role) {
-  if (role === "STUDENT") return "Estudiante";
-  if (role === "PRODUCER") return "Productor";
-  return "Afiliado";
+function ExploreGrid({ items }: { items: ExploreItem[] }) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {items.map((item) => (
+        <InfoProductCard key={item.title} {...item} />
+      ))}
+    </div>
+  );
 }
 
 type ExploreItem = {
@@ -60,183 +101,101 @@ type ExploreItem = {
   actionLabel?: string;
 };
 
-const STUDENT_CATALOG: ExploreItem[] = [
-  {
-    title: "Sistemas de diseño en Figma",
-    category: "Diseño",
-    accent: "violet",
-    icon: FiPenTool,
-    badge: "4.9 ★",
-    subtitle: "María López · Academia UI",
-    highlights: [
-      { icon: FiBarChart2, label: "Intermedio" },
-      { icon: FiClock, label: "8 h video" },
-      { icon: FiUsers, label: "1.2k alumnos" },
-    ],
-    actionLabel: "Ver detalle",
-  },
-  {
-    title: "JavaScript moderno para web",
-    category: "Desarrollo",
-    accent: "amber",
-    icon: FiCode,
-    badge: "Nuevo",
-    subtitle: "Carlos Ruiz · Fullstack Lab",
-    highlights: [
-      { icon: FiBarChart2, label: "Principiante" },
-      { icon: FiAward, label: "Certificado" },
-      { icon: FiLayers, label: "12 módulos" },
-    ],
-    actionLabel: "Inscribirme",
-  },
-  {
-    title: "Productividad para developers",
-    category: "Carrera",
-    accent: "cyan",
-    icon: FiZap,
-    badge: "Popular",
-    subtitle: "Ana Vega · Dev Productivity",
-    highlights: [
-      { icon: FiClock, label: "3 h · corto" },
-      { icon: FiDownload, label: "Plantillas" },
-      { icon: FiStar, label: "4.7 ★" },
-    ],
-    actionLabel: "Ver detalle",
-  },
-  {
-    title: "IA aplicada al producto digital",
-    category: "IA",
-    accent: "blue",
-    icon: FiCpu,
-    badge: "Tendencia",
-    subtitle: "Equipo Monetra · Ruta guiada",
-    highlights: [
-      { icon: FiBarChart2, label: "Avanzado" },
-      { icon: FiVideo, label: "Live + async" },
-      { icon: FiUsers, label: "Comunidad" },
-    ],
-    actionLabel: "Explorar ruta",
-  },
-];
+function roleTone(role: Role): "blue" | "emerald" | "violet" {
+  if (role === "STUDENT") return "blue";
+  if (role === "PRODUCER") return "emerald";
+  return "violet";
+}
 
-const PRODUCER_CATALOG: ExploreItem[] = [
-  {
-    title: "Plantillas de onboarding SaaS",
-    category: "SaaS",
-    accent: "emerald",
-    icon: FiLayers,
-    badge: "Referencia",
-    subtitle: "Ticket medio · alto volumen",
-    highlights: [
-      { icon: FiDollarSign, label: "€49–€79" },
-      { icon: FiTrendingUp, label: "Demanda alta" },
-      { icon: FiUsers, label: "Red de afiliados" },
-    ],
-    actionLabel: "Ver benchmark",
-  },
-  {
-    title: "Mentorías 1:1 en grupo reducido",
-    category: "Coaching",
-    accent: "violet",
-    icon: FiUsers,
-    badge: "Tendencia",
-    subtitle: "Formato premium · baja devolución",
-    highlights: [
-      { icon: FiDollarSign, label: "€200+" },
-      { icon: FiBarChart2, label: "8% devolución" },
-      { icon: FiClock, label: "6 semanas" },
-    ],
-    actionLabel: "Analizar nicho",
-  },
-  {
-    title: "Bootcamp híbrido no-code",
-    category: "No-code",
-    accent: "cyan",
-    icon: FiZap,
-    badge: "En alza",
-    subtitle: "Retención superior al promedio",
-    highlights: [
-      { icon: FiTrendingUp, label: "Nicho en alza" },
-      { icon: FiLayers, label: "Híbrido" },
-      { icon: FiAward, label: "Alta finalización" },
-    ],
-    actionLabel: "Ver benchmark",
-  },
-];
-
-const AFFILIATE_CATALOG: ExploreItem[] = [
-  {
-    title: "Curso de automatización con n8n",
-    category: "Automatización",
-    accent: "blue",
-    icon: FiCpu,
-    badge: "Solicitar acceso",
-    subtitle: "Productor verificado · pagos puntuales",
-    highlights: [
-      { icon: FiPercent, label: "20% comisión" },
-      { icon: FiClock, label: "Cookie 45 días" },
-      { icon: FiDownload, label: "Kit promocional" },
-    ],
-    actionLabel: "Solicitar acceso",
-  },
-  {
-    title: "Membresía comunidad creativos",
-    category: "Comunidad",
-    accent: "rose",
-    icon: FiHeart,
-    badge: "Abierto",
-    subtitle: "Modelo recurrente · EPC estable",
-    highlights: [
-      { icon: FiPercent, label: "25% 1.er mes" },
-      { icon: FiRepeat, label: "Recurrente" },
-      { icon: FiTrendingUp, label: "EPC alto" },
-    ],
-    actionLabel: "Unirme al programa",
-  },
-  {
-    title: "Ebook + workshop en vivo",
-    category: "Formato mixto",
-    accent: "amber",
-    icon: FiBookOpen,
-    badge: "Nuevo",
-    subtitle: "Material en español · lanzamiento Q2",
-    highlights: [
-      { icon: FiPercent, label: "15% comisión" },
-      { icon: FiDownload, label: "Swipes listos" },
-      { icon: FiUsers, label: "Embudos incluidos" },
-    ],
-    actionLabel: "Ver creatividades",
-  },
-];
-
-function ExploreGrid({ items }: { items: ExploreItem[] }) {
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {items.map((item) => (
-        <InfoProductCard key={item.title} {...item} />
-      ))}
-    </div>
-  );
+function roleLabel(role: Role) {
+  if (role === "STUDENT") return "Estudiante";
+  if (role === "PRODUCER") return "Productor";
+  return "Afiliado";
 }
 
 export default function ExplorePage() {
-  const { user, loading } = useProfile();
+  const { user, loading: profileLoading } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
   const tone = roleTone(role);
 
-  if (loading) {
+  const [products, setProducts] = useState<ProductResponse[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchCatalog = async (pageNum: number, append = false) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setCatalogLoading(true);
+    }
+
+    const { ok, result } = await listCatalog(pageNum);
+    if (ok && result.data) {
+      const data = result.data as CatalogResult;
+      if (append) {
+        setProducts((prev) => [...prev, ...data.products]);
+      } else {
+        setProducts(data.products);
+      }
+      setTotalPages(data.totalPages);
+    }
+
+    setCatalogLoading(false);
+    setLoadingMore(false);
+  };
+
+  useEffect(() => {
+    if (!profileLoading) {
+      fetchCatalog(1);
+    }
+  }, [profileLoading]);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchCatalog(nextPage, true);
+  };
+
+  const publishedCount = products.length;
+  const affiliateCount = products.filter((p) => p.affiliateEnabled).length;
+  const avgPrice = publishedCount > 0
+    ? products.reduce((s, p) => s + Number(p.price), 0) / publishedCount
+    : 0;
+  const maxCommission = affiliateCount > 0
+    ? Math.max(...products.filter((p) => p.affiliateEnabled).map((p) => p.commissionRate ?? 0))
+    : 0;
+
+  const query = searchQuery.toLowerCase().trim();
+  const filteredProducts = query
+    ? products.filter((p) => {
+        const producer = (p as any).producer as { fullname?: string; username?: string } | undefined;
+        const producerName = producer?.fullname ?? producer?.username ?? "";
+        return (
+          p.title.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query) ||
+          producerName.toLowerCase().includes(query)
+        );
+      })
+    : products;
+
+  const catalogItems = filteredProducts.map((p, i) => productToExploreItem(p, i));
+
+  if (profileLoading) {
     return (
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="animate-pulse space-y-2">
           <div className="h-8 w-3/4 max-w-lg rounded-lg bg-gray-200 dark:bg-white/10" />
           <div className="h-4 w-full max-w-md rounded bg-gray-200 dark:bg-white/10" />
         </div>
-        <div className="h-14 animate-pulse rounded-xl bg-gray-200 dark:bg-white/10" />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <InfoProductCardSkeleton key={i} />
+            <div key={i} className="h-28 animate-pulse rounded-xl bg-gray-200 dark:bg-white/10" />
           ))}
         </div>
+        <InfoProductCardSkeleton />
       </div>
     );
   }
@@ -252,145 +211,186 @@ export default function ExplorePage() {
         title="Explorar el mercado"
         description={
           role === "STUDENT"
-            ? "Encuentra cursos y rutas de aprendizaje según tu nivel y objetivos."
+            ? "Descubre cursos y productos digitales creados por nuestra comunidad. Encuentra lo que mejor se adapte a tu aprendizaje."
             : role === "PRODUCER"
-              ? "Analiza nichos, precios y formatos para posicionar mejor tus lanzamientos."
-              : "Descubre productos con comisiones atractivas y materiales listos para promocionar."
+              ? "Analiza el mercado, compara precios y encuentra oportunidades para posicionar tus productos."
+              : "Encuentra productos con comisiones atractivas para promocionar y generar ingresos."
         }
         badge={<RoleBadge label={roleLabel(role)} tone={tone} />}
       />
 
-      <div className="mb-6 flex flex-col gap-3 rounded-xl border border-border bg-background/50 p-4 dark:bg-white/3 sm:flex-row sm:items-center">
-        <div className="flex flex-1 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2.5">
-          <FiSearch className="shrink-0 text-gray-400 dark:text-white/40" />
-          <input
-            type="search"
-            readOnly
-            placeholder={
-              role === "STUDENT"
-                ? "Buscar por tema, instructor o duración…"
-                : role === "PRODUCER"
-                  ? "Buscar categorías, keywords o competidores…"
-                  : "Buscar productos, % de comisión o nicho…"
-            }
-            className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/35"
-          />
-        </div>
-        <button
-          type="button"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-primary/5 dark:text-white/80 dark:hover:bg-primary/10"
-        >
-          <FiFilter size={16} />
-          Filtros
-        </button>
-      </div>
-
-      {role === "STUDENT" && (
-        <>
-          <div className="mb-6 grid gap-3 sm:grid-cols-3">
+      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+        {role === "STUDENT" && (
+          <>
             <StatCard
               icon={FiBookOpen}
-              label="Recomendados para ti"
-              value="12+"
-              hint="Basado en tu historial"
+              label="Cursos disponibles"
+              value={String(publishedCount)}
+              hint="Productos publicados en la plataforma"
               tone="blue"
             />
             <StatCard
-              icon={FiTrendingUp}
-              label="Tendencias"
-              value="UX · IA aplicada"
-              hint="Categorías populares esta semana"
+              icon={FiDollarSign}
+              label="Desde"
+              value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : "—"}
+              hint="Precio promedio del mercado"
               tone="neutral"
             />
             <StatCard
               icon={FiUsers}
               label="Comunidad"
-              value="Grupos activos"
-              hint="Estudia con otros alumnos"
+              value="En crecimiento"
+              hint="Nuevos cursos cada semana"
               tone="violet"
             />
-          </div>
-          <SectionCard title="Cursos destacados">
-            <ExploreGrid items={STUDENT_CATALOG} />
-          </SectionCard>
-        </>
-      )}
-
-      {role === "PRODUCER" && (
-        <>
-          <div className="mb-6 grid gap-3 sm:grid-cols-3">
+          </>
+        )}
+        {role === "PRODUCER" && (
+          <>
             <StatCard
               icon={FiTrendingUp}
-              label="Nichos en alza"
-              value="No-code · Datos"
-              hint="Demanda estimada en la plataforma"
+              label="Mercado total"
+              value={String(publishedCount)}
+              hint="Productos publicados en la plataforma"
               tone="emerald"
             />
             <StatCard
-              icon={FiBookOpen}
-              label="Formato top"
-              value="Bootcamps híbridos"
-              hint="Mayor retención reportada"
+              icon={FiDollarSign}
+              label="Precio promedio"
+              value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : "—"}
+              hint="Referencia para tus precios"
               tone="neutral"
             />
             <StatCard
-              icon={FiUsers}
-              label="Afiliación"
-              value="Canales activos"
-              hint="Productos con red de afiliados"
+              icon={FiPercent}
+              label="Con afiliación"
+              value={`${affiliateCount} (${publishedCount > 0 ? Math.round(affiliateCount / publishedCount * 100) : 0}%)`}
+              hint="Productos con programa de afiliados"
               tone="violet"
             />
-          </div>
-          <SectionCard
-            title="Inspiración y benchmarks"
-            action={
-              <QuickLink href="/user/products" label="Tu catálogo" variant="outline" />
-            }
-          >
-            <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
-              Compara precios, formatos y señales de demanda antes de publicar o
-              actualizar un producto.
-            </p>
-            <ExploreGrid items={PRODUCER_CATALOG} />
-          </SectionCard>
-        </>
-      )}
-
-      {role === "AFFILIATE" && (
-        <>
-          <div className="mb-6 grid gap-3 sm:grid-cols-3">
+          </>
+        )}
+        {role === "AFFILIATE" && (
+          <>
             <StatCard
               icon={FiTrendingUp}
-              label="Mayor comisión"
-              value="Hasta 40%"
-              hint="Programas seleccionados"
+              label="Oportunidades"
+              value={String(affiliateCount)}
+              hint="Productos con programa de afiliados"
               tone="violet"
             />
             <StatCard
-              icon={FiBookOpen}
-              label="Listos para promocionar"
-              value="Kits y swipes"
-              hint="Creatividades aprobadas"
+              icon={FiPercent}
+              label="Comisión máxima"
+              value={maxCommission > 0 ? `${maxCommission}%` : "—"}
+              hint="Productos con mayor comisión"
               tone="blue"
             />
             <StatCard
-              icon={FiUsers}
-              label="Productores top"
-              value="Verificados"
-              hint="Historial de pagos puntual"
+              icon={FiBookOpen}
+              label="Catálogo total"
+              value={String(publishedCount)}
+              hint="Productos disponibles"
               tone="neutral"
             />
-          </div>
-          <SectionCard
-            title="Oportunidades para afiliados"
-            action={
-              <QuickLink href="/user/affiliations" label="Mis programas" variant="outline" />
+          </>
+        )}
+      </div>
+
+      <div className="mb-6 flex flex-col gap-3 rounded-xl border border-border bg-background/50 p-4 dark:bg-white/3 sm:flex-row sm:items-center">
+        <div className="flex flex-1 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 transition hover:border-[#7C3AED] hover:ring-1 hover:ring-[#7C3AED] focus-within:border-[#7C3AED] focus-within:ring-1 focus-within:ring-[#7C3AED] dark:border-white/10 dark:bg-white/5">
+          <FiSearch className="shrink-0 text-gray-400 dark:text-white/40" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={
+              role === "STUDENT"
+                ? "Buscar por nombre, productor o precio…"
+                : role === "PRODUCER"
+                  ? "Buscar productos, categorías o competidores…"
+                  : "Buscar por comisión, producto o nicho…"
             }
-          >
-            <ExploreGrid items={AFFILIATE_CATALOG} />
-          </SectionCard>
-        </>
+            className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden dark:text-white dark:placeholder:text-white/40"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/10 dark:hover:text-white/70"
+            >
+              <FiX size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {catalogLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <InfoProductCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : products.length === 0 ? (
+        <SectionCard title="Productos disponibles">
+          <div className="flex flex-col items-center gap-3 py-10 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/5">
+              <FiInbox size={20} className="text-gray-400 dark:text-white/40" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700 dark:text-white/70">
+                Aún no hay productos publicados
+              </p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-white/45">
+                Los productos que los creadores publiquen aparecerán aquí.
+              </p>
+            </div>
+          </div>
+        </SectionCard>
+      ) : catalogItems.length === 0 ? (
+        <SectionCard title="Productos disponibles">
+          <div className="flex flex-col items-center gap-3 py-10 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/5">
+              <FiSearch size={20} className="text-gray-400 dark:text-white/40" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700 dark:text-white/70">
+                Sin resultados para &ldquo;{searchQuery}&rdquo;
+              </p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-white/45">
+                Prueba con otros términos o revisa el catálogo completo.
+              </p>
+            </div>
+          </div>
+        </SectionCard>
+      ) : (
+        <SectionCard
+          title={query ? `Resultados para "${searchQuery}"` : "Productos disponibles"}
+          action={
+            <span className="text-xs text-gray-500 dark:text-white/45">
+              {filteredProducts.length} resultado{filteredProducts.length !== 1 ? "s" : ""}
+              {!query && products.length > 0 ? ` — Pág. ${page}` : ""}
+            </span>
+          }
+        >
+          <ExploreGrid items={catalogItems} />
+
+          {!query && page < totalPages && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50 dark:text-white/80 dark:hover:bg-primary/10"
+              >
+                {loadingMore ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+                ) : null}
+                {loadingMore ? "Cargando..." : "Cargar más productos"}
+              </button>
+            </div>
+          )}
+        </SectionCard>
       )}
+
     </motion.div>
   );
 }

@@ -73,3 +73,17 @@ export async function deleteProduct(id: string) {
   const {ok, result} = await res.json().then(r => ({ok: res.ok, result: r}));
   return { ok, result };
 }
+
+export interface CatalogResult {
+  products: ProductResponse[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export async function listCatalog(page = 1, limit = 12) {
+  const res = await fetch(`/api/products/catalog?page=${page}&limit=${limit}`);
+  const {ok, result} = await res.json().then(r => ({ok: res.ok, result: r}));
+  return { ok, result };
+}

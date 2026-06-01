@@ -178,7 +178,7 @@ export default function ProductsPage() {
 
   const activos = products.filter((p) => p.status === "PUBLISHED").length;
   const totalAffiliations = products.reduce(
-    (sum, p) => sum + p._count.affiliations,
+    (sum, p) => sum + (p._count?.affiliations ?? 0),
     0,
   );
 

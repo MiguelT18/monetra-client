@@ -30,7 +30,7 @@ export interface ProductResponse {
   affiliateCookieDays: number;
   createdAt: string;
   updatedAt: string;
-  _count: {
+  _count?: {
     affiliations: number;
     enrollments: number;
     orders: number;

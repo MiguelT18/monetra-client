@@ -5,6 +5,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { FaUserAlt } from "react-icons/fa";
 import { RoleSelect } from "./desktop/RoleSelect";
 import { NotificationButton } from "./desktop/NotificationButton";
+import { UserSearch } from "./desktop/UserSearch";
 import { AnimatePresence, motion } from "motion/react";
 import type { Role } from "@/types/user";
 import { FiMoon, FiSun } from "react-icons/fi";
@@ -24,10 +25,12 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
   return (
     <nav className="col-start-2 bg-surface rounded-lg p-3">
       {/* Desktop navbar */}
-      <div className="max-md:hidden flex items-center justify-between">
+      <div className="max-md:hidden flex items-center gap-4">
         <MenuButton isOpen={isOpen} onToggle={onToggle} buttonRef={buttonRef} />
 
-        <div className="flex items-center gap-3">
+        <UserSearch />
+
+        <div className="flex items-center gap-3 ml-auto">
           {/* Role select */}
           {loading ? (
             <div className="h-8 w-28 rounded-lg bg-gray-300 dark:bg-white/10 animate-pulse" />

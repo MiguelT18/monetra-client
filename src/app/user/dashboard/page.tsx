@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useProfile } from "@/hooks/useProfile";
 import type { Role } from "@/types/user";
@@ -11,6 +12,9 @@ import {
   QuickLink,
   RoleBadge,
 } from "@/components/user/userShell";
+import { Modal } from "@/components/UI/Modal";
+import { ProductForm } from "@/components/UI/ProductForm";
+import { listMyProducts, type ProductResponse } from "@/lib/product-api";
 import {
   FiBookOpen,
   FiTrendingUp,
@@ -20,6 +24,8 @@ import {
   FiBarChart2,
   FiLink,
   FiDollarSign,
+  FiPlus,
+  FiInbox,
 } from "react-icons/fi";
 
 function roleTone(role: Role): "blue" | "emerald" | "violet" {
@@ -35,9 +41,25 @@ function roleBadgeLabel(role: Role) {
 }
 
 export default function UserDashboard() {
-  const { user, loading } = useProfile();
+  const { user, loading, refetch } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
+  const [products, setProducts] = useState<ProductResponse[]>([]);
+  const [productModalOpen, setProductModalOpen] = useState(false);
   const tone = roleTone(role);
+
+  const fetchProducts = async () => {
+    if (role !== "PRODUCER") return;
+    const { ok, result } = await listMyProducts();
+    if (ok && result.data?.products) {
+      setProducts(result.data.products);
+    }
+  };
+
+  useEffect(() => {
+    if (!loading) {
+      fetchProducts();
+    }
+  }, [loading, role]);
   const firstName =
     user?.fullname?.split(/\s+/)[0] ?? user?.username ?? "tu cuenta";
   const xp = user?.gamifications.xp ?? 0;
@@ -159,8 +181,8 @@ export default function UserDashboard() {
             <StatCard
               icon={FiBookOpen}
               label="Productos publicados"
-              value="—"
-              hint="Cursos, packs y membresías"
+              value={String(products.filter((p) => p.status === "PUBLISHED").length)}
+              hint={`${products.length} producto${products.length !== 1 ? "s" : ""} en total`}
               tone="neutral"
             />
             <StatCard
@@ -178,18 +200,38 @@ export default function UserDashboard() {
                 <QuickLink href="/user/products" label="Gestionar" variant="outline" />
               }
             >
-              <div className="space-y-2">
-                <PlaceholderRow
-                  title="Bootcamp Full Stack"
-                  subtitle="Curso principal · público"
-                  meta="Borrador"
-                />
-                <PlaceholderRow
-                  title="Pack plantillas Notion"
-                  subtitle="Producto digital"
-                  meta="Activo"
-                />
-              </div>
+              {products.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 py-6 text-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/5">
+                    <FiInbox size={18} className="text-gray-400 dark:text-white/40" />
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-white/45">
+                    Aún no tienes productos. Crea tu primer producto para empezar.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {products.slice(0, 4).map((p) => (
+                    <PlaceholderRow
+                      key={p.id}
+                      title={p.title}
+                      subtitle={`$${Number(p.price).toFixed(2)} · ${new Date(p.createdAt).toLocaleDateString()}`}
+                      meta={
+                        p.status === "PUBLISHED"
+                          ? "Activo"
+                          : p.status === "DRAFT"
+                            ? "Borrador"
+                            : "Archivado"
+                      }
+                    />
+                  ))}
+                  {products.length > 4 && (
+                    <p className="text-xs text-center text-gray-400 dark:text-white/35 pt-1">
+                      +{products.length - 4} producto{products.length - 4 !== 1 ? "s" : ""} más
+                    </p>
+                  )}
+                </div>
+              )}
             </SectionCard>
             <SectionCard title="Resumen comercial">
               <p className="text-sm text-gray-600 dark:text-white/55">
@@ -197,7 +239,13 @@ export default function UserDashboard() {
                 afiliados que impulsan tus lanzamientos.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <QuickLink href="/user/products" label="Nuevo producto" variant="primary" />
+                <button
+                  onClick={() => setProductModalOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  <FiPlus size={16} />
+                  Nuevo producto
+                </button>
                 <QuickLink href="/user/explore" label="Ver competencia" variant="outline" />
               </div>
             </SectionCard>
@@ -272,6 +320,16 @@ export default function UserDashboard() {
           </div>
         </>
       )}
+      <Modal isOpen={productModalOpen} onClose={() => setProductModalOpen(false)}>
+        <ProductForm
+          onClose={() => setProductModalOpen(false)}
+          onSuccess={() => {
+            setProductModalOpen(false);
+            refetch();
+            fetchProducts();
+          }}
+        />
+      </Modal>
     </motion.div>
   );
 }

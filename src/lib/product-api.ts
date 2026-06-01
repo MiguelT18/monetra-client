@@ -1,0 +1,75 @@
+export interface CreateProductInput {
+  title: string;
+  description: string;
+  price: number;
+  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  affiliateEnabled?: boolean;
+  commissionRate?: number | null;
+  affiliateCookieDays?: number;
+}
+
+export interface UpdateProductInput {
+  title?: string;
+  description?: string;
+  price?: number;
+  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  affiliateEnabled?: boolean;
+  commissionRate?: number | null;
+  affiliateCookieDays?: number;
+}
+
+export interface ProductResponse {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  producerId: string;
+  affiliateEnabled: boolean;
+  commissionRate: number | null;
+  affiliateCookieDays: number;
+  createdAt: string;
+  updatedAt: string;
+  _count: {
+    affiliations: number;
+    enrollments: number;
+    orders: number;
+  };
+}
+
+export async function createProduct(data: CreateProductInput) {
+  const res = await fetch("/api/products", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const {ok, result} = await res.json().then(r => ({ok: res.ok, result: r}));
+  return { ok, result };
+}
+
+export async function listMyProducts() {
+  const res = await fetch("/api/products/mine");
+  const {ok, result} = await res.json().then(r => ({ok: res.ok, result: r}));
+  return { ok, result };
+}
+
+export async function updateProduct(id: string, data: UpdateProductInput) {
+  const res = await fetch(`/api/products/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const {ok, result} = await res.json().then(r => ({ok: res.ok, result: r}));
+  return { ok, result };
+}
+
+export async function deleteProduct(id: string) {
+  const res = await fetch(`/api/products/${id}`, {
+    method: "DELETE",
+  });
+
+  const {ok, result} = await res.json().then(r => ({ok: res.ok, result: r}));
+  return { ok, result };
+}

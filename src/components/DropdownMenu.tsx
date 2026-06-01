@@ -1,14 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useRef, useCallback } from "react";
-
-type Position = {
-  top?: number;
-  bottom?: number;
-  left?: number;
-  right?: number;
-};
+import { useEffect, useRef } from "react";
 
 interface DropdownMenuProps {
   isOpen: boolean;
@@ -33,95 +26,72 @@ export function DropdownMenu({
 }: DropdownMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const calculatePosition = useCallback(() => {
-    if (!anchorRef.current || !menuRef.current) return;
-
-    const anchor = anchorRef.current.getBoundingClientRect();
-    const menuW = menuRef.current.offsetWidth;
-    const menuH = menuRef.current.offsetHeight;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const MARGIN = 8;
-
-    const pos: Position = {};
-
-    // --- Eje vertical ---
-    const spaceBelow = vh - anchor.bottom - MARGIN;
-    const spaceAbove = anchor.top - MARGIN;
-
-    const goesBelow =
-      side === "bottom"
-        ? spaceBelow >= menuH || spaceBelow >= spaceAbove
-        : spaceAbove < menuH;
-
-    if (goesBelow) {
-      pos.top = anchor.bottom + offset;
-    } else {
-      pos.bottom = vh - anchor.top + offset;
-    }
-
-    // --- Eje horizontal ---
-    if (align === "right") {
-      const idealLeft = anchor.right - menuW;
-      if (idealLeft >= MARGIN) {
-        pos.right = vw - anchor.right;
-      } else {
-        pos.left = Math.max(MARGIN, Math.min(anchor.left, vw - menuW - MARGIN));
-      }
-    } else {
-      const idealLeft = anchor.left;
-      if (idealLeft + menuW <= vw - MARGIN) {
-        pos.left = idealLeft;
-      } else {
-        pos.left = Math.max(MARGIN, vw - menuW - MARGIN);
-      }
-    }
-
-    // Aplicar posición directamente al DOM sin pasar por state
-    const el = menuRef.current;
-    el.style.top = pos.top !== undefined ? `${pos.top}px` : "";
-    el.style.bottom = pos.bottom !== undefined ? `${pos.bottom}px` : "";
-    el.style.left = pos.left !== undefined ? `${pos.left}px` : "";
-    el.style.right = pos.right !== undefined ? `${pos.right}px` : "";
-    el.style.visibility = "visible";
-  }, [anchorRef, align, side, offset]);
-
   useEffect(() => {
     if (!isOpen) return;
 
-    // Ocultar mientras se calcula la posición
-    if (menuRef.current) {
-      menuRef.current.style.visibility = "hidden";
-    }
+    const menu = menuRef.current;
+    const anchor = anchorRef.current;
+    if (!menu || !anchor) return;
 
-    let innerFrame = 0;
-    const outerFrame = requestAnimationFrame(() => {
-      innerFrame = requestAnimationFrame(calculatePosition);
+    const position = () => {
+      const anchorRect = anchor.getBoundingClientRect();
+      const menuW = menu.offsetWidth;
+      const menuH = menu.offsetHeight;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const MARGIN = 8;
+
+      const spaceBelow = vh - anchorRect.bottom - MARGIN;
+      const spaceAbove = anchorRect.top - MARGIN;
+      const goesBelow =
+        side === "bottom"
+          ? spaceBelow >= menuH || spaceBelow >= spaceAbove
+          : spaceAbove < menuH;
+
+      const top = goesBelow
+        ? anchorRect.bottom + offset
+        : anchorRect.top - menuH - offset;
+
+      const left =
+        align === "right"
+          ? Math.max(MARGIN, Math.min(anchorRect.right - menuW, vw - menuW - MARGIN))
+          : Math.max(MARGIN, Math.min(anchorRect.left, vw - menuW - MARGIN));
+
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+      menu.style.visibility = "visible";
+    };
+
+    menu.style.visibility = "hidden";
+
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(position);
     });
 
-    window.addEventListener("resize", calculatePosition);
-    window.addEventListener("scroll", calculatePosition, true);
-    return () => {
-      cancelAnimationFrame(outerFrame);
-      if (innerFrame) cancelAnimationFrame(innerFrame);
-      window.removeEventListener("resize", calculatePosition);
-      window.removeEventListener("scroll", calculatePosition, true);
-    };
-  }, [isOpen, calculatePosition]);
+    const observer = new ResizeObserver(() => position());
+    observer.observe(menu);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: MouseEvent) => {
+    window.addEventListener("scroll", position, true);
+    window.addEventListener("resize", position);
+
+    const handleClick = (e: MouseEvent) => {
       if (
-        menuRef.current?.contains(e.target as Node) ||
-        anchorRef.current?.contains(e.target as Node)
+        menu.contains(e.target as Node) ||
+        anchor.contains(e.target as Node)
       )
         return;
       onClose();
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [isOpen, onClose, anchorRef]);
+    document.addEventListener("mousedown", handleClick);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+      window.removeEventListener("scroll", position, true);
+      window.removeEventListener("resize", position);
+      document.removeEventListener("mousedown", handleClick);
+    };
+  }, [isOpen, onClose, anchorRef, align, side, offset]);
 
   return (
     <AnimatePresence>
@@ -140,7 +110,6 @@ export function DropdownMenu({
           style={{
             position: "fixed",
             zIndex: 50,
-            visibility: "hidden", // oculto hasta que calculatePosition lo muestre
           }}
           className={`bg-surface border border-border rounded-xl shadow-xl dark:shadow-black/40 overflow-hidden ${className}`}
         >

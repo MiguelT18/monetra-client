@@ -84,7 +84,7 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-white/10"
+          className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-500/15 dark:hover:text-red-400"
         >
           <FiX size={18} />
         </button>

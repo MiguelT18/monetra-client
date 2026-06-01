@@ -28,7 +28,7 @@ export function UserSearch() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (query.length < 2) {
+    if (query.length < 1) {
       setResults([]);
       setLoading(false);
       setOpen(false);

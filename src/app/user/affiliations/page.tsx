@@ -43,7 +43,7 @@ export default function AffiliationsPage() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-lg rounded-xl border border-border bg-background/60 p-6 text-center dark:bg-white/3"
+        className="mx-auto max-w-lg rounded-2xl border border-border bg-background/60 p-6 text-center dark:bg-white/3"
       >
         <p className="text-sm font-medium text-gray-900 dark:text-white">
           Las afiliaciones están disponibles para el rol Afiliado
@@ -68,7 +68,7 @@ export default function AffiliationsPage() {
       <UserPageHeader
         title="Mis afiliaciones"
         description="Programas aceptados, tasas de comisión, ventanas de cookie y enlaces listos para campañas."
-        badge={<RoleBadge label="Afiliado" tone="violet" />}
+        badge={<RoleBadge label="Afiliado" tone="emerald" />}
       />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
@@ -77,20 +77,20 @@ export default function AffiliationsPage() {
           label="Comisiones (mes)"
           value="—"
           hint="Liquidación según calendario"
-          tone="violet"
+          tone="emerald"
         />
         <StatCard
           icon={FiLink}
           label="Conversiones"
           value="—"
           hint="Ventas atribuidas a tus enlaces"
-          tone="blue"
+          tone="emerald"
         />
         <StatCard
           icon={FiUsers}
           label="Programas activos"
           value="—"
-          hint="Productores con los que colaboras"
+          hint="Creadores con los que colaboras"
           tone="neutral"
         />
       </div>
@@ -129,7 +129,7 @@ export default function AffiliationsPage() {
         >
           <p className="mb-3 text-sm text-gray-600 dark:text-white/55">
             Copia enlaces con UTM, descarga creatividades y revisa políticas de
-            marca de cada productor.
+            marca de cada creador.
           </p>
           <div className="space-y-2">
             <div className="flex items-center justify-between rounded-lg border border-border bg-background/50 px-3 py-2.5 dark:bg-white/2">

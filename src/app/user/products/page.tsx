@@ -26,6 +26,7 @@ import {
   FiEdit3,
   FiTrash2,
   FiInbox,
+  FiImage,
 } from "react-icons/fi";
 
 function statusLabel(status: string) {
@@ -62,16 +63,31 @@ function ProductRow({
       animate={{ opacity: 1, y: 0 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative flex flex-col gap-1 rounded-lg border border-border bg-background/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4 dark:bg-white/2"
+      className="relative flex flex-col gap-3 rounded-xl border border-border hover:bg-background/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4 hover:dark:bg-white/2 transition-all cursor-pointer"
     >
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-gray-900 dark:text-white">
-          {product.title}
-        </p>
-        <p className="text-xs text-gray-500 dark:text-white/45">
-          ${Number(product.price).toFixed(2)} ·{" "}
-          {new Date(product.createdAt).toLocaleDateString()}
-        </p>
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg">
+          {product.thumbnail ? (
+            <img
+              src={product.thumbnail}
+              alt={product.title}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-200 to-gray-100 dark:from-white/10 dark:to-white/5">
+              <FiImage size={16} className="text-gray-400 dark:text-white/30" />
+            </div>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+            {product.title}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-white/45">
+            ${Number(product.price).toFixed(2)} ·{" "}
+            {new Date(product.createdAt).toLocaleDateString()}
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
@@ -91,14 +107,14 @@ function ProductRow({
           >
             <button
               onClick={() => onEdit(product)}
-              className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/15"
+              className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/15 cursor-pointer"
               title="Editar"
             >
               <FiEdit3 size={14} />
             </button>
             <button
               onClick={() => onDelete(product)}
-              className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+              className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 cursor-pointer"
               title="Eliminar"
             >
               <FiTrash2 size={14} />
@@ -136,7 +152,7 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<ProductResponse | undefined>(undefined);
 
   const fetchProducts = async () => {
-    if (role !== "PRODUCER") return;
+    if (role !== "CREATOR") return;
     setLoading(true);
     const { ok, result } = await listMyProducts();
     if (ok && result.data?.products) {
@@ -182,7 +198,7 @@ export default function ProductsPage() {
     0,
   );
 
-  if (profileLoading || (loading && role === "PRODUCER")) {
+  if (profileLoading || (loading && role === "CREATOR")) {
     return (
       <div className="animate-pulse space-y-6">
         <div className="h-8 w-2/3 max-w-md rounded-lg bg-gray-200 dark:bg-white/10" />
@@ -198,18 +214,18 @@ export default function ProductsPage() {
     );
   }
 
-  if (role !== "PRODUCER") {
+  if (role !== "CREATOR") {
     return (
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-lg rounded-xl border border-border bg-background/60 p-6 text-center dark:bg-white/3"
+        className="mx-auto max-w-lg rounded-2xl border border-border bg-background/60 p-6 text-center dark:bg-white/3"
       >
         <p className="text-sm font-medium text-gray-900 dark:text-white">
-          Solo productores gestionan el catálogo
+          Solo creadores gestionan el catálogo
         </p>
         <p className="mt-2 text-sm text-gray-600 dark:text-white/55">
-          Activa el rol Productor para crear y editar productos.
+          Activa el rol Creador para crear y editar productos.
         </p>
         <div className="mt-4 flex justify-center">
           <QuickLink
@@ -232,7 +248,7 @@ export default function ProductsPage() {
       <UserPageHeader
         title="Mis productos"
         description="Publica, actualiza precios y conecta afiliados a tus lanzamientos."
-        badge={<RoleBadge label="Productor" tone="emerald" />}
+        badge={<RoleBadge label="Creador" tone="violet" />}
       />
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -246,7 +262,7 @@ export default function ProductsPage() {
                 ? "1 producto visible en la tienda"
                 : `${activos} productos visibles en la tienda`
             }
-            tone="emerald"
+            tone="violet"
           />
           <StatCard
             icon={FiDollarSign}
@@ -309,7 +325,7 @@ export default function ProductsPage() {
               setEditingProduct(undefined);
               setProductModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
           >
             <FiPlus size={16} />
             Nuevo producto

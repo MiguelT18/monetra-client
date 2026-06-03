@@ -26,17 +26,18 @@ import {
   FiDollarSign,
   FiPlus,
   FiInbox,
+  FiImage,
 } from "react-icons/fi";
 
-function roleTone(role: Role): "blue" | "emerald" | "violet" {
-  if (role === "STUDENT") return "blue";
-  if (role === "PRODUCER") return "emerald";
-  return "violet";
+function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" {
+  if (role === "STUDENT") return "amber";
+  if (role === "CREATOR") return "violet";
+  return "emerald";
 }
 
 function roleBadgeLabel(role: Role) {
   if (role === "STUDENT") return "Estudiante";
-  if (role === "PRODUCER") return "Productor";
+  if (role === "CREATOR") return "Creador";
   return "Afiliado";
 }
 
@@ -48,7 +49,7 @@ export default function UserDashboard() {
   const tone = roleTone(role);
 
   const fetchProducts = async () => {
-    if (role !== "PRODUCER") return;
+    if (role !== "CREATOR") return;
     const { ok, result } = await listMyProducts();
     if (ok && result.data?.products) {
       setProducts(result.data.products);
@@ -96,7 +97,7 @@ export default function UserDashboard() {
         description={
           role === "STUDENT"
             ? "Resumen de tu aprendizaje, progreso y accesos rápidos a tus cursos."
-            : role === "PRODUCER"
+            : role === "CREATOR"
               ? "Visión general de tu catálogo, rendimiento y próximas acciones comerciales."
               : "Seguimiento de tus promociones, enlaces y comisiones en un solo lugar."
         }
@@ -111,7 +112,7 @@ export default function UserDashboard() {
               label="Cursos activos"
               value="3"
               hint="Próxima entrega · Fundamentos de UX"
-              tone="blue"
+              tone="amber"
             />
             <StatCard
               icon={FiAward}
@@ -125,7 +126,7 @@ export default function UserDashboard() {
               label="Meta semanal"
               value={`${xpPct}%`}
               hint="Mantén el ritmo para desbloquear insignias"
-              tone="violet"
+              tone="amber"
             />
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
@@ -168,7 +169,7 @@ export default function UserDashboard() {
         </>
       )}
 
-      {role === "PRODUCER" && (
+      {role === "CREATOR" && (
         <>
           <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <StatCard
@@ -176,7 +177,7 @@ export default function UserDashboard() {
               label="Ingresos (30 días)"
               value="—"
               hint="Conecta tu pasarela para ver datos reales"
-              tone="emerald"
+              tone="violet"
             />
             <StatCard
               icon={FiBookOpen}
@@ -212,18 +213,45 @@ export default function UserDashboard() {
               ) : (
                 <div className="space-y-2">
                   {products.slice(0, 4).map((p) => (
-                    <PlaceholderRow
+                    <div
                       key={p.id}
-                      title={p.title}
-                      subtitle={`$${Number(p.price).toFixed(2)} · ${new Date(p.createdAt).toLocaleDateString()}`}
-                      meta={
+                      className="flex items-center gap-3 rounded-xl border border-border px-4 py-3.5 hover:bg-primary/[0.03] transition-all"
+                    >
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg">
+                        {p.thumbnail ? (
+                          <img
+                            src={p.thumbnail}
+                            alt={p.title}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-200 to-gray-100 dark:from-white/10 dark:to-white/5">
+                            <FiImage size={16} className="text-gray-400 dark:text-white/30" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
+                          {p.title}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-white/45">
+                          ${Number(p.price).toFixed(2)} · {new Date(p.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <span className={`shrink-0 text-xs font-medium ${
                         p.status === "PUBLISHED"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : p.status === "DRAFT"
+                            ? "text-amber-600 dark:text-amber-400"
+                            : "text-gray-500 dark:text-white/45"
+                      }`}>
+                        {p.status === "PUBLISHED"
                           ? "Activo"
                           : p.status === "DRAFT"
                             ? "Borrador"
-                            : "Archivado"
-                      }
-                    />
+                            : "Archivado"}
+                      </span>
+                    </div>
                   ))}
                   {products.length > 4 && (
                     <p className="text-xs text-center text-gray-400 dark:text-white/35 pt-1">
@@ -241,7 +269,7 @@ export default function UserDashboard() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   onClick={() => setProductModalOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
                 >
                   <FiPlus size={16} />
                   Nuevo producto
@@ -260,8 +288,8 @@ export default function UserDashboard() {
               icon={FiDollarSign}
               label="Comisiones pendientes"
               value="—"
-              hint="Liquidación según calendario del productor"
-              tone="violet"
+              hint="Liquidación según calendario del creador"
+              tone="emerald"
             />
             <StatCard
               icon={FiLink}
@@ -275,7 +303,7 @@ export default function UserDashboard() {
               label="Clics (7 días)"
               value="—"
               hint="Tráfico atribuido a tus enlaces"
-              tone="blue"
+              tone="emerald"
             />
           </div>
           <div className="grid gap-6 lg:grid-cols-2">

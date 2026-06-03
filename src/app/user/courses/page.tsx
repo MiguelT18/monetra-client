@@ -40,7 +40,7 @@ export default function UserCourses() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-lg rounded-xl border border-border bg-background/60 p-6 text-center dark:bg-white/3"
+        className="mx-auto max-w-lg rounded-2xl border border-border bg-background/60 p-6 text-center dark:bg-white/3"
       >
         <p className="text-sm font-medium text-gray-900 dark:text-white">
           Esta sección es solo para estudiantes
@@ -65,7 +65,7 @@ export default function UserCourses() {
       <UserPageHeader
         title={`Mis cursos — ${firstName}`}
         description="Retoma donde lo dejaste, revisa el tiempo invertido y mantén tu racha de aprendizaje."
-        badge={<RoleBadge label="Estudiante" tone="blue" />}
+        badge={<RoleBadge label="Estudiante" tone="amber" />}
       />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
@@ -74,7 +74,7 @@ export default function UserCourses() {
           label="Inscritos"
           value="5"
           hint="2 en progreso activo"
-          tone="blue"
+          tone="amber"
         />
         <StatCard
           icon={FiClock}
@@ -88,7 +88,7 @@ export default function UserCourses() {
           label="Insignias"
           value="8"
           hint="Desbloquea más completando módulos"
-          tone="violet"
+          tone="amber"
         />
       </div>
 

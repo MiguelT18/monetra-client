@@ -13,13 +13,14 @@ import { UserProfile } from "@/types/user";
 import { ROLE_ROUTES } from "@/lib/user";
 
 // mismo ROLE_ROUTES que en el middleware
-type Role = "STUDENT" | "PRODUCER" | "AFFILIATE";
+type Role = "STUDENT" | "CREATOR" | "AFFILIATE";
 
 export type ProfileUpdateInput = {
   bio?: string | null;
   avatar?: string | null;
   fullname?: string;
   username?: string;
+  phone?: string | null;
 };
 
 interface ProfileContextType {
@@ -74,6 +75,18 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
     return () => controller.abort();
   }, [trigger]);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        await fetch("/api/auth/refresh-session", { method: "POST" });
+      } catch {
+        // Silently ignore — the middleware will handle expired tokens
+      }
+    }, 45 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const refetch = useCallback(() => setTrigger((t) => t + 1), []);
 

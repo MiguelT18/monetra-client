@@ -17,30 +17,32 @@ import {
   FiLink2,
   FiCamera,
   FiAlignLeft,
+  FiMail,
 } from "react-icons/fi";
 import { FaRegTrashAlt, FaUserAlt } from "react-icons/fa";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { resizeImageFile } from "@/lib/resizeImage";
+import { PhoneInput } from "@/components/UI/PhoneInput";
 
 const BIO_MAX = 160;
 
-function roleTone(role: Role): "blue" | "emerald" | "violet" {
-  if (role === "STUDENT") return "blue";
-  if (role === "PRODUCER") return "emerald";
-  return "violet";
+function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" {
+  if (role === "STUDENT") return "amber";
+  if (role === "CREATOR") return "violet";
+  return "emerald";
 }
 
 function roleLabel(role: Role) {
   if (role === "STUDENT") return "Estudiante";
-  if (role === "PRODUCER") return "Productor";
+  if (role === "CREATOR") return "Creador";
   return "Afiliado";
 }
 
 function roleSettingsIntro(role: Role) {
   if (role === "STUDENT")
     return "Perfil, seguridad y preferencias de aprendizaje. Las opciones específicas de estudiante aparecen abajo.";
-  if (role === "PRODUCER")
+  if (role === "CREATOR")
     return "Gestiona tu identidad de marca, pagos como vendedor y preferencias de catálogo.";
   return "Configura cómo cobras comisiones, tus enlaces de tracking y datos fiscales básicos.";
 }
@@ -53,6 +55,7 @@ export default function UserSettings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
@@ -63,6 +66,7 @@ export default function UserSettings() {
     if (!user) return;
     setBio(user.bio ?? "");
     setAvatar(user.avatar);
+    setPhone(user.phone ?? "");
   }, [user]);
 
   const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,30 +93,47 @@ export default function UserSettings() {
     setSaving(true);
     setFeedback(null);
 
+    let avatarUrl = avatar;
+
+    if (avatar && user && avatar.startsWith("data:")) {
+      const uploadRes = await fetch("/api/users/avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: avatar }),
+      });
+
+      const uploadResult = await uploadRes.json();
+
+      if (!uploadRes.ok) {
+        setSaving(false);
+        setFeedback({ type: "error", message: uploadResult.message ?? "Error al subir la imagen" });
+        return;
+      }
+
+      avatarUrl = uploadResult.data?.avatar ?? avatar;
+    }
+
     const result = await updateProfile({
       bio: bio.trim() || null,
-      avatar,
+      avatar: avatarUrl,
+      phone: phone || null,
     });
 
     setSaving(false);
 
     if (!result.ok) {
       setFeedback({ type: "error", message: result.message });
-      setTimeout(() => {
-        setFeedback(null)
-        return;
-      }, 4000)
+      setTimeout(() => setFeedback(null), 4000);
+      return;
     }
 
     setFeedback({ type: "success", message: result.message });
-    setTimeout(() => {
-      setFeedback(null)
-    }, 4000)
+    setTimeout(() => setFeedback(null), 4000);
   };
 
   const profileDirty =
     user &&
-    (bio !== (user.bio ?? "") || avatar !== (user.avatar ?? null));
+    (bio !== (user.bio ?? "") || avatar !== (user.avatar ?? null) || phone !== (user.phone ?? ""));
 
   if (loading) {
     return (
@@ -140,11 +161,11 @@ export default function UserSettings() {
       <div className="space-y-6">
         <SectionCard title="Perfil público">
           <p className="mb-5 text-sm text-gray-600 dark:text-white/55">
-            Tu foto y descripción se muestran en la plataforma para cualquier rol.
+            Tu foto, nombre, usuario y teléfono se muestran en la plataforma.
           </p>
 
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-            <div className="flex flex-col items-center gap-3 sm:items-start">
+            <div className="flex flex-col items-center gap-3">
               <div className="relative h-24 w-24 overflow-hidden rounded-full border border-border bg-gray-100 dark:bg-white/5">
                 {avatar ? (
                   <Image
@@ -175,7 +196,7 @@ export default function UserSettings() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10 cursor-pointer"
               >
                 <FiCamera size={14} />
                 Cambiar foto
@@ -193,23 +214,49 @@ export default function UserSettings() {
               )}
             </div>
 
-            <label className="block flex-1">
-              <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-white/55">
-                <FiAlignLeft size={14} />
-                Descripción
-              </span>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value.slice(0, BIO_MAX))}
-                rows={4}
-                maxLength={BIO_MAX}
-                placeholder="Cuéntanos sobre ti, tu experiencia o lo que ofreces..."
-                className="w-full resize-none rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:bg-white/4 dark:text-white"
-              />
-              <span className="mt-1 block text-right text-xs text-gray-500 dark:text-white/40">
-                {bio.length}/{BIO_MAX}
-              </span>
-            </label>
+            <div className="flex flex-1 flex-col gap-4">
+              <label className="block">
+                <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-white/55">
+                  <FiUser size={14} />
+                  Nombre completo
+                </span>
+                <input
+                  value={user?.fullname ?? ""}
+                  readOnly
+                  className="w-full rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none dark:bg-white/4 dark:text-white"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-white/55">
+                  <FiUser size={14} />
+                  Usuario
+                </span>
+                <input
+                  value={`@${user?.username ?? ""}`}
+                  readOnly
+                  className="w-full rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none dark:bg-white/4 dark:text-white"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-white/55">
+                  <FiAlignLeft size={14} />
+                  Descripción
+                </span>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value.slice(0, BIO_MAX))}
+                  rows={4}
+                  maxLength={BIO_MAX}
+                  placeholder="Cuéntanos sobre ti, tu experiencia o lo que ofreces..."
+                  className="w-full resize-none rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:bg-white/4 dark:text-white"
+                />
+                <span className="mt-1 block text-right text-xs text-gray-500 dark:text-white/40">
+                  {bio.length}/{BIO_MAX}
+                </span>
+              </label>
+            </div>
           </div>
         </SectionCard>
 
@@ -217,26 +264,22 @@ export default function UserSettings() {
           <div className="space-y-4">
             <label className="block">
               <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-white/55">
-                <FiUser size={14} />
-                Nombre visible
+                <FiMail size={14} />
+                Correo electrónico
               </span>
               <input
                 readOnly
-                value={user?.fullname ?? ""}
-                placeholder="Tu nombre"
+                value={user?.email ?? ""}
                 className="w-full rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none dark:bg-white/4 dark:text-white"
               />
             </label>
+
             <label className="block">
               <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-white/55">
-                <FiUser size={14} />
-                Usuario
+                <FiAlignLeft size={14} className="rotate-90" />
+                Teléfono
               </span>
-              <input
-                readOnly
-                value={user?.username ?? ""}
-                className="w-full rounded-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none dark:bg-white/4 dark:text-white"
-              />
+              <PhoneInput value={phone} onChange={setPhone} />
             </label>
           </div>
         </SectionCard>
@@ -273,7 +316,7 @@ export default function UserSettings() {
           </SectionCard>
         )}
 
-        {role === "PRODUCER" && (
+        {role === "CREATOR" && (
           <SectionCard title="Vendedor y pagos">
             <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
               Cuenta bancaria o wallet, datos fiscales simplificados y política
@@ -325,7 +368,7 @@ export default function UserSettings() {
             type="button"
             onClick={handleSaveProfile}
             disabled={saving || !profileDirty}
-            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            className="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           >
             {saving ? "Guardando..." : "Guardar perfil"}
           </button>

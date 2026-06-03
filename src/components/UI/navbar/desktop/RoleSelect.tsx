@@ -8,6 +8,12 @@ import { FiChevronDown, FiCheck } from "react-icons/fi";
 import type { Role } from "@/types/user";
 import { DropdownMenu } from "@/components/DropdownMenu";
 
+const ROLE_COLORS: Record<Role, { bar: string; ring: string; text: string }> = {
+  STUDENT: { bar: "bg-amber-500", ring: "ring-amber-500/30", text: "text-amber-600 dark:text-amber-400" },
+  CREATOR: { bar: "bg-violet-500", ring: "ring-violet-500/30", text: "text-violet-600 dark:text-violet-400" },
+  AFFILIATE: { bar: "bg-emerald-500", ring: "ring-emerald-500/30", text: "text-emerald-600 dark:text-emerald-400" },
+};
+
 const ROLES: { value: Role; label: string; description: string }[] = [
   {
     value: "STUDENT",
@@ -15,8 +21,8 @@ const ROLES: { value: Role; label: string; description: string }[] = [
     description: "Accede a cursos y contenido",
   },
   {
-    value: "PRODUCER",
-    label: "Productor",
+    value: "CREATOR",
+    label: "Creador",
     description: "Crea y vende contenido",
   },
   {
@@ -84,6 +90,7 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
         }}
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 transition-all text-sm text-gray-700 dark:text-white/80 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed"
       >
+        <span className={`h-4 w-1 rounded-full ${ROLE_COLORS[selected].bar}`} />
         <span className="group-hover:text-primary">{selectedRole.label}</span>
 
         <AnimatePresence mode="wait" initial={false}>
@@ -145,34 +152,39 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
         offset={8}
         className="w-60"
       >
-        {ROLES.map((role, i) => (
-          <motion.button
-            key={role.value}
-            initial={{ opacity: 0, x: -6 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.06, duration: 0.2, ease: "easeOut" }}
-            onClick={() => handleSelect(role.value)}
-            className="w-full flex items-start gap-3 px-4 py-3 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors text-left cursor-pointer group"
-          >
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {role.label}
-              </p>
-              <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">
-                {role.description}
-              </p>
-            </div>
-            {selected === role.value && (
-              <motion.span
-                initial={{ scale: 0, rotate: -90 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 20 }}
-              >
-                <FiCheck size={14} className="text-[#7C3AED] mt-0.5 shrink-0" />
-              </motion.span>
-            )}
-          </motion.button>
-        ))}
+        {ROLES.map((role, i) => {
+          const colors = ROLE_COLORS[role.value];
+          const isSelected = selected === role.value;
+          return (
+            <motion.button
+              key={role.value}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.06, duration: 0.2, ease: "easeOut" }}
+              onClick={() => handleSelect(role.value)}
+              className={`w-full flex items-start gap-3 px-4 py-3 transition-colors text-left cursor-pointer group relative ${isSelected ? "bg-primary/4" : "hover:bg-primary/5 dark:hover:bg-primary/10"}`}
+            >
+              <div className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full ${colors.bar} ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-60"}`} />
+              <div className="flex-1 min-w-0 pl-1">
+                <p className={`text-sm font-medium ${isSelected ? colors.text : "text-gray-900 dark:text-white"}`}>
+                  {role.label}
+                </p>
+                <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">
+                  {role.description}
+                </p>
+              </div>
+              {isSelected && (
+                <motion.span
+                  initial={{ scale: 0, rotate: -90 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                >
+                  <FiCheck size={14} className={`${colors.text} mt-0.5 shrink-0`} />
+                </motion.span>
+              )}
+            </motion.button>
+          );
+        })}
       </DropdownMenu>
     </>
   );

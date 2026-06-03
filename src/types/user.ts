@@ -1,4 +1,4 @@
-export type Role = "STUDENT" | "PRODUCER" | "AFFILIATE";
+export type Role = "STUDENT" | "CREATOR" | "AFFILIATE";
 
 export interface Gamifications {
   xp: number;
@@ -13,6 +13,7 @@ export interface UserProfile {
   bio: string | null;
   role: Role;
   avatar: string | null;
+  phone: string | null;
   gamifications: Gamifications;
 }
 

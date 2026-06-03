@@ -4,6 +4,23 @@ export async function resizeImageFile(
   file: File,
   maxDimension = 256,
 ): Promise<string> {
+  return resizeImage(file, maxDimension, MAX_AVATAR_BYTES);
+}
+
+const MAX_THUMBNAIL_BYTES = 500_000;
+
+export async function resizeThumbnailFile(
+  file: File,
+  maxDimension = 640,
+): Promise<string> {
+  return resizeImage(file, maxDimension, MAX_THUMBNAIL_BYTES);
+}
+
+async function resizeImage(
+  file: File,
+  maxDimension: number,
+  maxBytes: number,
+): Promise<string> {
   if (!file.type.startsWith("image/")) {
     throw new Error("Selecciona un archivo de imagen válido");
   }
@@ -28,12 +45,12 @@ export async function resizeImageFile(
     let quality = 0.88;
     let dataUrl = canvas.toDataURL("image/jpeg", quality);
 
-    while (dataUrl.length > MAX_AVATAR_BYTES && quality > 0.45) {
+    while (dataUrl.length > maxBytes && quality > 0.45) {
       quality -= 0.1;
       dataUrl = canvas.toDataURL("image/jpeg", quality);
     }
 
-    if (dataUrl.length > MAX_AVATAR_BYTES) {
+    if (dataUrl.length > maxBytes) {
       throw new Error("La imagen sigue siendo muy grande. Prueba con otra más pequeña.");
     }
 

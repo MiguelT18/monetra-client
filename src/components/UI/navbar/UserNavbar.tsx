@@ -23,7 +23,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
   const { theme, toggle } = useThemeContext();
 
   return (
-    <nav className="col-start-2 bg-surface rounded-lg p-3">
+    <nav className="col-start-2 bg-surface rounded-2xl p-3 shadow-sm">
       {/* Desktop navbar */}
       <div className="max-md:hidden flex items-center gap-4">
         <MenuButton isOpen={isOpen} onToggle={onToggle} buttonRef={buttonRef} />
@@ -43,9 +43,10 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
           {/* Notifications */}
           <NotificationButton />
 
+          {/* Theme toggle */}
           <button
             onClick={toggle}
-            className="relative p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 transition-all cursor-pointer group"
+            className="relative p-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10 transition-all cursor-pointer group"
           >
             <AnimatePresence mode="wait" initial={false}>
               {theme === "dark" ? (
@@ -54,7 +55,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
                   initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
                   exit={{ opacity: 0, scale: 0.5, rotate: 45 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 25 }} // Ajuste de velocidad
+                  transition={{ type: "spring", stiffness: 500, damping: 25 }}
                   className="block"
                 >
                   <FiMoon
@@ -68,7 +69,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
                   initial={{ opacity: 0, scale: 0.5, rotate: 45 }}
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
                   exit={{ opacity: 0, scale: 0.5, rotate: -45 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 25 }} // Ajuste de velocidad
+                  transition={{ type: "spring", stiffness: 500, damping: 25 }}
                   className="block"
                 >
                   <FiSun
@@ -81,12 +82,12 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
           </button>
 
           {/* Divider */}
-          <div className="w-px h-6 bg-gray-300 dark:bg-white/10" />
+          <div className="w-px h-8 bg-gray-200 dark:bg-white/10" />
 
           {/* Profile */}
           {loading || !user ? (
             <div className="flex items-center gap-3 animate-pulse">
-              <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-white/10" />
+              <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-white/10" />
               <div className="flex flex-col gap-1">
                 <div className="h-3.5 w-24 bg-gray-300 dark:bg-white/10 rounded" />
                 <div className="h-3 w-32 bg-gray-200 dark:bg-white/5 rounded" />
@@ -98,12 +99,12 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
                 <Image
                   src={user.avatar}
                   alt={`Foto de perfil de ${user.fullname}`}
-                  width={32}
-                  height={32}
-                  className="rounded-full size-10 object-cover border border-gray-200 dark:border-white/10"
+                  width={40}
+                  height={40}
+                  className="rounded-full size-10 object-cover border-2 border-gray-200 dark:border-white/10"
                 />
               ) : (
-                <div className="bg-gray-300 dark:bg-white/10 rounded-full p-2 border border-gray-200 dark:border-white/10">
+                <div className="bg-gray-200 dark:bg-white/10 rounded-full p-2 border-2 border-gray-200 dark:border-white/10">
                   <FaUserAlt className="text-gray-500 dark:text-white/50" size={16} />
                 </div>
               )}

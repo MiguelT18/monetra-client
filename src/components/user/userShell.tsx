@@ -1,5 +1,5 @@
 import type { IconType } from "react-icons";
-import { FiLock } from "react-icons/fi";
+import { FiLock, FiTrendingUp } from "react-icons/fi";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -19,15 +19,15 @@ export function UserPageHeader({
   badge?: ReactNode;
 }) {
   return (
-    <header className="mb-6 sm:mb-8 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0 space-y-1">
+    <header className="mb-8 sm:mb-10 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0 space-y-1.5">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
             {title}
           </h1>
           {badge}
         </div>
-        <p className="max-w-2xl text-sm text-gray-600 dark:text-white/60 sm:text-base">
+        <p className="max-w-2xl text-sm text-gray-500 dark:text-white/55 sm:text-base">
           {description}
         </p>
       </div>
@@ -46,7 +46,7 @@ export function StatCard({
   label: string;
   value: string;
   hint?: string;
-  tone?: "neutral" | "blue" | "emerald" | "violet";
+  tone?: "neutral" | "blue" | "emerald" | "violet" | "amber";
 }) {
   const toneRing =
     tone === "blue"
@@ -55,7 +55,9 @@ export function StatCard({
         ? "border-emerald-200/80 dark:border-emerald-500/20 bg-emerald-500/[0.04] dark:bg-emerald-500/10"
         : tone === "violet"
           ? "border-violet-200/80 dark:border-violet-500/20 bg-violet-500/[0.04] dark:bg-violet-500/10"
-          : "border-border bg-background/60 dark:bg-white/3";
+          : tone === "amber"
+            ? "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10"
+            : "border-border bg-background/60 dark:bg-white/3";
 
   const iconClass =
     tone === "blue"
@@ -64,18 +66,20 @@ export function StatCard({
         ? "text-emerald-600 dark:text-emerald-400"
         : tone === "violet"
           ? "text-violet-600 dark:text-violet-400"
-          : "text-gray-500 dark:text-white/50";
+          : tone === "amber"
+            ? "text-amber-600 dark:text-amber-400"
+            : "text-gray-500 dark:text-white/50";
 
   return (
     <div
-      className={`rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md ${toneRing}`}
+      className={`rounded-2xl border p-5 shadow-md transition-all hover:shadow-xl hover:-translate-y-0.5 ${toneRing}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
+          <p className="text-xs sm:text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
             {label}
           </p>
-          <p className="truncate text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
+          <p className="truncate text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
             {value}
           </p>
           {hint ? (
@@ -83,9 +87,9 @@ export function StatCard({
           ) : null}
         </div>
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface ${iconClass}`}
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm ${iconClass}`}
         >
-          <Icon size={18} />
+          <Icon size={20} />
         </div>
       </div>
     </div>
@@ -102,14 +106,14 @@ export function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-border bg-surface">
-      <div className="flex flex-col gap-2 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+    <section className="rounded-2xl border border-border bg-background/60 shadow-sm dark:bg-white/3">
+      <div className="flex flex-col gap-2 border-b border-border px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white">
           {title}
         </h2>
         {action}
       </div>
-      <div className="p-4 sm:p-5">{children}</div>
+      <div className="p-5 sm:p-6">{children}</div>
     </section>
   );
 }
@@ -164,12 +168,23 @@ const accentThumbnail: Record<
   },
 };
 
+const accentColorHex: Record<InfoProductAccent, string> = {
+  blue: "#3B82F6",
+  emerald: "#10B981",
+  violet: "#8B5CF6",
+  amber: "#F59E0B",
+  rose: "#F43F5E",
+  cyan: "#06B6D4",
+};
+
 export function InfoProductCard({
   title,
   category,
   accent = "violet",
   icon: Icon,
+  thumbnail,
   badge,
+  promoLabel,
   subtitle,
   highlights,
   actionLabel,
@@ -178,49 +193,73 @@ export function InfoProductCard({
   category: string;
   accent?: InfoProductAccent;
   icon: IconType;
+  thumbnail?: string | null;
   badge?: string;
+  promoLabel?: string;
   subtitle?: string;
   highlights: { icon: IconType; label: string }[];
   actionLabel?: string;
 }) {
   const thumb = accentThumbnail[accent];
+  const accentHex = accentColorHex[accent];
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition hover:border-primary/30 hover:shadow-md">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-md transition-all hover:shadow-xl hover:-translate-y-0.5">
       <div
-        className={`relative aspect-16/10 overflow-hidden bg-linear-to-br ${thumb.gradient}`}
+        className={`relative aspect-16/10 overflow-hidden ${thumbnail ? "" : `bg-linear-to-br ${thumb.gradient}`}`}
       >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.35]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 80%, currentColor 1px, transparent 1px), radial-gradient(circle at 80% 20%, currentColor 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-          aria-hidden
-        ></div>
-        <div
-          className={`absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm transition group-hover:scale-105 ${thumb.iconBg}`}
-        >
-          <Icon size={26} className={thumb.iconText} />
-        </div>
-        <span className="absolute bottom-2.5 left-2.5 rounded-md bg-black/25 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
-          {category}
-        </span>
+        {thumbnail ? (
+          <img
+            src={thumbnail}
+            alt={title}
+            className="h-full w-full object-cover transition group-hover:scale-105"
+          />
+        ) : (
+          <>
+            <div
+              className="pointer-events-none absolute inset-0 opacity-[0.35]"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 80%, currentColor 1px, transparent 1px), radial-gradient(circle at 80% 20%, currentColor 1px, transparent 1px)",
+                backgroundSize: "24px 24px",
+              }}
+              aria-hidden
+            ></div>
+            <div
+              className={`absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm transition group-hover:scale-105 ${thumb.iconBg}`}
+            >
+              <Icon size={26} className={thumb.iconText} />
+            </div>
+          </>
+        )}
         {badge ? (
-          <span className="absolute right-2.5 top-2.5 rounded-full bg-surface/95 px-2 py-0.5 text-[10px] font-semibold text-primary shadow-sm backdrop-blur-sm dark:bg-gray-900/90">
+          <span className={`absolute ${promoLabel ? "left-2.5 top-2.5" : "right-2.5 top-2.5"} rounded-full bg-surface/95 px-2.5 py-1 text-[11px] font-bold text-primary shadow-md backdrop-blur-sm dark:bg-gray-900/90`}>
             {badge}
           </span>
         ) : null}
+        {promoLabel ? (
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 pb-3 pt-8">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-white shadow-lg">
+              <FiTrendingUp size={12} />
+              {promoLabel}
+            </span>
+          </div>
+        ) : null}
+        <span className="absolute bottom-2.5 left-2.5 rounded-md bg-black/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+          {category}
+        </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="min-w-0 space-y-0.5">
-          <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-gray-900 dark:text-white">
+      <div
+        className="flex flex-1 flex-col gap-3 p-4"
+        style={{ borderTop: `3px solid ${accentHex}18` }}
+      >
+        <div className="min-w-0 space-y-1">
+          <h3 className="line-clamp-2 text-sm font-bold leading-snug text-gray-900 dark:text-white">
             {title}
           </h3>
           {subtitle ? (
-            <p className="truncate text-xs text-gray-500 dark:text-white/45">
+            <p className="truncate text-xs font-medium text-gray-500 dark:text-white/45">
               {subtitle}
             </p>
           ) : null}
@@ -230,9 +269,9 @@ export function InfoProductCard({
           {highlights.map(({ icon: Hi, label }) => (
             <li
               key={label}
-              className="inline-flex items-center gap-1 rounded-md border border-border bg-background/50 px-2 py-1 text-[11px] font-medium text-gray-600 dark:bg-white/4 dark:text-white/60"
+              className="inline-flex items-center gap-1 rounded-lg border border-border/80 bg-background/50 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:bg-white/4 dark:text-white/60"
             >
-              <Hi size={12} className="shrink-0 opacity-70" />
+              <Hi size={12} className="shrink-0" />
               {label}
             </li>
           ))}
@@ -241,7 +280,7 @@ export function InfoProductCard({
         {actionLabel ? (
           <button
             type="button"
-            className="mt-auto w-full rounded-lg border border-border py-2 text-xs font-medium text-gray-800 transition hover:border-primary/40 hover:bg-primary/5 dark:text-white/85 dark:hover:bg-primary/10"
+            className="mt-auto w-full rounded-xl bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
           >
             {actionLabel}
           </button>
@@ -253,7 +292,7 @@ export function InfoProductCard({
 
 export function InfoProductCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
       <div className="aspect-16/10 animate-pulse bg-gray-200 dark:bg-white/10" />
       <div className="space-y-3 p-4">
         <div className="h-4 w-4/5 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
@@ -278,7 +317,7 @@ export function XpProgressPanel({
 }: {
   level: number;
   xp: number;
-  tone?: "blue" | "emerald" | "violet";
+  tone?: "blue" | "emerald" | "violet" | "amber";
 }) {
   const nextXp = xpForNextLevel(level);
   const pct = Math.min(100, Math.round((xp / nextXp) * 100));
@@ -288,22 +327,26 @@ export function XpProgressPanel({
       ? "bg-blue-500"
       : tone === "emerald"
         ? "bg-emerald-500"
-        : "bg-violet-500";
+        : tone === "violet"
+          ? "bg-violet-500"
+          : "bg-amber-500";
   const ringClass =
     tone === "blue"
       ? "border-blue-200/80 dark:border-blue-500/20 bg-blue-500/[0.04] dark:bg-blue-500/10"
       : tone === "emerald"
         ? "border-emerald-200/80 dark:border-emerald-500/20 bg-emerald-500/[0.04] dark:bg-emerald-500/10"
-        : "border-violet-200/80 dark:border-violet-500/20 bg-violet-500/[0.04] dark:bg-violet-500/10";
+        : tone === "violet"
+          ? "border-violet-200/80 dark:border-violet-500/20 bg-violet-500/[0.04] dark:bg-violet-500/10"
+          : "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10";
 
   return (
-    <div className={`mb-6 rounded-xl border p-5 shadow-sm ${ringClass}`}>
+    <div className={`mb-6 rounded-2xl border p-5 shadow-md ${ringClass}`}>
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
             Tu progreso
           </p>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
             Nivel {level}
           </p>
         </div>
@@ -355,7 +398,7 @@ export function AchievementBadgeCard({
 
   return (
     <article
-      className={`relative flex flex-col rounded-xl border p-4 transition ${
+      className={`relative flex flex-col rounded-2xl border p-4 transition-all hover:shadow-md ${
         isLocked
           ? "border-border bg-background/30 dark:bg-white/2"
           : isUnlocked
@@ -429,7 +472,7 @@ export function PlaceholderRow({
   meta?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-lg border border-border bg-background/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4 dark:bg-white/2">
+    <div className="flex flex-col gap-1 rounded-xl border border-border hover:bg-primary/[0.03] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5 cursor-pointer transition-all hover:shadow-sm">
       <div className="min-w-0">
         <p className="text-sm font-medium text-gray-900 dark:text-white">
           {title}
@@ -456,8 +499,8 @@ export function QuickLink({
 }) {
   const cls =
     variant === "primary"
-      ? "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
-      : "inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-primary/40 hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10";
+      ? "inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
+      : "inline-flex items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-medium text-gray-800 transition hover:border-primary/40 hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10";
 
   return (
     <Link href={href} className={cls}>
@@ -471,14 +514,16 @@ export function RoleBadge({
   tone,
 }: {
   label: string;
-  tone: "blue" | "emerald" | "violet";
+  tone: "blue" | "emerald" | "violet" | "amber";
 }) {
   const cls =
     tone === "blue"
       ? "bg-blue-500/15 text-blue-700 dark:text-blue-300"
       : tone === "emerald"
         ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-        : "bg-violet-500/15 text-violet-700 dark:text-violet-300";
+        : tone === "violet"
+          ? "bg-violet-500/15 text-violet-700 dark:text-violet-300"
+          : "bg-amber-500/15 text-amber-700 dark:text-amber-300";
 
   return (
     <span

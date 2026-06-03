@@ -6,7 +6,6 @@ import { MdOutlineDashboard, MdOutlineSchool } from "react-icons/md";
 import type { Role } from "@/types/user";
 import { IconType } from "react-icons";
 import { useProfile } from "@/hooks/useProfile";
-import { CiSettings } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/hooks/useNotification";
 import {
@@ -15,11 +14,14 @@ import {
   FiTrendingUp,
   FiUsers,
   FiAward,
+  FiCompass,
+  FiPackage,
+  FiLink,
+  FiSettings,
 } from "react-icons/fi";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaUserAlt } from "react-icons/fa";
-import { BsBoxSeam } from "react-icons/bs";
 import Image from "next/image";
 
 interface UserAsideProps {
@@ -39,7 +41,13 @@ const NAV_ITEMS: NavItem[] = [
     label: "Dashboard",
     icon: MdOutlineDashboard,
     href: "/user/dashboard",
-    roles: ["STUDENT", "PRODUCER", "AFFILIATE"],
+    roles: ["STUDENT", "CREATOR", "AFFILIATE"],
+  },
+  {
+    label: "Explorar",
+    icon: FiCompass,
+    href: "/user/explore",
+    roles: ["STUDENT", "CREATOR", "AFFILIATE"],
   },
   {
     label: "Mis cursos",
@@ -48,20 +56,14 @@ const NAV_ITEMS: NavItem[] = [
     roles: ["STUDENT"],
   },
   {
-    label: "Explorar",
-    icon: FiBookOpen,
-    href: "/user/explore",
-    roles: ["STUDENT", "PRODUCER", "AFFILIATE"],
-  },
-  {
     label: "Mis productos",
-    icon: BsBoxSeam,
+    icon: FiPackage,
     href: "/user/products",
-    roles: ["PRODUCER"],
+    roles: ["CREATOR"],
   },
   {
     label: "Mis afiliaciones",
-    icon: FiUsers,
+    icon: FiLink,
     href: "/user/affiliations",
     roles: ["AFFILIATE"],
   },
@@ -69,13 +71,13 @@ const NAV_ITEMS: NavItem[] = [
     label: "Logros",
     icon: FiAward,
     href: "/user/achievements",
-    roles: ["STUDENT", "AFFILIATE", "PRODUCER"],
+    roles: ["STUDENT", "AFFILIATE", "CREATOR"],
   },
   {
     label: "Configuración",
-    icon: CiSettings,
+    icon: FiSettings,
     href: "/user/settings",
-    roles: ["STUDENT", "PRODUCER", "AFFILIATE"],
+    roles: ["STUDENT", "CREATOR", "AFFILIATE"],
   },
 ];
 
@@ -98,13 +100,13 @@ const ROLE_CONFIG: Record<
     bgClass: "bg-blue-500/10 dark:bg-blue-500/10",
     textClass: "text-blue-600 dark:text-blue-400",
   },
-  PRODUCER: {
-    label: "Productor",
+  CREATOR: {
+    label: "Creador",
     description: "Crea y vende tu propio contenido.",
     icon: FiTrendingUp,
-    colorClass: "bg-emerald-500",
-    bgClass: "bg-emerald-500/10 dark:bg-emerald-500/10",
-    textClass: "text-emerald-600 dark:text-emerald-400",
+    colorClass: "bg-violet-500",
+    bgClass: "bg-violet-500/10 dark:bg-violet-500/10",
+    textClass: "text-violet-600 dark:text-violet-400",
   },
   AFFILIATE: {
     label: "Afiliado",
@@ -116,7 +118,6 @@ const ROLE_CONFIG: Record<
   },
 };
 
-// XP necesaria para el siguiente nivel (simplificado)
 function xpForNextLevel(level: number) {
   return level * 500;
 }
@@ -129,8 +130,6 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
 
   const { user, loading } = useProfile();
   const { notify } = useNotification();
-  {
-  }
 
   const role = (user?.role ?? "STUDENT") as Role;
   const roleConfig = ROLE_CONFIG[role];
@@ -170,7 +169,7 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
       ref={asideRef}
       animate={{ width: isOpen ? 256 : 56 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="row-start-1 row-span-2 max-md:hidden bg-surface rounded-lg overflow-hidden flex flex-col"
+      className="row-start-1 row-span-2 max-md:hidden bg-surface rounded-2xl overflow-hidden flex flex-col shadow-sm"
     >
       <div className="flex flex-col flex-1 p-2 min-h-0 justify-between">
         {/* Top: role badge + nav items */}
@@ -183,10 +182,10 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="mb-4"
+                className="mb-4 mt-1"
               >
                 <div
-                  className={`flex items-start gap-3 rounded-lg px-3 py-3 ${roleConfig.bgClass}`}
+                  className={`flex items-start gap-3 rounded-xl px-3 py-3 ${roleConfig.bgClass}`}
                 >
                   <div className={`mt-0.5 shrink-0 ${roleConfig.textClass}`}>
                     <RoleIcon size={16} />
@@ -207,7 +206,7 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
           </AnimatePresence>
 
           {/* Nav items */}
-          <ul className="space-y-1">
+          <ul className="space-y-1.5">
             {visibleItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -218,8 +217,8 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                   <Link
                     href={item.href}
                     className={`
-                  relative flex items-center p-3 rounded-md transition-all
-                  ${isOpen ? "gap-2 justify-start" : "justify-center"}
+                  relative flex items-center p-3 rounded-xl transition-all
+                  ${isOpen ? "gap-2.5 justify-start" : "justify-center"}
                   ${isActive
                         ? "text-primary cursor-not-allowed"
                         : "text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/15 cursor-pointer"
@@ -229,14 +228,14 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                     {isActive && (
                       <motion.div
                         layoutId="active-bar"
-                        className="absolute left-0 top-0 bottom-1 w-1 h-full bg-primary rounded-l-md"
+                        className="absolute left-0 top-1 bottom-1 w-1 h-[calc(100%-8px)] bg-primary rounded-r-md"
                       />
                     )}
                     {isActive && (
                       <motion.div
                         layoutId="active-pill"
                         className={`absolute inset-0 ${isOpen ? "bg-primary/15" : "bg-primary/25"
-                          } rounded-md`}
+                          } rounded-xl`}
                         transition={{
                           type: "spring",
                           stiffness: 300,
@@ -280,23 +279,23 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                 transition={{ duration: 0.15 }}
               >
                 <div className="px-2 py-3 space-y-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     {user?.avatar ? (
                       <Image
                         src={user.avatar}
                         alt={`Foto de perfil de ${user.fullname}`}
-                        width={32}
-                        height={32}
-                        className="rounded-full size-12 object-cover border border-gray-200 dark:border-white/10"
+                        width={40}
+                        height={40}
+                        className="rounded-full size-10 object-cover border-2 border-gray-200 dark:border-white/10"
                       />
                     ) : (
-                      <div className="bg-gray-300 dark:bg-white/10 rounded-full p-2 border border-gray-200 dark:border-white/10">
+                      <div className="bg-gray-200 dark:bg-white/10 rounded-full p-2 border-2 border-gray-200 dark:border-white/10">
                         <FaUserAlt className="text-gray-500 dark:text-white/50" size={16} />
                       </div>
                     )}
 
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate leading-tight mb-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate leading-tight mb-0.5">
                         {user?.fullname ?? user?.username ?? "—"}
                       </p>
                       <p className="text-xs text-gray-400 dark:text-white/40 truncate leading-tight">
@@ -307,14 +306,14 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
 
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-400 dark:text-white/40">
+                      <span className="text-xs font-medium text-gray-500 dark:text-white/45">
                         Nv. {currentLevel}
                       </span>
-                      <span className="text-xs text-gray-400 dark:text-white/40">
+                      <span className="text-xs font-medium text-gray-500 dark:text-white/45">
                         Nv. {currentLevel + 1}
                       </span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden">
+                    <div className="h-2 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${xpProgress}%` }}
@@ -341,7 +340,7 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
             onClick={handleLogout}
             disabled={logoutLoading}
             className={`
-          w-full relative flex items-center p-3 rounded-md transition-all bg-red-700/5
+          w-full relative flex items-center p-3 rounded-xl transition-all bg-red-500/5
           text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400
           hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer
           ${isOpen ? "gap-2 justify-center" : "justify-center"}

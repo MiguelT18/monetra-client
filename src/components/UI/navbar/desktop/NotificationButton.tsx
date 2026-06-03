@@ -24,18 +24,18 @@ const ROLE_CONFIG: Record<
     badgeClassName:
       "bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
   },
-  PRODUCER: {
+  CREATOR: {
     icon: (
       <FiTrendingUp
         size={20}
-        className="text-emerald-400 dark:text-emerald-400"
+        className="text-violet-400 dark:text-violet-400"
       />
     ),
     label: "Sin notificaciones",
     description: "Aquí verás actividad sobre\ntus cursos y ventas.",
-    badge: "Productor",
+    badge: "Creador",
     badgeClassName:
-      "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
+      "bg-violet-100 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400",
   },
   AFFILIATE: {
     icon: (

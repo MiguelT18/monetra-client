@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "motion/react";
 import {
@@ -9,8 +9,10 @@ import {
   type CreateProductInput,
   type ProductResponse,
 } from "@/lib/product-api";
-import { FiX, FiCheck } from "react-icons/fi";
+import { FiX, FiCheck, FiImage, FiTrash2 } from "react-icons/fi";
 import { Select } from "@/components/UI/Select";
+import { resizeThumbnailFile } from "@/lib/resizeImage";
+import { useNotification } from "@/hooks/useNotification";
 
 interface ProductFormProps {
   onClose: () => void;
@@ -22,6 +24,11 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
   const isEditing = !!editProduct;
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
+    editProduct?.thumbnail ?? null,
+  );
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -41,18 +48,46 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
     },
   });
 
+  const { notify } = useNotification();
+
   const watchedAffiliate = watch("affiliateEnabled");
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setThumbnailFile(file);
+      const dataUrl = await resizeThumbnailFile(file);
+      setThumbnailPreview(dataUrl);
+    } catch (err: any) {
+      setError(err.message ?? "Error al procesar la imagen");
+    }
+  };
+
+  const handleRemoveThumbnail = () => {
+    setThumbnailPreview(null);
+    setThumbnailFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const onSubmit = async (data: CreateProductInput) => {
     setSubmitting(true);
     setError(null);
 
-    const payload = {
+    const payload: any = {
       ...data,
       price: Number(data.price),
+      thumbnail: thumbnailPreview || null,
       commissionRate: data.affiliateEnabled ? Number(data.commissionRate) : null,
       affiliateCookieDays: data.affiliateEnabled ? Number(data.affiliateCookieDays) : undefined,
     };
+
+    if (isEditing && thumbnailPreview === null && editProduct?.thumbnail) {
+      payload.thumbnail = null;
+    }
 
     const { ok, result } = isEditing
       ? await updateProduct(editProduct!.id, payload)
@@ -64,6 +99,7 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
       return;
     }
 
+    notify("success", isEditing ? "Producto actualizado correctamente" : "Producto creado correctamente");
     onSuccess();
   };
 
@@ -143,6 +179,64 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
           placeholder="0.00"
         />
         {fieldError(errors.price?.message)}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className={labelBase}>Miniatura</label>
+        <div className="flex items-start gap-3">
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="relative flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-background/50 transition-colors hover:border-primary/50"
+          >
+            {thumbnailPreview ? (
+              <>
+                <img
+                  src={thumbnailPreview}
+                  alt="Vista previa"
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveThumbnail();
+                  }}
+                  className="absolute right-1 top-1 rounded-lg bg-black/50 p-1 text-white backdrop-blur-sm transition-colors hover:bg-red-500/80"
+                >
+                  <FiTrash2 size={12} />
+                </button>
+              </>
+            ) : (
+              <FiImage size={24} className="text-gray-400 dark:text-white/30" />
+            )}
+          </div>
+          <div className="flex flex-col gap-1 pt-1">
+            <p className="text-xs font-medium text-gray-600 dark:text-white/60">
+              {thumbnailPreview ? "Imagen seleccionada" : "Sube una imagen"}
+            </p>
+            <p className="text-[11px] leading-relaxed text-gray-500 dark:text-white/40">
+              Formatos: JPG, PNG, WebP
+              <br />
+              Máx. 640×640 px
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            {!thumbnailPreview && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-1 self-start rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-gray-600 transition-colors hover:bg-primary/5 hover:text-primary dark:text-white/60"
+              >
+                Seleccionar archivo
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">

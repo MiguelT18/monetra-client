@@ -2,6 +2,7 @@ export interface CreateProductInput {
   title: string;
   description: string;
   price: number;
+  thumbnail?: string | null;
   status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   affiliateEnabled?: boolean;
   commissionRate?: number | null;
@@ -12,6 +13,7 @@ export interface UpdateProductInput {
   title?: string;
   description?: string;
   price?: number;
+  thumbnail?: string | null;
   status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   affiliateEnabled?: boolean;
   commissionRate?: number | null;
@@ -23,6 +25,7 @@ export interface ProductResponse {
   title: string;
   description: string;
   price: number;
+  thumbnail?: string | null;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   producerId: string;
   affiliateEnabled: boolean;

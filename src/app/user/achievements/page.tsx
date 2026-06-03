@@ -36,15 +36,15 @@ import {
   FiPlayCircle,
 } from "react-icons/fi";
 
-function roleTone(role: Role): "blue" | "emerald" | "violet" {
-  if (role === "STUDENT") return "blue";
-  if (role === "PRODUCER") return "emerald";
-  return "violet";
+function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" {
+  if (role === "STUDENT") return "amber";
+  if (role === "CREATOR") return "violet";
+  return "emerald";
 }
 
 function roleLabel(role: Role) {
   if (role === "STUDENT") return "Estudiante";
-  if (role === "PRODUCER") return "Productor";
+  if (role === "CREATOR") return "Creador";
   return "Afiliado";
 }
 
@@ -121,7 +121,7 @@ const STUDENT_ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
-const PRODUCER_ACHIEVEMENTS: Achievement[] = [
+  const CREATOR_ACHIEVEMENTS: Achievement[] = [
   {
     id: "first-product",
     title: "Primer lanzamiento",
@@ -224,7 +224,7 @@ const AFFILIATE_ACHIEVEMENTS: Achievement[] = [
   {
     id: "top-affiliate",
     title: "Top del mes",
-    description: "Entra en el top 10 de afiliados de un productor verificado.",
+    description: "Entra en el top 10 de afiliados de un creador verificado.",
     icon: FiAward,
     status: "locked",
     accent: "rose",
@@ -242,7 +242,7 @@ const AFFILIATE_ACHIEVEMENTS: Achievement[] = [
 ];
 
 function achievementsForRole(role: Role): Achievement[] {
-  if (role === "PRODUCER") return PRODUCER_ACHIEVEMENTS;
+    if (role === "CREATOR") return CREATOR_ACHIEVEMENTS;
   if (role === "AFFILIATE") return AFFILIATE_ACHIEVEMENTS;
   return STUDENT_ACHIEVEMENTS;
 }
@@ -310,7 +310,7 @@ export default function AchievementsPage() {
         description={
           role === "STUDENT"
             ? "Gana XP estudiando, desbloquea insignias y sigue tu racha de aprendizaje."
-            : role === "PRODUCER"
+            : role === "CREATOR"
               ? "Reconoce hitos de tu catálogo, ventas y comunidad de afiliados."
               : "Celebra tus conversiones, comisiones y constancia como promotor."
         }
@@ -326,14 +326,14 @@ export default function AchievementsPage() {
             label="Insignias"
             value={`${unlocked.length} / ${all.length}`}
             hint="Desbloqueadas del catálogo visible"
-            tone="blue"
+            tone="amber"
           />
           <StatCard
             icon={FiZap}
             label="Racha actual"
             value="4 días"
             hint="Sigue estudiando para mantenerla"
-            tone="violet"
+            tone="amber"
           />
           <StatCard
             icon={FiClock}
@@ -345,14 +345,14 @@ export default function AchievementsPage() {
         </div>
       )}
 
-      {role === "PRODUCER" && (
+      {role === "CREATOR" && (
         <div className="mb-6 grid gap-3 sm:grid-cols-3">
           <StatCard
             icon={FiAward}
             label="Hitos comerciales"
             value={`${unlocked.length} / ${all.length}`}
             hint="Logros de catálogo y ventas"
-            tone="emerald"
+            tone="violet"
           />
           <StatCard
             icon={FiBarChart2}
@@ -378,7 +378,7 @@ export default function AchievementsPage() {
             label="Logros"
             value={`${unlocked.length} / ${all.length}`}
             hint="Desbloqueados en tu trayectoria"
-            tone="violet"
+            tone="emerald"
           />
           <StatCard
             icon={FiLink}
@@ -392,7 +392,7 @@ export default function AchievementsPage() {
             label="Conversiones"
             value="3"
             hint="Este mes · atribuidas a ti"
-            tone="blue"
+            tone="emerald"
           />
         </div>
       )}
@@ -404,7 +404,7 @@ export default function AchievementsPage() {
             action={
               role === "STUDENT" ? (
                 <QuickLink href="/user/courses" label="Mis cursos" variant="outline" />
-              ) : role === "PRODUCER" ? (
+              ) : role === "CREATOR" ? (
                 <QuickLink href="/user/products" label="Mi catálogo" variant="outline" />
               ) : (
                 <QuickLink
@@ -424,7 +424,7 @@ export default function AchievementsPage() {
             <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
               {role === "STUDENT"
                 ? "Completa estas metas para sumar XP y subir de nivel."
-                : role === "PRODUCER"
+                : role === "CREATOR"
                   ? "Estás cerca de estos hitos de negocio y reputación."
                   : "Sigue promocionando para cerrar estos objetivos."}
             </p>
@@ -442,7 +442,7 @@ export default function AchievementsPage() {
             <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
               {role === "STUDENT"
                 ? "Insignias que podrás desbloquear al seguir aprendiendo."
-                : role === "PRODUCER"
+                : role === "CREATOR"
                   ? "Objetivos avanzados para escalar tu catálogo y comunidad."
                   : "Metas para afiliados con mayor volumen y diversificación."}
             </p>

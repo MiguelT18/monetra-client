@@ -4,8 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { ReactNode } from "react";
 import { UserNavbar } from "@/components/UI/navbar/UserNavbar";
 import { UserAside } from "@/components/UI/UserAside";
-import { ProfileProvider } from "@/hooks/useProfile";
-
 export function UserLayoutClient({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const asideRef = useRef<HTMLElement | null>(null);
@@ -27,8 +25,10 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ProfileProvider>
-      <main className="min-h-dvh h-full w-full bg-background p-2 max-md:space-y-2 md:grid md:h-dvh md:min-h-0 md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr] md:gap-2 md:overflow-hidden">
+    <main className="relative min-h-dvh h-full w-full bg-background p-3 max-md:space-y-3 md:grid md:h-dvh md:min-h-0 md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr] md:gap-3 md:overflow-hidden">
+        {/* Subtle background gradient */}
+        <div className="pointer-events-none fixed inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent dark:from-primary/[0.02]" />
+
         <UserNavbar
           isOpen={isOpen}
           onToggle={() => setIsOpen((prev) => !prev)}
@@ -36,10 +36,9 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
         />
         <UserAside isOpen={isOpen} asideRef={asideRef} />
 
-        <section className="app-scrollbar row-start-2 col-start-2 min-h-0 overflow-y-auto bg-surface rounded-lg p-3 sm:p-5">
+        <section className="app-scrollbar relative row-start-2 col-start-2 min-h-0 overflow-y-auto bg-surface rounded-2xl p-4 shadow-sm sm:p-6">
           {children}
         </section>
       </main>
-    </ProfileProvider>
   );
 }

@@ -39,41 +39,67 @@ const ACCENTS: InfoProductAccent[] = ["blue", "emerald", "violet", "amber", "ros
 
 const ICONS: IconType[] = [FiBookOpen, FiCode, FiLayers, FiZap, FiCpu, FiPenTool, FiPackage, FiTrendingUp];
 
-function productToExploreItem(product: ProductResponse, index: number): {
+type ExploreItem = {
   title: string;
   category: string;
   accent: InfoProductAccent;
   icon: IconType;
+  thumbnail?: string | null;
   badge?: string;
+  promoLabel?: string;
   subtitle?: string;
   highlights: { icon: IconType; label: string }[];
   actionLabel?: string;
-} {
+};
+
+function productToExploreItem(product: ProductResponse, index: number, role?: Role): ExploreItem {
   const daysOld = Math.floor((Date.now() - new Date(product.createdAt).getTime()) / 86400000);
   const producer = (product as any).producer as { fullname?: string; username?: string } | undefined;
-  const producerName = producer?.username ? `@${producer.username}` : (producer?.fullname ?? "Productor");
+  const producerName = producer?.username ? `@${producer.username}` : (producer?.fullname ?? "Creador");
   const isNew = daysOld < 14;
-  const price = `$${Number(product.price).toFixed(2)}`;
+  const price = Number(product.price).toFixed(2);
+  const priceLabel = `$${price}`;
+  const isAffiliateView = role === "AFFILIATE";
+  const hasCommission = product.affiliateEnabled && product.commissionRate;
 
-  const highlights: { icon: IconType; label: string }[] = [
-    { icon: FiDollarSign, label: price },
-  ];
+  const highlights: { icon: IconType; label: string }[] = [];
+  let badge: string | undefined;
+  let promoLabel: string | undefined;
 
-  if (product.affiliateEnabled) {
-    highlights.push({ icon: FiPercent, label: `${product.commissionRate}% comisión` });
+  if (isAffiliateView) {
+    badge = hasCommission ? `${product.commissionRate}%` : "Sin comisión";
+
+    if (hasCommission) {
+      const commissionAmount = (Number(product.price) * product.commissionRate!) / 100;
+      promoLabel = `Gana $${commissionAmount.toFixed(2)}/venta`;
+    }
+
+    highlights.push({ icon: FiDollarSign, label: priceLabel });
+    highlights.push({
+      icon: isNew ? FiZap : FiClock,
+      label: isNew ? "Nuevo" : `${daysOld} días`,
+    });
+  } else {
+    badge = priceLabel;
+
+    if (hasCommission) {
+      highlights.push({ icon: FiPercent, label: `${product.commissionRate}% comisión` });
+    }
+
+    highlights.push({
+      icon: isNew ? FiZap : FiClock,
+      label: isNew ? "Nuevo" : `${daysOld} días`,
+    });
   }
-
-  highlights.push({
-    icon: isNew ? FiZap : FiClock,
-    label: isNew ? "Nuevo" : `${daysOld} días`,
-  });
 
   return {
     title: product.title,
     category: "Producto digital",
     accent: ACCENTS[index % ACCENTS.length],
     icon: ICONS[index % ICONS.length],
-    badge: isNew ? "Nuevo" : price,
+    thumbnail: product.thumbnail,
+    badge,
+    promoLabel,
     subtitle: `Por ${producerName}`,
     highlights,
     actionLabel: "Ver detalle",
@@ -90,26 +116,15 @@ function ExploreGrid({ items }: { items: ExploreItem[] }) {
   );
 }
 
-type ExploreItem = {
-  title: string;
-  category: string;
-  accent: InfoProductAccent;
-  icon: IconType;
-  badge?: string;
-  subtitle?: string;
-  highlights: { icon: IconType; label: string }[];
-  actionLabel?: string;
-};
-
-function roleTone(role: Role): "blue" | "emerald" | "violet" {
-  if (role === "STUDENT") return "blue";
-  if (role === "PRODUCER") return "emerald";
-  return "violet";
+function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" {
+  if (role === "STUDENT") return "amber";
+  if (role === "CREATOR") return "violet";
+  return "emerald";
 }
 
 function roleLabel(role: Role) {
   if (role === "STUDENT") return "Estudiante";
-  if (role === "PRODUCER") return "Productor";
+  if (role === "CREATOR") return "Creador";
   return "Afiliado";
 }
 
@@ -181,7 +196,7 @@ export default function ExplorePage() {
       })
     : products;
 
-  const catalogItems = filteredProducts.map((p, i) => productToExploreItem(p, i));
+  const catalogItems = filteredProducts.map((p, i) => productToExploreItem(p, i, role));
 
   if (profileLoading) {
     return (
@@ -212,7 +227,7 @@ export default function ExplorePage() {
         description={
           role === "STUDENT"
             ? "Descubre cursos y productos digitales creados por nuestra comunidad. Encuentra lo que mejor se adapte a tu aprendizaje."
-            : role === "PRODUCER"
+            : role === "CREATOR"
               ? "Analiza el mercado, compara precios y encuentra oportunidades para posicionar tus productos."
               : "Encuentra productos con comisiones atractivas para promocionar y generar ingresos."
         }
@@ -227,7 +242,7 @@ export default function ExplorePage() {
               label="Cursos disponibles"
               value={String(publishedCount)}
               hint="Productos publicados en la plataforma"
-              tone="blue"
+              tone="amber"
             />
             <StatCard
               icon={FiDollarSign}
@@ -241,18 +256,18 @@ export default function ExplorePage() {
               label="Comunidad"
               value="En crecimiento"
               hint="Nuevos cursos cada semana"
-              tone="violet"
+              tone="amber"
             />
           </>
         )}
-        {role === "PRODUCER" && (
+        {role === "CREATOR" && (
           <>
             <StatCard
               icon={FiTrendingUp}
               label="Mercado total"
               value={String(publishedCount)}
               hint="Productos publicados en la plataforma"
-              tone="emerald"
+              tone="violet"
             />
             <StatCard
               icon={FiDollarSign}
@@ -277,14 +292,14 @@ export default function ExplorePage() {
               label="Oportunidades"
               value={String(affiliateCount)}
               hint="Productos con programa de afiliados"
-              tone="violet"
+              tone="emerald"
             />
             <StatCard
               icon={FiPercent}
               label="Comisión máxima"
               value={maxCommission > 0 ? `${maxCommission}%` : "—"}
               hint="Productos con mayor comisión"
-              tone="blue"
+              tone="emerald"
             />
             <StatCard
               icon={FiBookOpen}
@@ -297,7 +312,7 @@ export default function ExplorePage() {
         )}
       </div>
 
-      <div className="mb-6 flex flex-col gap-3 rounded-xl border border-border bg-background/50 p-4 dark:bg-white/3 sm:flex-row sm:items-center">
+      <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-border bg-background/50 p-4 dark:bg-white/3 sm:flex-row sm:items-center">
         <div className="flex flex-1 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 transition hover:border-[#7C3AED] hover:ring-1 hover:ring-[#7C3AED] focus-within:border-[#7C3AED] focus-within:ring-1 focus-within:ring-[#7C3AED] dark:border-white/10 dark:bg-white/5">
           <FiSearch className="shrink-0 text-gray-400 dark:text-white/40" />
           <input
@@ -306,8 +321,8 @@ export default function ExplorePage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={
               role === "STUDENT"
-                ? "Buscar por nombre, productor o precio…"
-                : role === "PRODUCER"
+                ? "Buscar por nombre, creador o precio…"
+                : role === "CREATOR"
                   ? "Buscar productos, categorías o competidores…"
                   : "Buscar por comisión, producto o nicho…"
             }
@@ -379,7 +394,7 @@ export default function ExplorePage() {
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50 dark:text-white/80 dark:hover:bg-primary/10"
+                className="inline-flex items-center gap-2 rounded-xl border border-border px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50 dark:text-white/80 dark:hover:bg-primary/10"
               >
                 {loadingMore ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />

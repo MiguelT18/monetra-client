@@ -27,15 +27,17 @@ import { PhoneInput } from "@/components/UI/PhoneInput";
 
 const BIO_MAX = 160;
 
-function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" {
+function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" | "red" {
   if (role === "STUDENT") return "amber";
   if (role === "CREATOR") return "violet";
+  if (role === "ADMIN") return "red";
   return "emerald";
 }
 
 function roleLabel(role: Role) {
   if (role === "STUDENT") return "Estudiante";
   if (role === "CREATOR") return "Creador";
+  if (role === "ADMIN") return "Admin";
   return "Afiliado";
 }
 
@@ -44,11 +46,13 @@ function roleSettingsIntro(role: Role) {
     return "Perfil, seguridad y preferencias de aprendizaje. Las opciones específicas de estudiante aparecen abajo.";
   if (role === "CREATOR")
     return "Gestiona tu identidad de marca, pagos como vendedor y preferencias de catálogo.";
+  if (role === "ADMIN")
+    return "Configuración general de la plataforma, gestión de logros y control de usuarios.";
   return "Configura cómo cobras comisiones, tus enlaces de tracking y datos fiscales básicos.";
 }
 
 export default function UserSettings() {
-  const { user, loading, updateProfile } = useProfile();
+  const { user, loading, updateProfile, changeRole } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
   const tone = roleTone(role);
 
@@ -302,6 +306,37 @@ export default function UserSettings() {
             </button>
           </div>
         </SectionCard>
+
+        {role === "ADMIN" && (
+          <SectionCard title="Administración de la plataforma">
+            <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
+              Gestiona los logros, usuarios y configuración general de la plataforma.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <QuickLink href="/admin/achievements" label="Gestionar logros" variant="primary" />
+              <QuickLink href="/admin/users" label="Usuarios" variant="outline" />
+            </div>
+          </SectionCard>
+        )}
+
+        {role === "ADMIN" && (
+          <SectionCard title="Salir del modo administrador">
+            <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
+              Si ya no necesitas gestionar la plataforma, puedes volver al rol de
+              estudiante. Siempre podrás retomar el rol de admin más tarde si es necesario.
+            </p>
+            <button
+              type="button"
+              onClick={async () => {
+                await changeRole("STUDENT");
+                window.location.reload();
+              }}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-500/10 px-5 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition-all hover:bg-red-500/20 dark:border-red-500/20 dark:text-red-300"
+            >
+              Salir del rol admin
+            </button>
+          </SectionCard>
+        )}
 
         {role === "STUDENT" && (
           <SectionCard title="Aprendizaje">

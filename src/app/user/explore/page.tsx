@@ -116,15 +116,17 @@ function ExploreGrid({ items }: { items: ExploreItem[] }) {
   );
 }
 
-function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" {
+function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" | "red" {
   if (role === "STUDENT") return "amber";
   if (role === "CREATOR") return "violet";
+  if (role === "ADMIN") return "red";
   return "emerald";
 }
 
 function roleLabel(role: Role) {
   if (role === "STUDENT") return "Estudiante";
   if (role === "CREATOR") return "Creador";
+  if (role === "ADMIN") return "Admin";
   return "Afiliado";
 }
 
@@ -225,7 +227,7 @@ export default function ExplorePage() {
       <UserPageHeader
         title="Explorar el mercado"
         description={
-          role === "STUDENT"
+          role === "STUDENT" || role === "ADMIN"
             ? "Descubre cursos y productos digitales creados por nuestra comunidad. Encuentra lo que mejor se adapte a tu aprendizaje."
             : role === "CREATOR"
               ? "Analiza el mercado, compara precios y encuentra oportunidades para posicionar tus productos."
@@ -235,14 +237,14 @@ export default function ExplorePage() {
       />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        {role === "STUDENT" && (
+        {role === "STUDENT" || role === "ADMIN" ? (
           <>
             <StatCard
               icon={FiBookOpen}
               label="Cursos disponibles"
               value={String(publishedCount)}
               hint="Productos publicados en la plataforma"
-              tone="amber"
+              tone={role === "ADMIN" ? "red" : "amber"}
             />
             <StatCard
               icon={FiDollarSign}
@@ -256,11 +258,10 @@ export default function ExplorePage() {
               label="Comunidad"
               value="En crecimiento"
               hint="Nuevos cursos cada semana"
-              tone="amber"
+              tone={role === "ADMIN" ? "red" : "amber"}
             />
           </>
-        )}
-        {role === "CREATOR" && (
+        ) : role === "CREATOR" ? (
           <>
             <StatCard
               icon={FiTrendingUp}
@@ -284,8 +285,7 @@ export default function ExplorePage() {
               tone="violet"
             />
           </>
-        )}
-        {role === "AFFILIATE" && (
+        ) : (
           <>
             <StatCard
               icon={FiTrendingUp}
@@ -320,7 +320,7 @@ export default function ExplorePage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={
-              role === "STUDENT"
+              role === "STUDENT" || role === "ADMIN"
                 ? "Buscar por nombre, creador o precio…"
                 : role === "CREATOR"
                   ? "Buscar productos, categorías o competidores…"

@@ -3,8 +3,19 @@ import { FiLock, FiTrendingUp } from "react-icons/fi";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-export function xpForNextLevel(level: number) {
-  return Math.max(level * 500, 1);
+export function xpForNextLevel(level: number): number {
+  const linear = 50 * level;
+  const logarithmic = 80 * Math.log(level + 1);
+  const exponential = 5 * level * level;
+  return Math.max(Math.floor(linear + logarithmic + exponential), 1);
+}
+
+export function totalXpForLevel(level: number): number {
+  let total = 0;
+  for (let i = 1; i < level; i++) {
+    total += xpForNextLevel(i);
+  }
+  return total;
 }
 
 export type AchievementStatus = "unlocked" | "in_progress" | "locked";
@@ -46,7 +57,7 @@ export function StatCard({
   label: string;
   value: string;
   hint?: string;
-  tone?: "neutral" | "blue" | "emerald" | "violet" | "amber";
+  tone?: "neutral" | "blue" | "emerald" | "violet" | "amber" | "red";
 }) {
   const toneRing =
     tone === "blue"
@@ -57,7 +68,9 @@ export function StatCard({
           ? "border-violet-200/80 dark:border-violet-500/20 bg-violet-500/[0.04] dark:bg-violet-500/10"
           : tone === "amber"
             ? "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10"
-            : "border-border bg-background/60 dark:bg-white/3";
+            : tone === "red"
+              ? "border-red-200/80 dark:border-red-500/20 bg-red-500/[0.04] dark:bg-red-500/10"
+              : "border-border bg-background/60 dark:bg-white/3";
 
   const iconClass =
     tone === "blue"
@@ -68,7 +81,9 @@ export function StatCard({
           ? "text-violet-600 dark:text-violet-400"
           : tone === "amber"
             ? "text-amber-600 dark:text-amber-400"
-            : "text-gray-500 dark:text-white/50";
+            : tone === "red"
+              ? "text-red-600 dark:text-red-400"
+              : "text-gray-500 dark:text-white/50";
 
   return (
     <div
@@ -317,11 +332,13 @@ export function XpProgressPanel({
 }: {
   level: number;
   xp: number;
-  tone?: "blue" | "emerald" | "violet" | "amber";
+  tone?: "blue" | "emerald" | "violet" | "amber" | "red";
 }) {
-  const nextXp = xpForNextLevel(level);
-  const pct = Math.min(100, Math.round((xp / nextXp) * 100));
-  const remaining = Math.max(0, nextXp - xp);
+  const currentLevelXp = totalXpForLevel(level);
+  const xpInLevel = Math.max(0, xp - currentLevelXp);
+  const neededXp = xpForNextLevel(level);
+  const pct = Math.min(100, Math.round((xpInLevel / neededXp) * 100));
+  const remaining = Math.max(0, neededXp - xpInLevel);
   const barClass =
     tone === "blue"
       ? "bg-blue-500"
@@ -329,7 +346,9 @@ export function XpProgressPanel({
         ? "bg-emerald-500"
         : tone === "violet"
           ? "bg-violet-500"
-          : "bg-amber-500";
+          : tone === "red"
+            ? "bg-red-500"
+            : "bg-amber-500";
   const ringClass =
     tone === "blue"
       ? "border-blue-200/80 dark:border-blue-500/20 bg-blue-500/[0.04] dark:bg-blue-500/10"
@@ -337,7 +356,9 @@ export function XpProgressPanel({
         ? "border-emerald-200/80 dark:border-emerald-500/20 bg-emerald-500/[0.04] dark:bg-emerald-500/10"
         : tone === "violet"
           ? "border-violet-200/80 dark:border-violet-500/20 bg-violet-500/[0.04] dark:bg-violet-500/10"
-          : "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10";
+          : tone === "red"
+            ? "border-red-200/80 dark:border-red-500/20 bg-red-500/[0.04] dark:bg-red-500/10"
+            : "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10";
 
   return (
     <div className={`mb-6 rounded-2xl border p-5 shadow-md ${ringClass}`}>
@@ -352,10 +373,10 @@ export function XpProgressPanel({
         </div>
         <p className="text-sm text-gray-600 dark:text-white/55">
           <span className="font-semibold text-gray-900 dark:text-white">
-            {xp}
+            {xpInLevel}
           </span>
           {" / "}
-          {nextXp} XP
+          {neededXp} XP
         </p>
       </div>
       <div className="h-2.5 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
@@ -514,7 +535,7 @@ export function RoleBadge({
   tone,
 }: {
   label: string;
-  tone: "blue" | "emerald" | "violet" | "amber";
+  tone: "blue" | "emerald" | "violet" | "amber" | "red";
 }) {
   const cls =
     tone === "blue"
@@ -523,7 +544,9 @@ export function RoleBadge({
         ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
         : tone === "violet"
           ? "bg-violet-500/15 text-violet-700 dark:text-violet-300"
-          : "bg-amber-500/15 text-amber-700 dark:text-amber-300";
+          : tone === "red"
+            ? "bg-red-500/15 text-red-700 dark:text-red-300"
+            : "bg-amber-500/15 text-amber-700 dark:text-amber-300";
 
   return (
     <span

@@ -9,11 +9,10 @@ import {
   ReactNode,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { UserProfile } from "@/types/user";
+import { UserProfile, type Role } from "@/types/user";
 import { ROLE_ROUTES } from "@/lib/user";
 
 // mismo ROLE_ROUTES que en el middleware
-type Role = "STUDENT" | "CREATOR" | "AFFILIATE";
 
 export type ProfileUpdateInput = {
   bio?: string | null;

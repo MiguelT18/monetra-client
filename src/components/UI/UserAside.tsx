@@ -8,6 +8,7 @@ import { IconType } from "react-icons";
 import { useProfile } from "@/hooks/useProfile";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/hooks/useNotification";
+import { xpForNextLevel, totalXpForLevel } from "@/components/user/userShell";
 import {
   FiLogOut,
   FiBookOpen,
@@ -18,6 +19,8 @@ import {
   FiPackage,
   FiLink,
   FiSettings,
+  FiShield,
+  FiUserCheck,
 } from "react-icons/fi";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -38,15 +41,15 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
-    label: "Dashboard",
-    icon: MdOutlineDashboard,
-    href: "/user/dashboard",
-    roles: ["STUDENT", "CREATOR", "AFFILIATE"],
-  },
-  {
     label: "Explorar",
     icon: FiCompass,
     href: "/user/explore",
+    roles: ["STUDENT", "CREATOR", "AFFILIATE", "ADMIN"],
+  },
+  {
+    label: "Dashboard",
+    icon: MdOutlineDashboard,
+    href: "/user/dashboard",
     roles: ["STUDENT", "CREATOR", "AFFILIATE"],
   },
   {
@@ -72,6 +75,18 @@ const NAV_ITEMS: NavItem[] = [
     icon: FiAward,
     href: "/user/achievements",
     roles: ["STUDENT", "AFFILIATE", "CREATOR"],
+  },
+  {
+    label: "Logros",
+    icon: FiAward,
+    href: "/admin/achievements",
+    roles: ["ADMIN"],
+  },
+  {
+    label: "Usuarios",
+    icon: FiUserCheck,
+    href: "/admin/users",
+    roles: ["ADMIN"],
   },
   {
     label: "Configuración",
@@ -116,11 +131,15 @@ const ROLE_CONFIG: Record<
     bgClass: "bg-violet-500/10 dark:bg-violet-500/10",
     textClass: "text-violet-600 dark:text-violet-400",
   },
+  ADMIN: {
+    label: "Admin",
+    description: "Gestiona la plataforma y los usuarios.",
+    icon: FiAward,
+    colorClass: "bg-red-500",
+    bgClass: "bg-red-500/10 dark:bg-red-500/10",
+    textClass: "text-red-600 dark:text-red-400",
+  },
 };
-
-function xpForNextLevel(level: number) {
-  return level * 500;
-}
 
 export function UserAside({ isOpen, asideRef }: UserAsideProps) {
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -128,7 +147,7 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { user, loading } = useProfile();
+  const { user, loading, changeRole } = useProfile();
   const { notify } = useNotification();
 
   const role = (user?.role ?? "STUDENT") as Role;
@@ -141,8 +160,10 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
 
   const currentXp = user?.gamifications.xp ?? 0;
   const currentLevel = user?.gamifications.level ?? 1;
+  const currentLevelXp = totalXpForLevel(currentLevel);
+  const xpInLevel = Math.max(0, currentXp - currentLevelXp);
   const nextLevelXp = xpForNextLevel(currentLevel);
-  const xpProgress = Math.min((currentXp / nextLevelXp) * 100, 100);
+  const xpProgress = Math.min((xpInLevel / nextLevelXp) * 100, 100);
 
   const handleLogout = async () => {
     setLogoutLoading(true);
@@ -327,7 +348,7 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                       />
                     </div>
                     <p className="text-xs text-gray-400 dark:text-white/30 text-center">
-                      {currentXp} / {nextLevelXp} XP
+                      {xpInLevel} / {nextLevelXp} XP
                     </p>
                   </div>
                 </div>
@@ -335,32 +356,69 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
             )}
           </AnimatePresence>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={logoutLoading}
-            className={`
-          w-full relative flex items-center p-3 rounded-xl transition-all bg-red-500/5
-          text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400
-          hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer
-          ${isOpen ? "gap-2 justify-center" : "justify-center"}
-        `}
-          >
-            <FiLogOut size={20} className="shrink-0" />
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="whitespace-nowrap overflow-hidden text-sm"
-                >
-                  {logoutLoading ? "Cerrando sesión..." : "Cerrar sesión"}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
+          <div className={`flex ${isOpen ? "flex-col gap-1" : "flex-col gap-2"}`}>
+            {role === "ADMIN" && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const res = await changeRole("STUDENT");
+                  if (res.ok) {
+                    notify("success", res.message);
+                    if (pathname.startsWith("/admin")) {
+                      router.push("/user/dashboard");
+                    }
+                  } else notify("error", res.message);
+                }}
+                className={`
+                  w-full relative flex items-center p-3 rounded-xl transition-all bg-orange-500/5
+                  text-gray-500 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400
+                  hover:bg-orange-50 dark:hover:bg-orange-500/10 cursor-pointer
+                  ${isOpen ? "gap-2 justify-center" : "justify-center"}
+                `}
+              >
+                <FiShield size={20} className="shrink-0" />
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      className="whitespace-nowrap overflow-hidden text-sm"
+                    >
+                      Salir del rol admin
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={logoutLoading}
+              className={`
+                w-full relative flex items-center p-3 rounded-xl transition-all bg-red-500/5
+                text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400
+                hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer
+                ${isOpen ? "gap-2 justify-center" : "justify-center"}
+              `}
+            >
+              <FiLogOut size={20} className="shrink-0" />
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="whitespace-nowrap overflow-hidden text-sm"
+                  >
+                    {logoutLoading ? "Cerrando sesión..." : "Cerrar sesión"}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
         </div>
       </div>
     </motion.aside>

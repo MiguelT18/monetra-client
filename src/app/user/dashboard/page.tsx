@@ -11,6 +11,8 @@ import {
   PlaceholderRow,
   QuickLink,
   RoleBadge,
+  xpForNextLevel,
+  totalXpForLevel,
 } from "@/components/user/userShell";
 import { Modal } from "@/components/UI/Modal";
 import { ProductForm } from "@/components/UI/ProductForm";
@@ -29,15 +31,17 @@ import {
   FiImage,
 } from "react-icons/fi";
 
-function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" {
+function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" | "red" {
   if (role === "STUDENT") return "amber";
   if (role === "CREATOR") return "violet";
+  if (role === "ADMIN") return "red";
   return "emerald";
 }
 
 function roleBadgeLabel(role: Role) {
   if (role === "STUDENT") return "Estudiante";
   if (role === "CREATOR") return "Creador";
+  if (role === "ADMIN") return "Admin";
   return "Afiliado";
 }
 
@@ -65,8 +69,10 @@ export default function UserDashboard() {
     user?.fullname?.split(/\s+/)[0] ?? user?.username ?? "tu cuenta";
   const xp = user?.gamifications.xp ?? 0;
   const level = user?.gamifications.level ?? 1;
-  const nextXp = Math.max(level * 500, 1);
-  const xpPct = Math.min(100, Math.round((xp / nextXp) * 100));
+  const currentLevelXp = totalXpForLevel(level);
+  const xpInLevel = Math.max(0, xp - currentLevelXp);
+  const nextXp = xpForNextLevel(level);
+  const xpPct = Math.min(100, Math.round((xpInLevel / nextXp) * 100));
 
   if (loading) {
     return (
@@ -118,7 +124,7 @@ export default function UserDashboard() {
               icon={FiAward}
               label="Nivel actual"
               value={`Nv. ${level}`}
-              hint={`${xp} / ${nextXp} XP hacia el siguiente nivel`}
+              hint={`${xpInLevel} / ${nextXp} XP hacia el siguiente nivel`}
               tone="neutral"
             />
             <StatCard

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useProfile } from "@/hooks/useProfile";
 import type { Role } from "@/types/user";
+import type { Achievement } from "@/types/user";
 import {
   UserPageHeader,
   StatCard,
@@ -11,269 +13,91 @@ import {
   RoleBadge,
   XpProgressPanel,
   AchievementBadgeCard,
-  type AchievementStatus,
   type InfoProductAccent,
 } from "@/components/user/userShell";
-import type { IconType } from "react-icons";
 import {
   FiAward,
-  FiTarget,
-  FiBookOpen,
-  FiClock,
   FiZap,
-  FiUsers,
-  FiTrendingUp,
-  FiDollarSign,
-  FiLink,
-  FiStar,
-  FiCheckCircle,
-  FiLayers,
+  FiClock,
   FiBarChart2,
-  FiMessageCircle,
-  FiPackage,
-  FiShoppingBag,
-  FiShare2,
-  FiPlayCircle,
+  FiStar,
+  FiLink,
+  FiTarget,
+  FiInbox,
 } from "react-icons/fi";
+import { getMyAchievements } from "@/lib/achievement-api";
+import { achievementIcon } from "@/lib/achievement-icons";
 
-function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" {
+const ACCENTS: InfoProductAccent[] = [
+  "blue", "emerald", "violet", "amber", "rose", "cyan",
+];
+
+function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" | "red" {
   if (role === "STUDENT") return "amber";
   if (role === "CREATOR") return "violet";
+  if (role === "ADMIN") return "red";
   return "emerald";
 }
 
 function roleLabel(role: Role) {
   if (role === "STUDENT") return "Estudiante";
   if (role === "CREATOR") return "Creador";
+  if (role === "ADMIN") return "Admin";
   return "Afiliado";
 }
 
-type Achievement = {
-  id: string;
-  title: string;
-  description: string;
-  icon: IconType;
-  status: AchievementStatus;
-  accent: InfoProductAccent;
-  progress?: number;
-  xpReward?: number;
-  unlockedLabel?: string;
-};
-
-const STUDENT_ACHIEVEMENTS: Achievement[] = [
-  {
-    id: "first-lesson",
-    title: "Primera lección",
-    description: "Completa tu primera lección en cualquier curso.",
-    icon: FiPlayCircle,
-    status: "unlocked",
-    accent: "blue",
-    xpReward: 50,
-    unlockedLabel: "Desbloqueado",
-  },
-  {
-    id: "streak-7",
-    title: "Racha semanal",
-    description: "Estudia al menos 15 minutos durante 7 días seguidos.",
-    icon: FiZap,
-    status: "in_progress",
-    accent: "amber",
-    progress: 57,
-    xpReward: 200,
-  },
-  {
-    id: "first-course",
-    title: "Graduado",
-    description: "Termina por completo tu primer curso de la plataforma.",
-    icon: FiAward,
-    status: "in_progress",
-    accent: "violet",
-    progress: 72,
-    xpReward: 500,
-  },
-  {
-    id: "community",
-    title: "Voz en la comunidad",
-    description: "Participa en 5 hilos del foro o grupos de estudio.",
-    icon: FiMessageCircle,
-    status: "locked",
-    accent: "cyan",
-    xpReward: 150,
-  },
-  {
-    id: "certified",
-    title: "Certificado oficial",
-    description: "Obtén tu primer certificado verificable al completar un curso.",
-    icon: FiCheckCircle,
-    status: "unlocked",
-    accent: "emerald",
-    xpReward: 300,
-    unlockedLabel: "Desbloqueado",
-  },
-  {
-    id: "explorer",
-    title: "Explorador",
-    description: "Inscríbete en 3 cursos de categorías distintas.",
-    icon: FiBookOpen,
-    status: "locked",
-    accent: "rose",
-    xpReward: 100,
-  },
-];
-
-  const CREATOR_ACHIEVEMENTS: Achievement[] = [
-  {
-    id: "first-product",
-    title: "Primer lanzamiento",
-    description: "Publica tu primer infoproducto en el catálogo.",
-    icon: FiPackage,
-    status: "unlocked",
-    accent: "emerald",
-    xpReward: 250,
-    unlockedLabel: "Desbloqueado",
-  },
-  {
-    id: "first-sale",
-    title: "Primera venta",
-    description: "Registra tu primera venta confirmada en la plataforma.",
-    icon: FiShoppingBag,
-    status: "in_progress",
-    accent: "amber",
-    progress: 40,
-    xpReward: 400,
-  },
-  {
-    id: "reviews",
-    title: "Producto valorado",
-    description: "Recibe 10 reseñas con 4 estrellas o más en un mismo producto.",
-    icon: FiStar,
-    status: "in_progress",
-    accent: "violet",
-    progress: 60,
-    xpReward: 350,
-  },
-  {
-    id: "affiliate-network",
-    title: "Red de afiliados",
-    description: "Activa un programa de afiliados con al menos 5 promotores.",
-    icon: FiUsers,
-    status: "locked",
-    accent: "blue",
-    xpReward: 500,
-  },
-  {
-    id: "revenue-milestone",
-    title: "Hito de ingresos",
-    description: "Alcanza €1.000 en ventas acumuladas en un periodo de 30 días.",
-    icon: FiDollarSign,
-    status: "locked",
-    accent: "cyan",
-    xpReward: 600,
-  },
-  {
-    id: "catalog-5",
-    title: "Catálogo en expansión",
-    description: "Mantén 5 productos activos publicados simultáneamente.",
-    icon: FiLayers,
-    status: "locked",
-    accent: "rose",
-    xpReward: 200,
-  },
-];
-
-const AFFILIATE_ACHIEVEMENTS: Achievement[] = [
-  {
-    id: "first-link",
-    title: "Primer enlace",
-    description: "Genera y comparte tu primer enlace de afiliado con seguimiento.",
-    icon: FiLink,
-    status: "unlocked",
-    accent: "violet",
-    xpReward: 75,
-    unlockedLabel: "Desbloqueado",
-  },
-  {
-    id: "first-commission",
-    title: "Primera comisión",
-    description: "Recibe tu primera comisión liquidada por una venta atribuida.",
-    icon: FiDollarSign,
-    status: "in_progress",
-    accent: "emerald",
-    progress: 85,
-    xpReward: 300,
-  },
-  {
-    id: "clicks-100",
-    title: "Tráfico constante",
-    description: "Acumula 100 clics válidos en tus enlaces en un mes.",
-    icon: FiTrendingUp,
-    status: "in_progress",
-    accent: "blue",
-    progress: 34,
-    xpReward: 150,
-  },
-  {
-    id: "conversions-10",
-    title: "Conversor nato",
-    description: "Genera 10 conversiones confirmadas en un mismo programa.",
-    icon: FiTarget,
-    status: "locked",
-    accent: "amber",
-    xpReward: 400,
-  },
-  {
-    id: "top-affiliate",
-    title: "Top del mes",
-    description: "Entra en el top 10 de afiliados de un creador verificado.",
-    icon: FiAward,
-    status: "locked",
-    accent: "rose",
-    xpReward: 500,
-  },
-  {
-    id: "multi-program",
-    title: "Cartera diversificada",
-    description: "Promociona activamente 3 programas de nichos distintos.",
-    icon: FiShare2,
-    status: "locked",
-    accent: "cyan",
-    xpReward: 200,
-  },
-];
-
-function achievementsForRole(role: Role): Achievement[] {
-    if (role === "CREATOR") return CREATOR_ACHIEVEMENTS;
-  if (role === "AFFILIATE") return AFFILIATE_ACHIEVEMENTS;
-  return STUDENT_ACHIEVEMENTS;
-}
-
-function byStatus(items: Achievement[], status: AchievementStatus) {
+function byStatus(items: Achievement[], status: string) {
   return items.filter((a) => a.status === status);
 }
 
 function AchievementGrid({ items }: { items: Achievement[] }) {
-  if (items.length === 0) return null;
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-      {items.map((item) => (
-        <AchievementBadgeCard key={item.id} {...item} />
+      {items.map((item, i) => (
+        <AchievementBadgeCard
+          key={item.id}
+          title={item.title}
+          description={item.description}
+          icon={achievementIcon(item.icon)}
+          status={item.status as any}
+          progress={item.progress}
+          xpReward={item.xpReward}
+          accent={ACCENTS[i % ACCENTS.length]}
+          unlockedLabel={item.status === "unlocked" ? "Desbloqueado" : undefined}
+        />
       ))}
     </div>
   );
 }
 
 export default function AchievementsPage() {
-  const { user, loading } = useProfile();
+  const { user, loading: profileLoading } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
   const tone = roleTone(role);
   const xp = user?.gamifications.xp ?? 0;
   const level = user?.gamifications.level ?? 1;
-  const all = achievementsForRole(role);
-  const unlocked = byStatus(all, "unlocked");
-  const inProgress = byStatus(all, "in_progress");
-  const locked = byStatus(all, "locked");
 
-  if (loading) {
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (profileLoading) return;
+    setLoading(true);
+    getMyAchievements().then((res) => {
+      if (res.ok && res.data) {
+        setAchievements(res.data);
+      } else {
+        setAchievements([]);
+      }
+      setLoading(false);
+    });
+  }, [profileLoading]);
+
+  const unlocked = byStatus(achievements, "unlocked");
+  const inProgress = byStatus(achievements, "in_progress");
+  const locked = byStatus(achievements, "locked");
+
+  if (loading || profileLoading) {
     return (
       <div className="mx-auto max-w-6xl animate-pulse space-y-6">
         <div className="h-8 w-2/3 max-w-md rounded-lg bg-gray-200 dark:bg-white/10" />
@@ -319,137 +143,160 @@ export default function AchievementsPage() {
 
       <XpProgressPanel level={level} xp={xp} tone={tone} />
 
-      {role === "STUDENT" && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-3">
-          <StatCard
-            icon={FiAward}
-            label="Insignias"
-            value={`${unlocked.length} / ${all.length}`}
-            hint="Desbloqueadas del catálogo visible"
-            tone="amber"
-          />
-          <StatCard
-            icon={FiZap}
-            label="Racha actual"
-            value="4 días"
-            hint="Sigue estudiando para mantenerla"
-            tone="amber"
-          />
-          <StatCard
-            icon={FiClock}
-            label="Tiempo total"
-            value="18 h"
-            hint="Video + prácticas registradas"
-            tone="neutral"
+      {achievements.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-background/60 py-16 text-center dark:bg-white/3">
+          <FiInbox size={48} className="mb-4 text-gray-400 dark:text-white/25" />
+          <p className="text-lg font-semibold text-gray-900 dark:text-white">
+            No hay logros disponibles
+          </p>
+          <p className="mt-1 max-w-md text-sm text-gray-500 dark:text-white/45">
+            {role === "STUDENT"
+              ? "Comienza a explorar cursos y completar lecciones para desbloquear tus primeros logros."
+              : role === "CREATOR"
+                ? "Publica tu primer producto y empieza a construir tu reputación como creador."
+                : "Genera tu primer enlace de afiliado y comienza a promocionar."}
+          </p>
+          <QuickLink
+            href="/user/explore"
+            label="Explorar ahora"
+            variant="primary"
           />
         </div>
+      ) : (
+        <>
+          {role === "STUDENT" && (
+            <div className="mb-6 grid gap-3 sm:grid-cols-3">
+              <StatCard
+                icon={FiAward}
+                label="Insignias"
+                value={`${unlocked.length} / ${achievements.length}`}
+                hint="Desbloqueadas del catálogo visible"
+                tone="amber"
+              />
+              <StatCard
+                icon={FiZap}
+                label="Racha actual"
+                value="4 días"
+                hint="Sigue estudiando para mantenerla"
+                tone="amber"
+              />
+              <StatCard
+                icon={FiClock}
+                label="Tiempo total"
+                value="18 h"
+                hint="Video + prácticas registradas"
+                tone="neutral"
+              />
+            </div>
+          )}
+
+          {role === "CREATOR" && (
+            <div className="mb-6 grid gap-3 sm:grid-cols-3">
+              <StatCard
+                icon={FiAward}
+                label="Hitos comerciales"
+                value={`${unlocked.length} / ${achievements.length}`}
+                hint="Logros de catálogo y ventas"
+                tone="violet"
+              />
+              <StatCard
+                icon={FiBarChart2}
+                label="Productos activos"
+                value="2"
+                hint="Publicados en tu catálogo"
+                tone="neutral"
+              />
+              <StatCard
+                icon={FiStar}
+                label="Valoración media"
+                value="4.8 ★"
+                hint="Promedio de reseñas recientes"
+                tone="violet"
+              />
+            </div>
+          )}
+
+          {role === "AFFILIATE" && (
+            <div className="mb-6 grid gap-3 sm:grid-cols-3">
+              <StatCard
+                icon={FiAward}
+                label="Logros"
+                value={`${unlocked.length} / ${achievements.length}`}
+                hint="Desbloqueados en tu trayectoria"
+                tone="emerald"
+              />
+              <StatCard
+                icon={FiLink}
+                label="Enlaces activos"
+                value="6"
+                hint="Campañas con seguimiento UTM"
+                tone="neutral"
+              />
+              <StatCard
+                icon={FiTarget}
+                label="Conversiones"
+                value="3"
+                hint="Este mes · atribuidas a ti"
+                tone="emerald"
+              />
+            </div>
+          )}
+
+          <div className="space-y-6">
+            {unlocked.length > 0 && (
+              <SectionCard
+                title="Desbloqueados"
+                action={
+                  role === "STUDENT" ? (
+                    <QuickLink href="/user/courses" label="Mis cursos" variant="outline" />
+                  ) : role === "CREATOR" ? (
+                    <QuickLink href="/user/products" label="Mi catálogo" variant="outline" />
+                  ) : (
+                    <QuickLink
+                      href="/user/affiliations"
+                      label="Mis programas"
+                      variant="outline"
+                    />
+                  )
+                }
+              >
+                <AchievementGrid items={unlocked} />
+              </SectionCard>
+            )}
+
+            {inProgress.length > 0 && (
+              <SectionCard title="En progreso">
+                <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
+                  {role === "STUDENT"
+                    ? "Completa estas metas para sumar XP y subir de nivel."
+                    : role === "CREATOR"
+                      ? "Estás cerca de estos hitos de negocio y reputación."
+                      : "Sigue promocionando para cerrar estos objetivos."}
+                </p>
+                <AchievementGrid items={inProgress} />
+              </SectionCard>
+            )}
+
+            {locked.length > 0 && (
+              <SectionCard
+                title="Próximos desafíos"
+                action={
+                  <QuickLink href="/user/explore" label="Explorar" variant="outline" />
+                }
+              >
+                <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
+                  {role === "STUDENT"
+                    ? "Insignias que podrás desbloquear al seguir aprendiendo."
+                    : role === "CREATOR"
+                      ? "Objetivos avanzados para escalar tu catálogo y comunidad."
+                      : "Metas para afiliados con mayor volumen y diversificación."}
+                </p>
+                <AchievementGrid items={locked} />
+              </SectionCard>
+            )}
+          </div>
+        </>
       )}
-
-      {role === "CREATOR" && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-3">
-          <StatCard
-            icon={FiAward}
-            label="Hitos comerciales"
-            value={`${unlocked.length} / ${all.length}`}
-            hint="Logros de catálogo y ventas"
-            tone="violet"
-          />
-          <StatCard
-            icon={FiBarChart2}
-            label="Productos activos"
-            value="2"
-            hint="Publicados en tu catálogo"
-            tone="neutral"
-          />
-          <StatCard
-            icon={FiStar}
-            label="Valoración media"
-            value="4.8 ★"
-            hint="Promedio de reseñas recientes"
-            tone="violet"
-          />
-        </div>
-      )}
-
-      {role === "AFFILIATE" && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-3">
-          <StatCard
-            icon={FiAward}
-            label="Logros"
-            value={`${unlocked.length} / ${all.length}`}
-            hint="Desbloqueados en tu trayectoria"
-            tone="emerald"
-          />
-          <StatCard
-            icon={FiLink}
-            label="Enlaces activos"
-            value="6"
-            hint="Campañas con seguimiento UTM"
-            tone="neutral"
-          />
-          <StatCard
-            icon={FiTarget}
-            label="Conversiones"
-            value="3"
-            hint="Este mes · atribuidas a ti"
-            tone="emerald"
-          />
-        </div>
-      )}
-
-      <div className="space-y-6">
-        {unlocked.length > 0 && (
-          <SectionCard
-            title="Desbloqueados"
-            action={
-              role === "STUDENT" ? (
-                <QuickLink href="/user/courses" label="Mis cursos" variant="outline" />
-              ) : role === "CREATOR" ? (
-                <QuickLink href="/user/products" label="Mi catálogo" variant="outline" />
-              ) : (
-                <QuickLink
-                  href="/user/affiliations"
-                  label="Mis programas"
-                  variant="outline"
-                />
-              )
-            }
-          >
-            <AchievementGrid items={unlocked} />
-          </SectionCard>
-        )}
-
-        {inProgress.length > 0 && (
-          <SectionCard title="En progreso">
-            <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
-              {role === "STUDENT"
-                ? "Completa estas metas para sumar XP y subir de nivel."
-                : role === "CREATOR"
-                  ? "Estás cerca de estos hitos de negocio y reputación."
-                  : "Sigue promocionando para cerrar estos objetivos."}
-            </p>
-            <AchievementGrid items={inProgress} />
-          </SectionCard>
-        )}
-
-        {locked.length > 0 && (
-          <SectionCard
-            title="Próximos desafíos"
-            action={
-              <QuickLink href="/user/explore" label="Explorar" variant="outline" />
-            }
-          >
-            <p className="mb-4 text-sm text-gray-600 dark:text-white/55">
-              {role === "STUDENT"
-                ? "Insignias que podrás desbloquear al seguir aprendiendo."
-                : role === "CREATOR"
-                  ? "Objetivos avanzados para escalar tu catálogo y comunidad."
-                  : "Metas para afiliados con mayor volumen y diversificación."}
-            </p>
-            <AchievementGrid items={locked} />
-          </SectionCard>
-        )}
-      </div>
     </motion.div>
   );
 }

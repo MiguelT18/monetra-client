@@ -2,12 +2,31 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ReactNode } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { UserNavbar } from "@/components/UI/navbar/UserNavbar";
 import { UserAside } from "@/components/UI/UserAside";
+import { useProfile } from "@/hooks/useProfile";
+
+const ADMIN_ROUTES = ["/user/explore"];
+
 export function UserLayoutClient({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const asideRef = useRef<HTMLElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user, loading } = useProfile();
+  const role = user?.role;
+
+  useEffect(() => {
+    if (loading || !role) return;
+    if (role !== "ADMIN") return;
+    const allowed = ADMIN_ROUTES.some((r) => pathname === r || pathname.startsWith("/admin"));
+    if (!allowed) {
+      router.replace("/user/explore");
+    }
+  }, [role, pathname, loading, router]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {

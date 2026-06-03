@@ -12,6 +12,7 @@ const ROLE_COLORS: Record<Role, { bar: string; ring: string; text: string }> = {
   STUDENT: { bar: "bg-amber-500", ring: "ring-amber-500/30", text: "text-amber-600 dark:text-amber-400" },
   CREATOR: { bar: "bg-violet-500", ring: "ring-violet-500/30", text: "text-violet-600 dark:text-violet-400" },
   AFFILIATE: { bar: "bg-emerald-500", ring: "ring-emerald-500/30", text: "text-emerald-600 dark:text-emerald-400" },
+  ADMIN: { bar: "bg-red-500", ring: "ring-red-500/30", text: "text-red-600 dark:text-red-400" },
 };
 
 const ROLES: { value: Role; label: string; description: string }[] = [
@@ -30,12 +31,21 @@ const ROLES: { value: Role; label: string; description: string }[] = [
     label: "Afiliado",
     description: "Promociona y gana comisiones",
   },
+  {
+    value: "ADMIN",
+    label: "Admin",
+    description: "Administra la plataforma",
+  },
 ];
 
 export function RoleSelect({ currentRole }: { currentRole: Role }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Role>(currentRole ?? "STUDENT");
   const [updating, setUpdating] = useState<Role | null>(null);
+
+  useEffect(() => {
+    setSelected(currentRole);
+  }, [currentRole]);
 
   const { notify } = useNotification();
   const { changeRole, refetch } = useProfile();
@@ -49,6 +59,8 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
       mountedRef.current = false;
     };
   }, []);
+
+  const isAdmin = currentRole === "ADMIN";
 
   const selectedRole = ROLES.find((r) => r.value === selected)!;
 
@@ -80,6 +92,15 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
       }
     }
   };
+
+  if (isAdmin) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-600 dark:text-red-400 font-medium">
+        <span className="h-4 w-1 rounded-full bg-red-500" />
+        Admin
+      </div>
+    );
+  }
 
   return (
     <>
@@ -152,7 +173,7 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
         offset={8}
         className="w-60"
       >
-        {ROLES.map((role, i) => {
+        {ROLES.filter((r) => r.value !== "ADMIN").map((role, i) => {
           const colors = ROLE_COLORS[role.value];
           const isSelected = selected === role.value;
           return (

@@ -4,8 +4,9 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNotification } from "@/hooks/useNotification";
+import { useProfile } from "@/hooks/useProfile";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import {
   AuthCard,
@@ -28,6 +29,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { notify } = useNotification();
+  const { user, loading: profileLoading, refetch } = useProfile();
+
+  useEffect(() => {
+    if (!profileLoading && user) {
+      router.push("/");
+    }
+  }, [user, profileLoading, router]);
 
   const {
     register,
@@ -51,6 +59,7 @@ export default function LoginPage() {
         return;
       }
 
+      refetch();
       router.push("/user/dashboard");
       notify("success", result.message);
     } catch (error) {
@@ -139,7 +148,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="flex h-[42px] min-w-[42px] items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-400 transition-colors hover:text-gray-600 dark:border-white/10 dark:bg-white/5 dark:hover:text-white/70"
+              className="flex h-[42px] min-w-[42px] items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-400 transition-colors hover:text-gray-600 dark:border-white/10 dark:bg-white/5 dark:hover:text-white/70 cursor-pointer"
               tabIndex={-1}
             >
               {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}

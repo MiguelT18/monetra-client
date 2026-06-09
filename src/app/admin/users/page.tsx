@@ -198,7 +198,7 @@ export default function AdminUsersPage() {
                 <button
                   type="button"
                   onClick={() => setNotifUser(user)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-gray-400 transition hover:border-primary/40 hover:text-primary dark:hover:border-primary/40"
+                  className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-gray-400 transition hover:border-primary/40 hover:text-primary dark:hover:border-primary/40"
                   title="Enviar notificación"
                 >
                   <FiMessageSquare size={15} />
@@ -206,7 +206,7 @@ export default function AdminUsersPage() {
                 <button
                   type="button"
                   onClick={() => handleBan(user)}
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition ${
+                  className={`flex h-9 w-9 items-center justify-center rounded-md border transition ${
                     user.banned
                       ? "border-emerald-300 text-emerald-600 hover:border-emerald-500 hover:text-emerald-700 dark:border-emerald-500/30 dark:text-emerald-400"
                       : "border-red-200 text-red-500 hover:border-red-400 hover:text-red-600 dark:border-red-500/30 dark:text-red-400"

@@ -10,10 +10,12 @@ import {
   StatCard,
   SectionCard,
   QuickLink,
+  PlaceholderRow,
   RoleBadge,
   XpProgressPanel,
   AchievementBadgeCard,
   type InfoProductAccent,
+  calculateLevel,
 } from "@/components/user/userShell";
 import {
   FiAward,
@@ -75,7 +77,7 @@ export default function AchievementsPage() {
   const role = (user?.role ?? "STUDENT") as Role;
   const tone = roleTone(role);
   const xp = user?.gamifications.xp ?? 0;
-  const level = user?.gamifications.level ?? 1;
+  const level = calculateLevel(xp);
 
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);

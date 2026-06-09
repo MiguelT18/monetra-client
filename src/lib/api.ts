@@ -6,6 +6,17 @@ export function apiUrl(path: string) {
   return `${API_BASE}${normalized}`;
 }
 
+export function authHeaders(accessToken: string, refreshToken?: string) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
+  };
+  if (refreshToken) {
+    headers["x-refresh-token"] = refreshToken;
+  }
+  return headers;
+}
+
 export function forwardSetCookies(
   upstream: Response,
   response: { headers: { append: (name: string, value: string) => void } },

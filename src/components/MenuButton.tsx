@@ -20,7 +20,7 @@ export default function MenuButton({
         event.stopPropagation();
         onToggle();
       }}
-      className="flex flex-col justify-center items-center w-8 h-8 cursor-pointer space-y-1.25 p-2 rounded-lg hover:bg-primary/15 transition-colors outline-none group"
+      className="flex flex-col justify-center items-center w-8 h-8 cursor-pointer space-y-1.25 p-2 rounded-md hover:bg-primary/15 transition-colors outline-none group"
     >
       <motion.span
         animate={isOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}

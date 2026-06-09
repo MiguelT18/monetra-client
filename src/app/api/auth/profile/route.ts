@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { apiUrl } from "@/lib/api";
-
-function authHeaders(accessToken: string) {
-  return {
-    "Content-Type": "application/json",
-    Cookie: `access_token=${accessToken}`,
-  };
-}
+import { apiUrl, authHeaders } from "@/lib/api";
 
 export async function GET(request: NextRequest) {
   const accessToken = request.cookies.get("access_token")?.value;
+  const refreshToken = request.cookies.get("refresh_token")?.value;
 
   if (!accessToken) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 });
@@ -17,20 +11,25 @@ export async function GET(request: NextRequest) {
 
   const res = await fetch(apiUrl("/api/auth/get-profile"), {
     method: "GET",
-    headers: authHeaders(accessToken),
+    headers: authHeaders(accessToken, refreshToken),
   });
 
   const result = await res.json();
+  const response = NextResponse.json(result, { status: res.ok ? 200 : res.status });
 
-  if (!res.ok) {
-    return NextResponse.json(result, { status: res.status });
+  const setCookieHeader = res.headers.getSetCookie();
+  if (setCookieHeader?.length) {
+    setCookieHeader.forEach((cookie) => {
+      response.headers.append("Set-Cookie", cookie);
+    });
   }
 
-  return NextResponse.json(result, { status: 200 });
+  return response;
 }
 
 export async function PUT(request: NextRequest) {
   const accessToken = request.cookies.get("access_token")?.value;
+  const refreshToken = request.cookies.get("refresh_token")?.value;
 
   if (!accessToken) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 });
@@ -40,15 +39,19 @@ export async function PUT(request: NextRequest) {
 
   const res = await fetch(apiUrl("/api/auth/profile"), {
     method: "PUT",
-    headers: authHeaders(accessToken),
+    headers: authHeaders(accessToken, refreshToken),
     body: JSON.stringify(body),
   });
 
   const result = await res.json();
+  const response = NextResponse.json(result, { status: res.ok ? 200 : res.status });
 
-  if (!res.ok) {
-    return NextResponse.json(result, { status: res.status });
+  const setCookieHeader = res.headers.getSetCookie();
+  if (setCookieHeader?.length) {
+    setCookieHeader.forEach((cookie) => {
+      response.headers.append("Set-Cookie", cookie);
+    });
   }
 
-  return NextResponse.json(result, { status: 200 });
+  return response;
 }

@@ -121,7 +121,7 @@ function SelectField({
         type="button"
         onClick={openMenu}
         disabled={disabled}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-gray-900 transition hover:border-primary/40 disabled:opacity-50 dark:text-white"
+        className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-gray-900 transition hover:border-primary/40 disabled:opacity-50 dark:text-white"
       >
         <span className="flex items-center gap-2">
           {renderOption ? renderOption(value) : value}
@@ -274,7 +274,7 @@ export default function AdminAchievementsPage() {
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
         >
           <FiPlus size={16} />
           Nuevo logro
@@ -334,7 +334,7 @@ export default function AdminAchievementsPage() {
                         <button
                           type="button"
                           onClick={() => openEdit(a)}
-                          className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-primary/10 hover:text-primary dark:text-white/50"
+                          className="rounded-md p-2 text-gray-500 transition-colors hover:bg-primary/10 hover:text-primary dark:text-white/50"
                           title="Editar"
                         >
                           <FiEdit2 size={15} />
@@ -342,7 +342,7 @@ export default function AdminAchievementsPage() {
                         <button
                           type="button"
                           onClick={() => openDelete(a)}
-                          className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-red-500/10 hover:text-red-500 dark:text-white/50"
+                          className="rounded-md p-2 text-gray-500 transition-colors hover:bg-red-500/10 hover:text-red-500 dark:text-white/50"
                           title="Eliminar"
                         >
                           <FiTrash2 size={15} />
@@ -445,7 +445,7 @@ export default function AdminAchievementsPage() {
             <button
               type="button"
               onClick={() => setModalOpen(false)}
-              className="rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white"
+              className="rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white"
             >
               Cancelar
             </button>
@@ -453,7 +453,7 @@ export default function AdminAchievementsPage() {
               type="button"
               onClick={handleSave}
               disabled={saving || !form.key || !form.title || !form.description}
-              className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 disabled:opacity-50"
+              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 disabled:opacity-50"
             >
               {saving ? "Guardando..." : editing ? "Guardar cambios" : "Crear logro"}
             </button>
@@ -480,7 +480,7 @@ export default function AdminAchievementsPage() {
             <button
               type="button"
               onClick={() => setDeleteModalOpen(false)}
-              className="rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white"
+              className="rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white"
             >
               Cancelar
             </button>
@@ -488,7 +488,7 @@ export default function AdminAchievementsPage() {
               type="button"
               onClick={handleDelete}
               disabled={saving}
-              className="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 disabled:opacity-50"
+              className="rounded-lg bg-red-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 disabled:opacity-50"
             >
               {saving ? "Eliminando..." : "Eliminar"}
             </button>

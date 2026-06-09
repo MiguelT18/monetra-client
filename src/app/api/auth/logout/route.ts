@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiUrl, authHeaders } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
   const accessToken = request.cookies.get("access_token")?.value;
 
-  const res = await fetch("http://localhost:8000/api/auth/logout", {
+  const res = await fetch(apiUrl("/api/auth/logout"), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: `access_token=${accessToken}`,
-    },
+    headers: accessToken
+      ? authHeaders(accessToken)
+      : { "Content-Type": "application/json" },
   });
 
   const result = await res.json();
 
-  if (!res.ok) {
-    return NextResponse.json(result, { status: res.status });
-  }
+  const response = NextResponse.json(result, { status: res.status });
 
-  const response = NextResponse.json(result, { status: 200 });
-
-  // Limpiar las cookies en el browser
   response.cookies.delete("access_token");
   response.cookies.delete("refresh_token");
   response.cookies.delete("user_role");

@@ -8,7 +8,7 @@ import { IconType } from "react-icons";
 import { useProfile } from "@/hooks/useProfile";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/hooks/useNotification";
-import { xpForNextLevel, totalXpForLevel } from "@/components/user/userShell";
+import { xpForNextLevel, totalXpForLevel, calculateLevel, abbreviateXP } from "@/components/user/userShell";
 import {
   FiLogOut,
   FiBookOpen,
@@ -83,6 +83,12 @@ const NAV_ITEMS: NavItem[] = [
     roles: ["ADMIN"],
   },
   {
+    label: "Revisiones",
+    icon: FiShield,
+    href: "/admin/reviews",
+    roles: ["ADMIN"],
+  },
+  {
     label: "Usuarios",
     icon: FiUserCheck,
     href: "/admin/users",
@@ -147,7 +153,7 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { user, loading, changeRole } = useProfile();
+  const { user, loading, changeRole, clearUser, previousRole } = useProfile();
   const { notify } = useNotification();
 
   const role = (user?.role ?? "STUDENT") as Role;
@@ -159,10 +165,10 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
     : NAV_ITEMS.filter((item) => item.roles.includes(role));
 
   const currentXp = user?.gamifications.xp ?? 0;
-  const currentLevel = user?.gamifications.level ?? 1;
-  const currentLevelXp = totalXpForLevel(currentLevel);
+  const computedLevel = calculateLevel(currentXp);
+  const currentLevelXp = totalXpForLevel(computedLevel);
   const xpInLevel = Math.max(0, currentXp - currentLevelXp);
-  const nextLevelXp = xpForNextLevel(currentLevel);
+  const nextLevelXp = xpForNextLevel(computedLevel);
   const xpProgress = Math.min((xpInLevel / nextLevelXp) * 100, 100);
 
   const handleLogout = async () => {
@@ -172,7 +178,8 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
       const result = await res.json();
 
       if (res.ok) {
-        router.push("/auth/login");
+        clearUser();
+        router.push("/");
         notify("success", result.message);
       } else {
         notify("error", result.message);
@@ -238,7 +245,7 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                   <Link
                     href={item.href}
                     className={`
-                  relative flex items-center p-3 rounded-xl transition-all
+                  relative flex items-center p-3 rounded-lg transition-all
                   ${isOpen ? "gap-2.5 justify-start" : "justify-center"}
                   ${isActive
                         ? "text-primary cursor-not-allowed"
@@ -249,14 +256,14 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                     {isActive && (
                       <motion.div
                         layoutId="active-bar"
-                        className="absolute left-0 top-1 bottom-1 w-1 h-[calc(100%-8px)] bg-primary rounded-r-md"
+                        className="absolute left-0 top-1 bottom-1 w-1 bg-primary rounded-r-sm"
                       />
                     )}
                     {isActive && (
                       <motion.div
                         layoutId="active-pill"
                         className={`absolute inset-0 ${isOpen ? "bg-primary/15" : "bg-primary/25"
-                          } rounded-xl`}
+                          } rounded-md`}
                         transition={{
                           type: "spring",
                           stiffness: 300,
@@ -328,10 +335,10 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-gray-500 dark:text-white/45">
-                        Nv. {currentLevel}
+                        Nv. {computedLevel}
                       </span>
                       <span className="text-xs font-medium text-gray-500 dark:text-white/45">
-                        Nv. {currentLevel + 1}
+                        Nv. {computedLevel + 1}
                       </span>
                     </div>
                     <div className="h-2 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden">
@@ -348,7 +355,7 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
                       />
                     </div>
                     <p className="text-xs text-gray-400 dark:text-white/30 text-center">
-                      {xpInLevel} / {nextLevelXp} XP
+                      {abbreviateXP(xpInLevel)} / {abbreviateXP(nextLevelXp)} XP
                     </p>
                   </div>
                 </div>
@@ -361,19 +368,19 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
               <button
                 type="button"
                 onClick={async () => {
-                  const res = await changeRole("STUDENT");
+                  const res = await changeRole(previousRole);
                   if (res.ok) {
-                    notify("success", res.message);
+                    notify("success", `Rol cambiado a ${ROLE_CONFIG[previousRole].label}`);
                     if (pathname.startsWith("/admin")) {
                       router.push("/user/dashboard");
                     }
                   } else notify("error", res.message);
                 }}
                 className={`
-                  w-full relative flex items-center p-3 rounded-xl transition-all bg-orange-500/5
+                  relative flex items-center p-3 rounded-lg transition-all bg-orange-500/5
                   text-gray-500 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400
                   hover:bg-orange-50 dark:hover:bg-orange-500/10 cursor-pointer
-                  ${isOpen ? "gap-2 justify-center" : "justify-center"}
+                  ${isOpen ? "w-full gap-2 justify-center" : "justify-center"}
                 `}
               >
                 <FiShield size={20} className="shrink-0" />
@@ -396,12 +403,12 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
               type="button"
               onClick={handleLogout}
               disabled={logoutLoading}
-              className={`
-                w-full relative flex items-center p-3 rounded-xl transition-all bg-red-500/5
-                text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400
-                hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer
-                ${isOpen ? "gap-2 justify-center" : "justify-center"}
-              `}
+                className={`
+                  relative flex items-center p-3 rounded-lg transition-all bg-red-500/5
+                  text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400
+                  hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer
+                  ${isOpen ? "w-full gap-2 justify-center" : "justify-center"}
+                `}
             >
               <FiLogOut size={20} className="shrink-0" />
               <AnimatePresence initial={false}>

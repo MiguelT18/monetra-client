@@ -158,7 +158,7 @@ export function NotificationButton() {
                 </span>
                 <button
                   onClick={handleDeleteAll}
-                  className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                  className="flex items-center gap-1 rounded px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                   title="Eliminar todas"
                 >
                   <FiTrash size={12} />
@@ -229,7 +229,7 @@ export function NotificationButton() {
                       e.stopPropagation();
                       handleDelete(n.id);
                     }}
-                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md opacity-0 transition-all bg-white text-gray-400 shadow-sm ring-1 ring-gray-200 hover:bg-red-50 hover:text-red-500 hover:ring-red-200 group-hover/item:opacity-100 dark:bg-gray-800 dark:ring-gray-700 dark:hover:bg-red-500/10 dark:hover:ring-red-500/30"
+                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded opacity-0 transition-all bg-white text-gray-400 shadow-sm ring-1 ring-gray-200 hover:bg-red-50 hover:text-red-500 hover:ring-red-200 group-hover/item:opacity-100 dark:bg-gray-800 dark:ring-gray-700 dark:hover:bg-red-500/10 dark:hover:ring-red-500/30"
                     title="Eliminar"
                   >
                     <FiTrash2 size={14} />

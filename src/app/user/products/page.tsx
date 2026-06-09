@@ -30,19 +30,23 @@ import {
 } from "react-icons/fi";
 
 function statusLabel(status: string) {
-  return status === "DRAFT"
-    ? "Borrador"
-    : status === "PUBLISHED"
-      ? "Activo"
-      : "Archivado";
+  switch (status) {
+    case "DRAFT": return "Borrador";
+    case "UNDER_REVIEW": return "En revisión";
+    case "PUBLISHED": return "Activo";
+    case "REJECTED": return "Rechazado";
+    default: return "Archivado";
+  }
 }
 
 function statusColor(status: string) {
-  return status === "PUBLISHED"
-    ? "text-emerald-600 dark:text-emerald-400"
-    : status === "DRAFT"
-      ? "text-amber-600 dark:text-amber-400"
-      : "text-gray-500 dark:text-white/45";
+  switch (status) {
+    case "PUBLISHED": return "text-emerald-600 dark:text-emerald-400";
+    case "UNDER_REVIEW": return "text-blue-600 dark:text-blue-400";
+    case "REJECTED": return "text-red-600 dark:text-red-400";
+    case "DRAFT": return "text-amber-600 dark:text-amber-400";
+    default: return "text-gray-500 dark:text-white/45";
+  }
 }
 
 function ProductRow({
@@ -63,7 +67,7 @@ function ProductRow({
       animate={{ opacity: 1, y: 0 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative flex flex-col gap-3 rounded-xl border border-border hover:bg-background/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4 hover:dark:bg-white/2 transition-all cursor-pointer"
+      className="relative flex flex-col gap-3 rounded-lg border border-border hover:bg-background/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4 hover:dark:bg-white/2 transition-all cursor-pointer"
     >
       <div className="flex items-center gap-3 min-w-0">
         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg">
@@ -107,14 +111,14 @@ function ProductRow({
           >
             <button
               onClick={() => onEdit(product)}
-              className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/15 cursor-pointer"
+              className="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/15 cursor-pointer"
               title="Editar"
             >
               <FiEdit3 size={14} />
             </button>
             <button
               onClick={() => onDelete(product)}
-              className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 cursor-pointer"
+              className="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 cursor-pointer"
               title="Eliminar"
             >
               <FiTrash2 size={14} />
@@ -126,14 +130,14 @@ function ProductRow({
       <div className="flex gap-2 sm:hidden">
         <button
           onClick={() => onEdit(product)}
-          className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:text-white/60"
+          className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:text-white/60"
         >
           <FiEdit3 size={12} />
           Editar
         </button>
         <button
           onClick={() => onDelete(product)}
-          className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-red-400 hover:text-red-600 dark:text-white/60"
+          className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-red-400 hover:text-red-600 dark:text-white/60"
         >
           <FiTrash2 size={12} />
           Eliminar
@@ -150,6 +154,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductResponse | undefined>(undefined);
+  const [deleteTarget, setDeleteTarget] = useState<ProductResponse | null>(null);
 
   const fetchProducts = async () => {
     if (role !== "CREATOR") return;
@@ -173,10 +178,14 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (product: ProductResponse) => {
-    if (!window.confirm(`¿Eliminar "${product.title}"?`)) return;
+    setDeleteTarget(product);
+  };
 
-    const { ok } = await deleteProduct(product.id);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const { ok } = await deleteProduct(deleteTarget.id);
     if (ok) {
+      setDeleteTarget(null);
       fetchProducts();
     }
   };
@@ -325,7 +334,7 @@ export default function ProductsPage() {
               setEditingProduct(undefined);
               setProductModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
           >
             <FiPlus size={16} />
             Nuevo producto
@@ -344,6 +353,41 @@ export default function ProductsPage() {
           onClose={handleFormClose}
           onSuccess={handleFormSuccess}
         />
+      </Modal>
+
+      <Modal isOpen={deleteTarget !== null} onClose={() => setDeleteTarget(null)}>
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex size-10 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+              <FiTrash2 size={18} className="text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                Eliminar producto
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-white/45">
+                Esta acción no se puede deshacer.
+              </p>
+            </div>
+          </div>
+          <p className="text-sm text-gray-700 dark:text-white/70 mb-6">
+            ¿Estás seguro de eliminar <strong>{deleteTarget?.title}</strong>?
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setDeleteTarget(null)}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-white/60 transition-colors hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={confirmDelete}
+              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
       </Modal>
     </motion.div>
   );

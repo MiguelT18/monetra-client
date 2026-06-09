@@ -1,9 +1,10 @@
+export type ProductStatus = "DRAFT" | "UNDER_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
+
 export interface CreateProductInput {
   title: string;
   description: string;
   price: number;
   thumbnail?: string | null;
-  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   affiliateEnabled?: boolean;
   commissionRate?: number | null;
   affiliateCookieDays?: number;
@@ -14,7 +15,6 @@ export interface UpdateProductInput {
   description?: string;
   price?: number;
   thumbnail?: string | null;
-  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   affiliateEnabled?: boolean;
   commissionRate?: number | null;
   affiliateCookieDays?: number;
@@ -26,18 +26,30 @@ export interface ProductResponse {
   description: string;
   price: number;
   thumbnail?: string | null;
-  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  status: ProductStatus;
   producerId: string;
   affiliateEnabled: boolean;
   commissionRate: number | null;
   affiliateCookieDays: number;
   createdAt: string;
   updatedAt: string;
+  producer?: {
+    id: string;
+    fullname: string | null;
+    username: string | null;
+    avatar: string | null;
+  };
   _count?: {
     affiliations: number;
     enrollments: number;
     orders: number;
   };
+}
+
+export async function submitForReview(productId: string) {
+  const res = await fetch(`/api/products/${productId}/submit-review`, { method: "POST" });
+  const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
+  return { ok, result };
 }
 
 export async function createProduct(data: CreateProductInput) {

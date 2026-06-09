@@ -2,15 +2,17 @@
 
 import MenuButton from "@/components/MenuButton";
 import { useProfile } from "@/hooks/useProfile";
-import { FaUserAlt } from "react-icons/fa";
+import { FaUserAlt, FaCog } from "react-icons/fa";
 import { RoleSelect } from "./desktop/RoleSelect";
 import { NotificationButton } from "./desktop/NotificationButton";
 import { UserSearch } from "./desktop/UserSearch";
 import { AnimatePresence, motion } from "motion/react";
 import type { Role } from "@/types/user";
-import { FiMoon, FiSun } from "react-icons/fi";
+import { FiMoon, FiSun, FiChevronRight } from "react-icons/fi";
 import { useThemeContext } from "@/contexts/themeContext";
 import Image from "next/image";
+import Link from "next/link";
+import { totalXpForLevel, xpForNextLevel, calculateLevel, abbreviateXP } from "@/components/user/userShell";
 
 interface UserNavbarProps {
   isOpen: boolean;
@@ -46,7 +48,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
           {/* Theme toggle */}
           <button
             onClick={toggle}
-            className="relative p-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10 transition-all cursor-pointer group"
+            className="relative p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10 transition-all cursor-pointer group"
           >
             <AnimatePresence mode="wait" initial={false}>
               {theme === "dark" ? (
@@ -94,29 +96,60 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              {user.avatar ? (
-                <Image
-                  src={user.avatar}
-                  alt={`Foto de perfil de ${user.fullname}`}
-                  width={40}
-                  height={40}
-                  className="rounded-full size-10 object-cover border-2 border-gray-200 dark:border-white/10"
-                />
-              ) : (
-                <div className="bg-gray-200 dark:bg-white/10 rounded-full p-2 border-2 border-gray-200 dark:border-white/10">
-                  <FaUserAlt className="text-gray-500 dark:text-white/50" size={16} />
+            <Link
+              href="/user/settings"
+              className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
+            >
+              <div className="relative shrink-0">
+                {user.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={`Foto de perfil de ${user.fullname}`}
+                    width={36}
+                    height={36}
+                    className="rounded-full size-9 object-cover ring-2 ring-gray-200 dark:ring-white/10 group-hover:ring-primary/40 dark:group-hover:ring-primary/60 transition-all"
+                  />
+                ) : (
+                  <div className="rounded-full size-9 flex items-center justify-center bg-gray-200 dark:bg-white/10 ring-2 ring-gray-200 dark:ring-white/10 group-hover:ring-primary/40 dark:group-hover:ring-primary/60 transition-all">
+                    <FaUserAlt className="text-gray-500 dark:text-white/50" size={14} />
+                  </div>
+                )}
+                <div className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <FaCog size={8} className="text-gray-500 dark:text-white/60" />
                 </div>
-              )}
-              <div className="space-y-1">
-                <p className="block text-gray-900 dark:text-white text-sm font-medium leading-tight">
-                  Hola, {user.fullname?.split(" ")[0] ?? user.username}
-                </p>
-                <p className="block text-gray-400 dark:text-white/40 text-xs leading-tight">
-                  Nv. {user.gamifications.level} · {user.gamifications.xp} XP
-                </p>
               </div>
-            </div>
+              <div className="min-w-0">
+                <p className="text-gray-900 dark:text-white text-sm font-medium leading-tight truncate">
+                  {user.fullname?.split(" ").slice(0, 2).join(" ") ?? user.username}
+                </p>
+                  {(() => {
+                    const lvl = calculateLevel(user.gamifications.xp);
+                    const xpInLevel = user.gamifications.xp - totalXpForLevel(lvl);
+                    return (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-semibold text-primary dark:text-primary/90 uppercase tracking-wider">
+                          Nv.{lvl}
+                        </span>
+                        <div className="h-1 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden w-14">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all"
+                            style={{
+                              width: `${Math.min((xpInLevel / xpForNextLevel(lvl)) * 100, 100)}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium tabular-nums">
+                          {abbreviateXP(xpInLevel)} XP
+                        </span>
+                      </div>
+                    );
+                  })()}
+              </div>
+              <FiChevronRight
+                size={12}
+                className="shrink-0 text-gray-300 dark:text-white/20 group-hover:text-gray-500 dark:group-hover:text-white/50 transition-colors"
+              />
+            </Link>
           )}
         </div>
       </div>

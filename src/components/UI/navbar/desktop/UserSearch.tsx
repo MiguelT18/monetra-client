@@ -5,6 +5,7 @@ import { FiSearch, FiX, FiUser, FiStar } from "react-icons/fi";
 import { DropdownMenu } from "@/components/DropdownMenu";
 import Image from "next/image";
 import type { Role } from "@/types/user";
+import { calculateLevel, abbreviateXP } from "@/components/user/userShell";
 
 interface SearchUser {
   id: string;
@@ -147,7 +148,7 @@ export function UserSearch() {
                     {user.gamifications ? (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
                         <FiStar size={12} className="fill-current" />
-                        Nv.{user.gamifications.level} · {user.gamifications.xp.toLocaleString()} XP
+                        Nv.{calculateLevel(user.gamifications.xp)} · {abbreviateXP(user.gamifications.xp)} XP
                       </span>
                     ) : (
                       <span className="text-xs text-gray-400 dark:text-white/40 whitespace-nowrap">

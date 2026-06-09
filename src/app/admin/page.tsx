@@ -7,7 +7,7 @@ export default function AdminPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/admin/achievements");
+    router.replace("/admin/reviews");
   }, [router]);
 
   return null;

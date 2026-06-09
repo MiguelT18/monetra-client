@@ -200,7 +200,7 @@ export default function UserSettings() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium text-gray-800 transition hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10 cursor-pointer"
               >
                 <FiCamera size={14} />
                 Cambiar foto
@@ -331,7 +331,7 @@ export default function UserSettings() {
                 await changeRole("STUDENT");
                 window.location.reload();
               }}
-              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-500/10 px-5 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition-all hover:bg-red-500/20 dark:border-red-500/20 dark:text-red-300"
+              className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-500/10 px-5 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition-all hover:bg-red-500/20 dark:border-red-500/20 dark:text-red-300"
             >
               Salir del rol admin
             </button>
@@ -403,7 +403,7 @@ export default function UserSettings() {
             type="button"
             onClick={handleSaveProfile}
             disabled={saving || !profileDirty}
-            className="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           >
             {saving ? "Guardando..." : "Guardar perfil"}
           </button>

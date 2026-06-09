@@ -272,14 +272,14 @@ export default function Home() {
           >
             <Link
               href="/auth/register"
-              className="group px-8 py-4 text-lg font-semibold rounded-xl bg-primary text-white hover:opacity-90 transition-all shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 flex items-center gap-2"
+              className="group px-8 py-4 text-lg font-semibold rounded-lg bg-primary text-white hover:opacity-90 transition-all shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 flex items-center gap-2"
             >
               Comenzar Gratis
               <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               href="#como-funciona"
-              className="px-8 py-4 text-lg font-semibold rounded-xl border border-border hover:bg-surface transition-all flex items-center gap-2"
+              className="px-8 py-4 text-lg font-semibold rounded-lg border border-border hover:bg-surface transition-all flex items-center gap-2"
             >
               <FiPlay className="w-5 h-5" />
               Ver Cómo Funciona
@@ -450,7 +450,7 @@ export default function Home() {
                 <div className="px-6 pb-6">
                   <Link
                     href="/auth/register"
-                    className={`block w-full text-center py-3 rounded-xl font-semibold bg-gradient-to-r ${role.gradient} text-white hover:opacity-90 transition-all shadow-lg ${role.shadow}`}
+                    className={`block w-full text-center py-3 rounded-lg font-semibold bg-gradient-to-r ${role.gradient} text-white hover:opacity-90 transition-all shadow-lg ${role.shadow}`}
                   >
                     {role.cta}
                   </Link>

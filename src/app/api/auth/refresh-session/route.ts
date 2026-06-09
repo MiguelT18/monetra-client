@@ -1,5 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import { apiUrl, forwardSetCookies } from "@/lib/api";
+import { apiUrl } from "@/lib/api";
+
+async function setAuthCookiesFromResult(
+  json: { data?: { access_token?: string; refresh_token?: string; user?: { role?: string } } },
+  response: NextResponse,
+) {
+  const isProduction = process.env.NODE_ENV === "production";
+
+  if (json.data?.access_token) {
+    response.cookies.set("access_token", json.data.access_token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60,
+    });
+  }
+
+  if (json.data?.refresh_token) {
+    response.cookies.set("refresh_token", json.data.refresh_token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 30 * 24 * 60 * 60,
+    });
+  }
+
+  if (json.data?.user?.role) {
+    response.cookies.set("user_role", json.data.user.role, {
+      httpOnly: false,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60,
+    });
+  }
+}
 
 async function refreshSession(request: NextRequest) {
   const refreshToken = request.cookies.get("refresh_token")?.value;
@@ -11,7 +48,8 @@ async function refreshSession(request: NextRequest) {
   const res = await fetch(apiUrl("/api/auth/refresh-session"), {
     method: "POST",
     headers: {
-      Cookie: `refresh_token=${refreshToken}`,
+      "Content-Type": "application/json",
+      "x-refresh-token": refreshToken,
     },
   });
 
@@ -19,7 +57,8 @@ async function refreshSession(request: NextRequest) {
     return { ok: false as const };
   }
 
-  return { ok: true as const, res };
+  const json = await res.json();
+  return { ok: true as const, json };
 }
 
 export async function GET(request: NextRequest) {
@@ -37,8 +76,7 @@ export async function GET(request: NextRequest) {
   }
 
   const response = NextResponse.redirect(new URL(redirectTo, request.url));
-  forwardSetCookies(result.res, response);
-
+  setAuthCookiesFromResult(result.json, response);
   return response;
 }
 
@@ -60,7 +98,6 @@ export async function POST(request: NextRequest) {
     { message: "Sesión refrescada" },
     { status: 200 },
   );
-  forwardSetCookies(result.res, response);
-
+  setAuthCookiesFromResult(result.json, response);
   return response;
 }

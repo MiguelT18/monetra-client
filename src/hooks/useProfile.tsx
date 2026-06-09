@@ -27,6 +27,8 @@ interface ProfileContextType {
   loading: boolean;
   error: string | null;
   refetch: () => void;
+  clearUser: () => void;
+  previousRole: Role;
   changeRole: (role: Role) => Promise<{ ok: boolean; message: string }>;
   updateProfile: (
     data: ProfileUpdateInput,
@@ -40,6 +42,14 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trigger, setTrigger] = useState(0);
+  const [previousRole, setPreviousRole] = useState<Role>(() => {
+    if (typeof window === "undefined") return "STUDENT";
+    const stored = window.localStorage.getItem("previousRole");
+    if (stored && ["STUDENT", "CREATOR", "AFFILIATE"].includes(stored)) {
+      return stored as Role;
+    }
+    return "STUDENT";
+  });
 
   const router = useRouter();
   const pathname = usePathname();
@@ -60,6 +70,11 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
           return;
         }
         setUser(result.data);
+        const role = result.data?.role;
+        if (role && role !== "ADMIN") {
+          setPreviousRole(role);
+          window.localStorage?.setItem("previousRole", role);
+        }
       } catch (err) {
         if (controller.signal.aborted) return;
         console.error("[ProfileContext error]:", err);
@@ -85,6 +100,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     }, 45 * 60 * 1000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  const clearUser = useCallback(() => {
+    setUser(null);
+    setLoading(false);
+    setError(null);
   }, []);
 
   const refetch = useCallback(() => setTrigger((t) => t + 1), []);
@@ -126,6 +147,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
       // actualizar el usuario en el contexto sin refetch completo
       setUser((prev) => (prev ? { ...prev, role } : prev));
+      if (role !== "ADMIN") {
+        setPreviousRole(role);
+        window.localStorage?.setItem("previousRole", role);
+      }
 
       // redirigir si la ruta actual no está permitida para el nuevo rol
       const matchedRoute = Object.keys(ROLE_ROUTES).find((route) =>
@@ -143,7 +168,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   return (
     <ProfileContext.Provider
-      value={{ user, loading, error, refetch, changeRole, updateProfile }}
+      value={{ user, loading, error, refetch, clearUser, previousRole, changeRole, updateProfile }}
     >
       {children}
     </ProfileContext.Provider>

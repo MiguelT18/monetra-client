@@ -18,6 +18,26 @@ export function totalXpForLevel(level: number): number {
   return total;
 }
 
+export function calculateLevel(xp: number): number {
+  let low = 1;
+  let high = 1000;
+  while (low < high) {
+    const mid = Math.floor((low + high + 1) / 2);
+    if (totalXpForLevel(mid) <= xp) {
+      low = mid;
+    } else {
+      high = mid - 1;
+    }
+  }
+  return low;
+}
+
+export function abbreviateXP(xp: number): string {
+  if (xp >= 1_000_000) return `${((xp / 1_000_000)).toFixed(1).replace(/\.0$/, "")}M`;
+  if (xp >= 1_000) return `${((xp / 1_000)).toFixed(1).replace(/\.0$/, "")}K`;
+  return xp.toString();
+}
+
 export type AchievementStatus = "unlocked" | "in_progress" | "locked";
 
 export function UserPageHeader({
@@ -295,7 +315,7 @@ export function InfoProductCard({
         {actionLabel ? (
           <button
             type="button"
-            className="mt-auto w-full rounded-xl bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
+            className="mt-auto w-full rounded-lg bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
           >
             {actionLabel}
           </button>
@@ -493,7 +513,7 @@ export function PlaceholderRow({
   meta?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-xl border border-border hover:bg-primary/[0.03] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5 cursor-pointer transition-all hover:shadow-sm">
+    <div className="flex flex-col gap-1 rounded-lg border border-border hover:bg-primary/[0.03] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5 cursor-pointer transition-all hover:shadow-sm">
       <div className="min-w-0">
         <p className="text-sm font-medium text-gray-900 dark:text-white">
           {title}
@@ -520,8 +540,8 @@ export function QuickLink({
 }) {
   const cls =
     variant === "primary"
-      ? "inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
-      : "inline-flex items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-medium text-gray-800 transition hover:border-primary/40 hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10";
+      ? "inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
+      : "inline-flex items-center justify-center rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium text-gray-800 transition hover:border-primary/40 hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10";
 
   return (
     <Link href={href} className={cls}>

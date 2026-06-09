@@ -63,8 +63,16 @@ export async function createProduct(data: CreateProductInput) {
   return { ok, result };
 }
 
-export async function listMyProducts() {
-  const res = await fetch("/api/products/mine");
+export interface MyProductsResult {
+  products: ProductResponse[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export async function listMyProducts(page = 1, limit = 10) {
+  const res = await fetch(`/api/products/mine?page=${page}&limit=${limit}`);
   const {ok, result} = await res.json().then(r => ({ok: res.ok, result: r}));
   return { ok, result };
 }

@@ -15,7 +15,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 });
   }
 
-  const res = await fetch(apiUrl("/api/products/mine"), {
+  const { searchParams } = new URL(request.url);
+  const page = searchParams.get("page") ?? "1";
+  const limit = searchParams.get("limit") ?? "10";
+
+  const res = await fetch(apiUrl(`/api/products/mine?page=${page}&limit=${limit}`), {
     method: "GET",
     headers: authHeaders(accessToken),
   });

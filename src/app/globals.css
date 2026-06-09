@@ -103,6 +103,6 @@ body::-webkit-scrollbar-corner,
 }
 
 html {
-  font-size: 17px;
+  font-size: 18px;
   scrollbar-gutter: stable;
 }

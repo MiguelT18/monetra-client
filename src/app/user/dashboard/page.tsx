@@ -108,154 +108,156 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
 
   return (
     <>
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <section className="flex flex-col rounded-2xl border border-violet-200/80 bg-violet-500/[0.04] p-5 shadow-md dark:border-violet-500/20 dark:bg-violet-500/10">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+        <section className="flex flex-col rounded-2xl border border-violet-200/80 bg-violet-500/[0.04] p-4 shadow-md dark:border-violet-500/20 dark:bg-violet-500/10 sm:p-5">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
+            <div className="min-w-0 space-y-2 sm:space-y-3">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-white/45 sm:text-xs">
                   Saldo total
                 </p>
                 <button
                   onClick={() => setShowBalance((v) => !v)}
-                  className="text-foreground/30 hover:text-foreground/70 transition-colors"
+                  className="shrink-0 text-foreground/30 hover:text-foreground/70 transition-colors"
                 >
-                  {showBalance ? <FiEyeOff size={14} /> : <FiEye size={14} />}
+                  {showBalance ? <FiEyeOff size={13} /> : <FiEye size={13} />}
                 </button>
               </div>
-              <p className="truncate text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+              <p className="truncate text-xl font-bold text-gray-900 dark:text-white sm:text-2xl lg:text-3xl">
                 {mask(saldoTotal)}
               </p>
             </div>
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm text-violet-600 dark:text-violet-400">
-              <FiDollarSign size={20} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm text-violet-600 dark:text-violet-400 sm:h-12 sm:w-12">
+              <FiDollarSign size={18} />
             </div>
           </div>
-          <div className="mt-auto pt-4">
-            <div className="h-px bg-violet-200/50 dark:bg-violet-500/15 mb-3" />
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-2 w-2 rounded-full bg-violet-500" />
-                  <span className="text-xs text-gray-500 dark:text-white/40">Disponible</span>
+          <div className="mt-auto pt-3 sm:pt-4">
+            <div className="h-px bg-violet-200/50 dark:bg-violet-500/15 mb-2 sm:mb-3" />
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="flex items-center justify-between min-w-0 gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-violet-500" />
+                  <span className="text-[11px] text-gray-500 dark:text-white/40 sm:text-xs truncate">Disponible</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                <span className="shrink-0 text-xs font-semibold text-gray-900 dark:text-white sm:text-sm">
                   {mask(saldoDisponible)}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-2 w-2 rounded-full bg-amber-400" />
-                  <span className="text-xs text-gray-500 dark:text-white/40">Congelado</span>
+              <div className="flex items-center justify-between min-w-0 gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+                  <span className="text-[11px] text-gray-500 dark:text-white/40 sm:text-xs truncate">Congelado</span>
                 </div>
-                <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                <span className="shrink-0 text-xs font-semibold text-amber-600 dark:text-amber-400 sm:text-sm">
                   {mask(saldoCongelado)}
                 </span>
               </div>
             </div>
           </div>
         </section>
-        <section className="flex flex-col rounded-2xl border border-border bg-background/60 p-5 shadow-md dark:bg-white/3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
+        <section className="flex flex-col rounded-2xl border border-border bg-background/60 p-4 shadow-md dark:bg-white/3 sm:p-5">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
+            <div className="min-w-0 space-y-2 sm:space-y-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-white/45 sm:text-xs">
                 Productos
               </p>
-              <p className="truncate text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+              <p className="truncate text-xl font-bold text-gray-900 dark:text-white sm:text-2xl lg:text-3xl">
                 {products.length}
               </p>
             </div>
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm text-gray-500 dark:text-white/50">
-              <FiBookOpen size={20} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm text-gray-500 dark:text-white/50 sm:h-12 sm:w-12">
+              <FiBookOpen size={18} />
             </div>
           </div>
-          <div className="mt-auto pt-4">
-            <div className="h-px bg-border dark:bg-white/10 mb-3" />
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-                  <span className="text-gray-500 dark:text-white/40">Activos</span>
+          <div className="mt-auto pt-3 sm:pt-4">
+            <div className="h-px bg-border dark:bg-white/10 mb-2 sm:mb-3" />
+            <div className="space-y-1 sm:space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] sm:text-xs min-w-0 gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="text-gray-500 dark:text-white/40 truncate">Activos</span>
                 </div>
-                <span className="font-medium text-emerald-600 dark:text-emerald-400">{publishedCount}</span>
+                <span className="shrink-0 font-medium text-emerald-600 dark:text-emerald-400">{publishedCount}</span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
-                  <span className="text-gray-500 dark:text-white/40">En revisión</span>
+              <div className="flex items-center justify-between text-[11px] sm:text-xs min-w-0 gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                  <span className="text-gray-500 dark:text-white/40 truncate">En revisión</span>
                 </div>
-                <span className="font-medium text-blue-600 dark:text-blue-400">{underReviewCount}</span>
+                <span className="shrink-0 font-medium text-blue-600 dark:text-blue-400">{underReviewCount}</span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
-                  <span className="text-gray-500 dark:text-white/40">Borradores</span>
+              <div className="flex items-center justify-between text-[11px] sm:text-xs min-w-0 gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+                  <span className="text-gray-500 dark:text-white/40 truncate">Borradores</span>
                 </div>
-                <span className="font-medium text-amber-600 dark:text-amber-400">{draftCount}</span>
+                <span className="shrink-0 font-medium text-amber-600 dark:text-amber-400">{draftCount}</span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-red-500" />
-                  <span className="text-gray-500 dark:text-white/40">Rechazados</span>
+              <div className="flex items-center justify-between text-[11px] sm:text-xs min-w-0 gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-red-500" />
+                  <span className="text-gray-500 dark:text-white/40 truncate">Rechazados</span>
                 </div>
-                <span className="font-medium text-red-600 dark:text-red-400">{rejectedCount}</span>
+                <span className="shrink-0 font-medium text-red-600 dark:text-red-400">{rejectedCount}</span>
               </div>
             </div>
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10 flex">
-              {[
-                { count: publishedCount, color: "bg-emerald-500" },
-                { count: underReviewCount, color: "bg-blue-500" },
-                { count: draftCount, color: "bg-amber-500" },
-                { count: rejectedCount, color: "bg-red-500" },
-              ].map((seg) =>
-                seg.count > 0 ? (
-                  <div
-                    key={seg.color}
-                    className={`h-full ${seg.color} transition-all`}
-                    style={{ width: `${(seg.count / products.length) * 100}%` }}
-                  />
-                ) : null
-              )}
-            </div>
+            {products.length > 0 && (
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10 flex sm:mt-3">
+                {[
+                  { count: publishedCount, color: "bg-emerald-500" },
+                  { count: underReviewCount, color: "bg-blue-500" },
+                  { count: draftCount, color: "bg-amber-500" },
+                  { count: rejectedCount, color: "bg-red-500" },
+                ].map((seg) =>
+                  seg.count > 0 ? (
+                    <div
+                      key={seg.color}
+                      className={`h-full ${seg.color} transition-all`}
+                      style={{ width: `${(seg.count / products.length) * 100}%` }}
+                    />
+                  ) : null
+                )}
+              </div>
+            )}
             {archivedCount > 0 && (
-              <p className="mt-1.5 text-[11px] text-gray-400 dark:text-white/35 text-right">
+              <p className="mt-1 text-[11px] text-gray-400 dark:text-white/35 text-right sm:mt-1.5">
                 +{archivedCount} archivado{archivedCount !== 1 ? "s" : ""}
               </p>
             )}
           </div>
         </section>
-        <section className="flex flex-col rounded-2xl border border-violet-200/80 bg-violet-500/[0.04] p-5 shadow-md dark:border-violet-500/20 dark:bg-violet-500/10">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
+        <section className="flex flex-col rounded-2xl border border-violet-200/80 bg-violet-500/[0.04] p-4 shadow-md dark:border-violet-500/20 dark:bg-violet-500/10 sm:p-5">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
+            <div className="min-w-0 space-y-2 sm:space-y-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-white/45 sm:text-xs">
                 Estudiantes
               </p>
-              <p className="truncate text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+              <p className="truncate text-xl font-bold text-gray-900 dark:text-white sm:text-2xl lg:text-3xl">
                 {totalStudents}
               </p>
             </div>
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm text-violet-600 dark:text-violet-400">
-              <FiUsers size={20} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm text-violet-600 dark:text-violet-400 sm:h-12 sm:w-12">
+              <FiUsers size={18} />
             </div>
           </div>
-          <div className="mt-auto pt-4">
-            <div className="h-px bg-violet-200/50 dark:bg-violet-500/15 mb-3" />
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-2 w-2 rounded-full bg-violet-500" />
-                  <span className="text-xs text-gray-500 dark:text-white/40">Afiliados totales</span>
+          <div className="mt-auto pt-3 sm:pt-4">
+            <div className="h-px bg-violet-200/50 dark:bg-violet-500/15 mb-2 sm:mb-3" />
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="flex items-center justify-between min-w-0 gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-violet-500" />
+                  <span className="text-[11px] text-gray-500 dark:text-white/40 sm:text-xs truncate">Afiliados totales</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                <span className="shrink-0 text-xs font-semibold text-gray-900 dark:text-white sm:text-sm">
                   {totalAffiliates}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-2 w-2 rounded-full bg-violet-300" />
-                  <span className="text-xs text-gray-500 dark:text-white/40">Ventas completadas</span>
+              <div className="flex items-center justify-between min-w-0 gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-violet-300" />
+                  <span className="text-[11px] text-gray-500 dark:text-white/40 sm:text-xs truncate">Ventas completadas</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                <span className="shrink-0 text-xs font-semibold text-gray-900 dark:text-white sm:text-sm">
                   {totalOrders}
                 </span>
               </div>
@@ -420,7 +422,7 @@ export default function UserDashboard() {
 
   const fetchProducts = async () => {
     if (role !== "CREATOR") return;
-    const { ok, result } = await listMyProducts();
+    const { ok, result } = await listMyProducts(1, 100);
     if (ok && result.data?.products) {
       setProducts(result.data.products);
     }

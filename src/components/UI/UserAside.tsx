@@ -23,6 +23,7 @@ import {
   FiUserCheck,
 } from "react-icons/fi";
 import Link from "next/link";
+import LogoIcon from "@/icons/Logo";
 import { usePathname } from "next/navigation";
 import { FaUserAlt } from "react-icons/fa";
 import Image from "next/image";
@@ -157,8 +158,6 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
   const { notify } = useNotification();
 
   const role = (user?.role ?? "STUDENT") as Role;
-  const roleConfig = ROLE_CONFIG[role];
-  const RoleIcon = roleConfig.icon;
 
   const visibleItems = loading
     ? NAV_ITEMS.filter((item) => item.roles.includes("STUDENT"))
@@ -202,36 +201,19 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
       <div className="flex flex-col flex-1 p-2 min-h-0 justify-between">
         {/* Top: role badge + nav items */}
         <div className="space-y-1">
-          {/* Role badge */}
-          <AnimatePresence initial={false}>
-            {isOpen && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="mb-4 mt-1"
-              >
-                <div
-                  className={`flex items-start gap-3 rounded-xl px-3 py-3 ${roleConfig.bgClass}`}
-                >
-                  <div className={`mt-0.5 shrink-0 ${roleConfig.textClass}`}>
-                    <RoleIcon size={16} />
-                  </div>
-                  <div className="min-w-0">
-                    <p
-                      className={`text-xs font-semibold ${roleConfig.textClass}`}
-                    >
-                      {roleConfig.label}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-white/40 mt-0.5 leading-relaxed">
-                      {roleConfig.description}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Logo */}
+          {isOpen && (
+            <Link href="/" className="mb-5 mt-2 block">
+              <div className="flex items-center gap-2.5 px-2">
+                <span className="text-primary shrink-0">
+                  <LogoIcon width={30} height={30} />
+                </span>
+                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  Monetra
+                </span>
+              </div>
+            </Link>
+          )}
 
           {/* Nav items */}
           <ul className="space-y-1.5">

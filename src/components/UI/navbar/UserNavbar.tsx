@@ -28,8 +28,6 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
     <nav className="col-start-2 bg-surface rounded-2xl p-3 shadow-sm">
       {/* Desktop navbar */}
       <div className="max-md:hidden flex items-center gap-4">
-        <MenuButton isOpen={isOpen} onToggle={onToggle} buttonRef={buttonRef} />
-
         <UserSearch />
 
         <div className="flex items-center gap-3 ml-auto">

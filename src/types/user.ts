@@ -45,7 +45,7 @@ export interface Notification {
   read: boolean;
   createdAt: string;
   sender?: {
-    id: string;
+    id: string | null;
     username: string | null;
     fullname: string | null;
     role: Role;

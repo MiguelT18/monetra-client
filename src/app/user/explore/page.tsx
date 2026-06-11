@@ -34,6 +34,7 @@ import {
   FiX,
 } from "react-icons/fi";
 import { listCatalog, type ProductResponse, type CatalogResult } from "@/lib/product-api";
+import { listMyEnrollments, type EnrollmentResponse } from "@/lib/enrollment-api";
 
 const ACCENTS: InfoProductAccent[] = ["blue", "emerald", "violet", "amber", "rose", "cyan"];
 
@@ -50,9 +51,16 @@ type ExploreItem = {
   subtitle?: string;
   highlights: { icon: IconType; label: string }[];
   actionLabel?: string;
+  productId?: string;
+  isEnrolled?: boolean;
 };
 
-function productToExploreItem(product: ProductResponse, index: number, role?: Role): ExploreItem {
+function productToExploreItem(
+  product: ProductResponse,
+  index: number,
+  role?: Role,
+  enrolledProductIds?: Set<string>,
+): ExploreItem {
   const daysOld = Math.floor((Date.now() - new Date(product.createdAt).getTime()) / 86400000);
   const producer = (product as any).producer as { fullname?: string; username?: string } | undefined;
   const producerName = producer?.username ? `@${producer.username}` : (producer?.fullname ?? "Creador");
@@ -61,6 +69,7 @@ function productToExploreItem(product: ProductResponse, index: number, role?: Ro
   const priceLabel = `$${price}`;
   const isAffiliateView = role === "AFFILIATE";
   const hasCommission = product.affiliateEnabled && product.commissionRate;
+  const isEnrolled = enrolledProductIds?.has(product.id) ?? false;
 
   const highlights: { icon: IconType; label: string }[] = [];
   let badge: string | undefined;
@@ -102,7 +111,9 @@ function productToExploreItem(product: ProductResponse, index: number, role?: Ro
     promoLabel,
     subtitle: `Por ${producerName}`,
     highlights,
-    actionLabel: "Ver detalle",
+    actionLabel: isEnrolled ? "Ver mis cursos" : "Ver detalle",
+    productId: product.id,
+    isEnrolled,
   };
 }
 
@@ -110,7 +121,12 @@ function ExploreGrid({ items }: { items: ExploreItem[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {items.map((item) => (
-        <InfoProductCard key={item.title} {...item} />
+        <InfoProductCard
+          key={item.productId ?? item.title}
+          {...item}
+          productId={item.productId}
+          isEnrolled={item.isEnrolled}
+        />
       ))}
     </div>
   );
@@ -136,11 +152,14 @@ export default function ExplorePage() {
   const tone = roleTone(role);
 
   const [products, setProducts] = useState<ProductResponse[]>([]);
+  const [enrollments, setEnrollments] = useState<EnrollmentResponse[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const enrolledProductIds = new Set(enrollments.map((e) => e.productId));
 
   const fetchCatalog = async (pageNum: number, append = false) => {
     if (append) {
@@ -167,8 +186,16 @@ export default function ExplorePage() {
   useEffect(() => {
     if (!profileLoading) {
       fetchCatalog(1);
+
+      if (role === "STUDENT") {
+        listMyEnrollments(1, 100).then(({ ok, result }) => {
+          if (ok && result.data?.enrollments) {
+            setEnrollments(result.data.enrollments);
+          }
+        });
+      }
     }
-  }, [profileLoading]);
+  }, [profileLoading, role]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
@@ -198,7 +225,9 @@ export default function ExplorePage() {
       })
     : products;
 
-  const catalogItems = filteredProducts.map((p, i) => productToExploreItem(p, i, role));
+  const catalogItems = filteredProducts.map((p, i) =>
+    productToExploreItem(p, i, role, enrolledProductIds)
+  );
 
   if (profileLoading) {
     return (
@@ -331,7 +360,7 @@ export default function ExplorePage() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/10 dark:hover:text-white/70"
+              className="rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/10 dark:hover:text-white/70 cursor-pointer"
             >
               <FiX size={14} />
             </button>
@@ -394,7 +423,7 @@ export default function ExplorePage() {
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50 dark:text-white/80 dark:hover:bg-primary/10"
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50 dark:text-white/80 dark:hover:bg-primary/10 cursor-pointer"
               >
                 {loadingMore ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />

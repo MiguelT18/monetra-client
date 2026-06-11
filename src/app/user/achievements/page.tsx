@@ -5,6 +5,8 @@ import { motion } from "motion/react";
 import { useProfile } from "@/hooks/useProfile";
 import type { Role } from "@/types/user";
 import type { Achievement } from "@/types/user";
+import { listMyProducts } from "@/lib/product-api";
+import { listMyAffiliations } from "@/lib/affiliation-api";
 import {
   UserPageHeader,
   StatCard,
@@ -80,20 +82,32 @@ export default function AchievementsPage() {
   const level = calculateLevel(xp);
 
   const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [activeProducts, setActiveProducts] = useState(0);
+  const [affiliatePrograms, setAffiliatePrograms] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (profileLoading) return;
     setLoading(true);
-    getMyAchievements().then((res) => {
-      if (res.ok && res.data) {
-        setAchievements(res.data);
+    Promise.all([
+      getMyAchievements(),
+      role === "CREATOR" ? listMyProducts(1, 1) : Promise.resolve(null),
+      role === "AFFILIATE" ? listMyAffiliations(1, 1) : Promise.resolve(null),
+    ]).then(([achRes, prodRes, affRes]) => {
+      if (achRes.ok && achRes.data) {
+        setAchievements(achRes.data);
       } else {
         setAchievements([]);
       }
+      if (prodRes?.ok && prodRes.result.data?.total !== undefined) {
+        setActiveProducts(prodRes.result.data.total);
+      }
+      if (affRes?.ok && affRes.result.data?.total !== undefined) {
+        setAffiliatePrograms(affRes.result.data.total);
+      }
       setLoading(false);
     });
-  }, [profileLoading]);
+  }, [profileLoading, role]);
 
   const unlocked = byStatus(achievements, "unlocked");
   const inProgress = byStatus(achievements, "in_progress");
@@ -178,15 +192,15 @@ export default function AchievementsPage() {
               <StatCard
                 icon={FiZap}
                 label="Racha actual"
-                value="4 días"
-                hint="Sigue estudiando para mantenerla"
-                tone="amber"
+                value="—"
+                hint="Disponible próximamente"
+                tone="neutral"
               />
               <StatCard
                 icon={FiClock}
                 label="Tiempo total"
-                value="18 h"
-                hint="Video + prácticas registradas"
+                value="—"
+                hint="Disponible próximamente"
                 tone="neutral"
               />
             </div>
@@ -204,16 +218,16 @@ export default function AchievementsPage() {
               <StatCard
                 icon={FiBarChart2}
                 label="Productos activos"
-                value="2"
+                value={String(activeProducts)}
                 hint="Publicados en tu catálogo"
                 tone="neutral"
               />
               <StatCard
                 icon={FiStar}
                 label="Valoración media"
-                value="4.8 ★"
-                hint="Promedio de reseñas recientes"
-                tone="violet"
+                value="—"
+                hint="Disponible próximamente"
+                tone="neutral"
               />
             </div>
           )}
@@ -230,16 +244,16 @@ export default function AchievementsPage() {
               <StatCard
                 icon={FiLink}
                 label="Enlaces activos"
-                value="6"
+                value={String(affiliatePrograms)}
                 hint="Campañas con seguimiento UTM"
                 tone="neutral"
               />
               <StatCard
                 icon={FiTarget}
                 label="Conversiones"
-                value="3"
-                hint="Este mes · atribuidas a ti"
-                tone="emerald"
+                value="—"
+                hint="Disponible próximamente"
+                tone="neutral"
               />
             </div>
           )}

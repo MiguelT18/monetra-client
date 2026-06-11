@@ -161,10 +161,10 @@ export function PhoneInput({ value, onChange, className = "" }: PhoneInputProps)
         key={c.code}
         type="button"
         onClick={() => selectCountry(c.code)}
-        className={`flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-xs transition hover:bg-gray-100 dark:hover:bg-white/8 cursor-pointer ${
+        className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition cursor-pointer ${
           selectedCountry.code === c.code
             ? "bg-primary/10 font-medium text-primary"
-            : "text-gray-900 dark:text-white"
+            : "text-gray-700 hover:bg-primary/5 dark:text-white/80 dark:hover:bg-primary/10"
         }`}
       >
         <Flag code={c.code} />
@@ -176,11 +176,11 @@ export function PhoneInput({ value, onChange, className = "" }: PhoneInputProps)
 
   return (
     <div className={`relative flex ${className}`}>
-      <div ref={dropdownRef} className="relative">
+      <div ref={dropdownRef} className="relative" style={{ zIndex: 60 }}>
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className="flex h-full items-center gap-1.5 rounded-l-lg border border-r-0 border-border bg-background/60 px-2.5 py-2.5 text-sm text-gray-900 outline-none transition hover:bg-gray-50 dark:text-white dark:bg-white/4 dark:hover:bg-white/8 cursor-pointer"
+          className="flex h-full items-center gap-1.5 rounded-l-xl border border-r-0 border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none transition hover:bg-primary/5 dark:text-white dark:hover:bg-primary/10 cursor-pointer"
         >
           <Flag code={selectedCountry.code} />
           <span className="text-xs text-gray-500 dark:text-white/45">
@@ -190,12 +190,12 @@ export function PhoneInput({ value, onChange, className = "" }: PhoneInputProps)
         </button>
 
         {open && (
-          <div className="absolute top-full left-0 z-50 mt-1 max-h-60 w-72 overflow-auto rounded-lg border border-border bg-white p-1 shadow-lg dark:bg-gray-900 dark:border-white/10">
+          <div className="absolute top-full left-0 z-50 mt-1 max-h-60 w-72 overflow-auto rounded-xl border border-border bg-surface p-1 shadow-xl dark:shadow-black/40">
             <input
               placeholder="Buscar país..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="sticky top-0 z-10 mb-1 w-full rounded-md border border-border bg-white px-2.5 py-1.5 text-xs text-gray-900 outline-none shadow-sm focus:border-primary dark:bg-gray-900 dark:text-white"
+              className="sticky top-0 z-10 mb-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-gray-900 outline-none shadow-sm focus:border-primary focus:ring-1 focus:ring-primary dark:text-white dark:placeholder-white/30"
             />
 
             {filtered ? (
@@ -230,7 +230,7 @@ export function PhoneInput({ value, onChange, className = "" }: PhoneInputProps)
         onBlur={() => setFocused(false)}
         placeholder={placeholder}
         autoComplete="tel"
-        className="min-w-0 flex-1 rounded-r-lg border border-border bg-background/60 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:bg-white/4 dark:text-white dark:placeholder:text-white/30"
+        className="min-w-0 flex-1 rounded-r-xl border border-border bg-background px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:text-white dark:placeholder:text-white/30"
       />
     </div>
   );

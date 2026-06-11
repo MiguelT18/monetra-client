@@ -134,7 +134,7 @@ export function SocialAuthButtons() {
           whileHover={{ scale: loadingProvider ? 1 : 1.02 }}
           whileTap={{ scale: loadingProvider ? 1 : 0.98 }}
           onClick={() => handleOAuth(provider)}
-          className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 transition hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/5 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:text-white/85 dark:hover:border-[#7C3AED]/50 dark:hover:bg-[#7C3AED]/10"
+          className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 transition hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/5 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:text-white/85 dark:hover:border-[#7C3AED]/50 dark:hover:bg-[#7C3AED]/10 cursor-pointer"
         >
           {icon}
           {loadingProvider === provider ? "Conectando…" : label}

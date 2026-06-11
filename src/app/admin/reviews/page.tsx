@@ -114,7 +114,7 @@ export default function AdminReviewsPage() {
                 <button
                   onClick={() => handleReview(product.id, "PUBLISHED")}
                   disabled={actionLoading === product.id}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3.5 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3.5 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60 cursor-pointer"
                 >
                   {actionLoading === product.id ? (
                     <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -126,9 +126,13 @@ export default function AdminReviewsPage() {
                 <button
                   onClick={() => handleReview(product.id, "REJECTED")}
                   disabled={actionLoading === product.id}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3.5 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3.5 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 cursor-pointer"
                 >
-                  <FiX size={14} />
+                  {actionLoading === product.id ? (
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                  ) : (
+                    <FiX size={14} />
+                  )}
                   Rechazar
                 </button>
               </div>

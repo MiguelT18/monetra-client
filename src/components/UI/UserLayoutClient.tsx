@@ -53,7 +53,7 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
           onToggle={() => setIsOpen((prev) => !prev)}
           buttonRef={buttonRef}
         />
-        <UserAside isOpen={isOpen} asideRef={asideRef} />
+        <UserAside isOpen={isOpen} onToggle={() => setIsOpen((prev) => !prev)} asideRef={asideRef} buttonRef={buttonRef} />
 
         <section className="app-scrollbar relative row-start-2 col-start-2 min-h-0 overflow-y-auto bg-surface rounded-2xl p-4 shadow-sm sm:p-6">
           {children}

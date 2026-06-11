@@ -4,7 +4,7 @@ import { ROLE_ROUTES } from "@/lib/user";
 const PROTECTED_ROUTES = ["/user"];
 const AUTH_ROUTES_REDIRECT_IF_SESSION = ["/auth/login", "/auth/register"];
 
-export function proxy(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("access_token")?.value;
   const refreshToken = request.cookies.get("refresh_token")?.value;
@@ -30,7 +30,6 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/user/dashboard", request.url));
   }
 
-  // verificar acceso por rol
   const matchedRoute = Object.keys(ROLE_ROUTES).find((route) =>
     pathname.startsWith(route),
   );

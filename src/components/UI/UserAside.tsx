@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { MdOutlineDashboard, MdOutlineSchool } from "react-icons/md";
 import type { Role } from "@/types/user";
 import { IconType } from "react-icons";
@@ -27,10 +27,13 @@ import LogoIcon from "@/icons/Logo";
 import { usePathname } from "next/navigation";
 import { FaUserAlt } from "react-icons/fa";
 import Image from "next/image";
+import MenuButton from "@/components/MenuButton";
 
 interface UserAsideProps {
   isOpen: boolean;
+  onToggle: () => void;
   asideRef: React.RefObject<HTMLElement | null>;
+  buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 interface NavItem {
@@ -148,8 +151,9 @@ const ROLE_CONFIG: Record<
   },
 };
 
-export function UserAside({ isOpen, asideRef }: UserAsideProps) {
+export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsideProps) {
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [roleLoading, setRoleLoading] = useState(false);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -199,216 +203,200 @@ export function UserAside({ isOpen, asideRef }: UserAsideProps) {
       className="row-start-1 row-span-2 max-md:hidden bg-surface rounded-2xl overflow-hidden flex flex-col shadow-sm"
     >
       <div className="flex flex-col flex-1 p-2 min-h-0 justify-between">
-        {/* Top: role badge + nav items */}
+        {/* Top section */}
         <div className="space-y-1">
-          {/* Logo */}
+          {/* Menu button - always visible */}
+          <div className={`flex items-center ${isOpen ? "justify-end" : "justify-center"} mb-2`}>
+            <MenuButton isOpen={isOpen} onToggle={onToggle} buttonRef={buttonRef} />
+          </div>
+
+          {/* Content visible only when expanded */}
           {isOpen && (
-            <Link href="/" className="mb-5 mt-2 block">
-              <div className="flex items-center gap-2.5 px-2">
-                <span className="text-primary shrink-0">
-                  <LogoIcon width={30} height={30} />
-                </span>
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  Monetra
-                </span>
-              </div>
-            </Link>
-          )}
+            <>
+              {/* Logo */}
+              <Link href="/" className="mb-5 mt-2 block">
+                <div className="flex items-center gap-2.5 px-2">
+                  <span className="text-primary shrink-0">
+                    <LogoIcon width={30} height={30} />
+                  </span>
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    Monetra
+                  </span>
+                </div>
+              </Link>
 
-          {/* Nav items */}
-          <ul className="space-y-1.5">
-            {visibleItems.map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                pathname === item.href || pathname.startsWith(item.href + "/");
+              {/* Nav items */}
+              <ul className="space-y-1.5">
+                {visibleItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive =
+                    pathname === item.href || pathname.startsWith(item.href + "/");
 
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`
-                  relative flex items-center p-3 rounded-lg transition-all
-                  ${isOpen ? "gap-2.5 justify-start" : "justify-center"}
-                  ${isActive
-                        ? "text-primary cursor-not-allowed"
-                        : "text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/15 cursor-pointer"
-                      }
-                `}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="active-bar"
-                        className="absolute left-0 top-1 bottom-1 w-1 bg-primary rounded-r-sm"
-                      />
-                    )}
-                    {isActive && (
-                      <motion.div
-                        layoutId="active-pill"
-                        className={`absolute inset-0 ${isOpen ? "bg-primary/15" : "bg-primary/25"
-                          } rounded-md`}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 30,
-                        }}
-                      />
-                    )}
-                    <Icon size={20} className="shrink-0 relative z-10" />
-                    <AnimatePresence initial={false}>
-                      {isOpen && (
-                        <motion.span
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: "auto" }}
-                          exit={{ opacity: 0, width: 0 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                          }}
-                          className="whitespace-nowrap overflow-hidden relative z-10 text-sm"
-                        >
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`
+                      relative flex items-center p-3 rounded-lg transition-all gap-2.5 justify-start
+                      ${isActive
+                            ? "text-primary cursor-not-allowed"
+                            : "text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/15 cursor-pointer"
+                          }
+                    `}
+                      >
+                        {isActive && (
+                          <motion.div
+                            layoutId="active-bar"
+                            className="absolute left-0 top-1 bottom-1 w-1 bg-primary rounded-r-sm"
+                          />
+                        )}
+                        {isActive && (
+                          <motion.div
+                            layoutId="active-pill"
+                            className="absolute inset-0 bg-primary/15 rounded-md"
+                            transition={{
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 30,
+                            }}
+                          />
+                        )}
+                        <Icon size={20} className="shrink-0 relative z-10" />
+                        <span className="whitespace-nowrap overflow-hidden relative z-10 text-sm">
                           {item.label}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
         </div>
 
-        {/* Bottom: perfil + logout */}
-        <div className="pt-2 border-t border-border space-y-1">
-          <AnimatePresence initial={false}>
-            {isOpen && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <div className="px-2 py-3 space-y-3">
-                  <div className="flex items-center gap-2.5">
-                    {user?.avatar ? (
-                      <Image
-                        src={user.avatar}
-                        alt={`Foto de perfil de ${user.fullname}`}
-                        width={40}
-                        height={40}
-                        className="rounded-full size-10 object-cover border-2 border-gray-200 dark:border-white/10"
-                      />
-                    ) : (
-                      <div className="bg-gray-200 dark:bg-white/10 rounded-full p-2 border-2 border-gray-200 dark:border-white/10">
-                        <FaUserAlt className="text-gray-500 dark:text-white/50" size={16} />
-                      </div>
-                    )}
-
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate leading-tight mb-0.5">
-                        {user?.fullname ?? user?.username ?? "—"}
-                      </p>
-                      <p className="text-xs text-gray-400 dark:text-white/40 truncate leading-tight">
-                        @{user?.username ?? "—"}
-                      </p>
-                    </div>
+        {/* Bottom: perfil + logout - visible only when expanded */}
+        {isOpen && (
+          <div className="pt-2 border-t border-border space-y-1">
+            <div className="px-2 py-3 space-y-3">
+              <div className="flex items-center gap-2.5">
+                {user?.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={`Foto de perfil de ${user.fullname}`}
+                    width={40}
+                    height={40}
+                    className="rounded-full size-10 object-cover border-2 border-gray-200 dark:border-white/10"
+                  />
+                ) : (
+                  <div className="bg-gray-200 dark:bg-white/10 rounded-full p-2 border-2 border-gray-200 dark:border-white/10">
+                    <FaUserAlt className="text-gray-500 dark:text-white/50" size={16} />
                   </div>
+                )}
 
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-gray-500 dark:text-white/45">
-                        Nv. {computedLevel}
-                      </span>
-                      <span className="text-xs font-medium text-gray-500 dark:text-white/45">
-                        Nv. {computedLevel + 1}
-                      </span>
-                    </div>
-                    <div className="h-2 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${xpProgress}%` }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 120,
-                          damping: 20,
-                          delay: 0.1,
-                        }}
-                        className="h-full rounded-full bg-primary"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-400 dark:text-white/30 text-center">
-                      {abbreviateXP(xpInLevel)} / {abbreviateXP(nextLevelXp)} XP
-                    </p>
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate leading-tight mb-0.5">
+                    {user?.fullname ?? user?.username ?? "—"}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-white/40 truncate leading-tight">
+                    @{user?.username ?? "—"}
+                  </p>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
 
-          <div className={`flex ${isOpen ? "flex-col gap-1" : "flex-col gap-2"}`}>
-            {role === "ADMIN" && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-gray-500 dark:text-white/45">
+                    Nv. {computedLevel}
+                  </span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-white/45">
+                    Nv. {computedLevel + 1}
+                  </span>
+                </div>
+                <div className="h-2 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${xpProgress}%` }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 120,
+                      damping: 20,
+                      delay: 0.1,
+                    }}
+                    className="h-full rounded-full bg-primary"
+                  />
+                </div>
+                <p className="text-xs text-gray-400 dark:text-white/30 text-center">
+                  {abbreviateXP(xpInLevel)} / {abbreviateXP(nextLevelXp)} XP
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-1">
+              {role !== "ADMIN" && user?.email === "miguel.teranj02@gmail.com" && (
+                <button
+                  type="button"
+                  disabled={roleLoading || logoutLoading}
+                  onClick={async () => {
+                    setRoleLoading(true);
+                    const res = await changeRole("ADMIN");
+                    if (res.ok) {
+                      notify("success", "Rol cambiado a Admin");
+                    } else notify("error", res.message);
+                    setRoleLoading(false);
+                  }}
+                  className="relative flex-1 flex items-center p-2.5 rounded-lg transition-all bg-emerald-500/5 gap-1.5 justify-center text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 cursor-pointer min-w-0 disabled:opacity-50"
+                >
+                  {roleLoading ? (
+                    <span className="size-4 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
+                  ) : (
+                    <FiShield size={16} className="shrink-0" />
+                  )}
+                  <span className="truncate text-xs font-medium">
+                    {roleLoading ? "Cambiando..." : "Ser Admin"}
+                  </span>
+                </button>
+              )}
+              {role === "ADMIN" && (
+                <button
+                  type="button"
+                  disabled={roleLoading || logoutLoading}
+                  onClick={async () => {
+                    setRoleLoading(true);
+                    const res = await changeRole(previousRole);
+                    if (res.ok) {
+                      notify("success", `Rol cambiado a ${ROLE_CONFIG[previousRole].label}`);
+                      if (pathname.startsWith("/admin")) {
+                        router.push("/user/dashboard");
+                      }
+                    } else notify("error", res.message);
+                    setRoleLoading(false);
+                  }}
+                  className="relative flex-1 flex items-center p-2.5 rounded-lg transition-all bg-orange-500/5 gap-1.5 justify-center text-gray-500 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 cursor-pointer min-w-0 disabled:opacity-50"
+                >
+                  {roleLoading ? (
+                    <span className="size-4 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                  ) : (
+                    <FiShield size={16} className="shrink-0" />
+                  )}
+                  <span className="truncate text-xs font-medium">
+                    {roleLoading ? "Cambiando..." : "Salir de Admin"}
+                  </span>
+                </button>
+              )}
               <button
                 type="button"
-                onClick={async () => {
-                  const res = await changeRole(previousRole);
-                  if (res.ok) {
-                    notify("success", `Rol cambiado a ${ROLE_CONFIG[previousRole].label}`);
-                    if (pathname.startsWith("/admin")) {
-                      router.push("/user/dashboard");
-                    }
-                  } else notify("error", res.message);
-                }}
-                className={`
-                  relative flex items-center p-3 rounded-lg transition-all bg-orange-500/5
-                  text-gray-500 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400
-                  hover:bg-orange-50 dark:hover:bg-orange-500/10 cursor-pointer
-                  ${isOpen ? "w-full gap-2 justify-center" : "justify-center"}
-                `}
+                onClick={handleLogout}
+                disabled={logoutLoading || roleLoading}
+                className="relative flex-1 flex items-center p-2.5 rounded-lg transition-all bg-red-500/5 gap-1.5 justify-center text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer min-w-0 disabled:opacity-50"
               >
-                <FiShield size={20} className="shrink-0" />
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: "auto" }}
-                      exit={{ opacity: 0, width: 0 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      className="whitespace-nowrap overflow-hidden text-sm"
-                    >
-                      Salir del rol admin
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                <FiLogOut size={16} className="shrink-0" />
+                <span className="truncate text-xs font-medium">
+                  {logoutLoading ? "Cerrando..." : "Salir"}
+                </span>
               </button>
-            )}
-            <button
-              type="button"
-              onClick={handleLogout}
-              disabled={logoutLoading}
-                className={`
-                  relative flex items-center p-3 rounded-lg transition-all bg-red-500/5
-                  text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400
-                  hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer
-                  ${isOpen ? "w-full gap-2 justify-center" : "justify-center"}
-                `}
-            >
-              <FiLogOut size={20} className="shrink-0" />
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: "auto" }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="whitespace-nowrap overflow-hidden text-sm"
-                  >
-                    {logoutLoading ? "Cerrando sesión..." : "Cerrar sesión"}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </motion.aside>
   );

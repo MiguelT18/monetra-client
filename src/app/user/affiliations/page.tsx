@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useProfile } from "@/hooks/useProfile";
 import type { Role } from "@/types/user";
@@ -11,6 +12,8 @@ import {
   QuickLink,
   RoleBadge,
 } from "@/components/user/userShell";
+import { listMyAffiliations, type AffiliationResponse } from "@/lib/affiliation-api";
+import { getCommissionStats, type CommissionStats } from "@/lib/commission-api";
 import {
   FiUsers,
   FiDollarSign,
@@ -21,6 +24,20 @@ import {
 export default function AffiliationsPage() {
   const { user, loading } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
+  const [affiliations, setAffiliations] = useState<AffiliationResponse[]>([]);
+  const [commissionStats, setCommissionStats] = useState<CommissionStats | null>(null);
+
+  useEffect(() => {
+    if (!loading && role === "AFFILIATE") {
+      Promise.all([
+        listMyAffiliations(1, 50),
+        getCommissionStats(),
+      ]).then(([affRes, statsRes]) => {
+        if (affRes.ok && affRes.result.data?.affiliations) setAffiliations(affRes.result.data.affiliations);
+        if (statsRes.ok && statsRes.data) setCommissionStats(statsRes.data);
+      });
+    }
+  }, [loading, role]);
 
   if (loading) {
     return (
@@ -58,6 +75,11 @@ export default function AffiliationsPage() {
     );
   }
 
+  const totalPending = commissionStats?.pending.total ?? 0;
+  const totalPaid = commissionStats?.paid.total ?? 0;
+  const pendingCount = commissionStats?.pending.count ?? 0;
+  const paidCount = commissionStats?.paid.count ?? 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -74,23 +96,23 @@ export default function AffiliationsPage() {
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         <StatCard
           icon={FiDollarSign}
-          label="Comisiones (mes)"
-          value="—"
-          hint="Liquidación según calendario"
+          label="Comisiones pendientes"
+          value={pendingCount > 0 ? `$${totalPending.toFixed(2)}` : "$0"}
+          hint={pendingCount > 0 ? `${pendingCount} comisión(es) por cobrar` : "Sin comisiones pendientes"}
           tone="emerald"
         />
         <StatCard
-          icon={FiLink}
-          label="Conversiones"
-          value="—"
-          hint="Ventas atribuidas a tus enlaces"
+          icon={FiDollarSign}
+          label="Comisiones pagadas"
+          value={paidCount > 0 ? `$${totalPaid.toFixed(2)}` : "$0"}
+          hint={paidCount > 0 ? `${paidCount} comisión(es) pagadas` : "Aún no has recibido pagos"}
           tone="emerald"
         />
         <StatCard
           icon={FiUsers}
           label="Programas activos"
-          value="—"
-          hint="Creadores con los que colaboras"
+          value={String(affiliations.length)}
+          hint={affiliations.length > 0 ? "Creadores con los que colaboras" : "Explora productos para afiliarte"}
           tone="neutral"
         />
       </div>
@@ -102,23 +124,22 @@ export default function AffiliationsPage() {
             <QuickLink href="/user/explore" label="Buscar más" variant="outline" />
           }
         >
-          <div className="space-y-2">
-            <PlaceholderRow
-              title="Monetra · Curso base de finanzas"
-              subtitle="15% · cookie 30 días · pago mensual"
-              meta="Activo"
-            />
-            <PlaceholderRow
-              title="Taller intensivo de copy"
-              subtitle="20% · cupos limitados"
-              meta="En revisión"
-            />
-            <PlaceholderRow
-              title="Suscripción newsletter premium"
-              subtitle="10% recurrente 6 meses"
-              meta="Activo"
-            />
-          </div>
+          {affiliations.length === 0 ? (
+            <p className="text-sm text-foreground/55 text-center py-6">
+              Aún no estás afiliado a ningún programa. <a href="/user/explore" className="text-primary underline">Explorar productos</a>
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {affiliations.map((a) => (
+                <PlaceholderRow
+                  key={a.id}
+                  title={a.product.title}
+                  subtitle={`${a.product.commissionRate}% · cookie ${a.product.affiliateCookieDays} días · código: ${a.code}`}
+                  meta="Activo"
+                />
+              ))}
+            </div>
+          )}
         </SectionCard>
 
         <SectionCard
@@ -132,24 +153,26 @@ export default function AffiliationsPage() {
             marca de cada creador.
           </p>
           <div className="space-y-2">
-            <div className="flex items-center justify-between rounded-lg border border-border bg-background/50 px-3 py-2.5 dark:bg-white/2">
-              <span className="truncate text-xs text-gray-600 dark:text-white/55">
-                monetra.io/ref/<span className="font-mono text-gray-900 dark:text-white">tu-id</span>
-              </span>
-              <button
-                type="button"
-                className="shrink-0 text-primary hover:underline text-xs font-medium"
-              >
-                Copiar
-              </button>
-            </div>
-            <button
-              type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border py-2.5 text-sm text-gray-600 transition hover:border-primary/40 hover:text-primary dark:text-white/55"
-            >
-              <FiExternalLink size={16} />
-              Generar enlace con UTM
-            </button>
+            {affiliations.slice(0, 3).map((a) => (
+              <div key={a.id} className="flex items-center justify-between rounded-lg border border-border bg-background/50 px-3 py-2.5 dark:bg-white/2">
+                <div className="min-w-0 flex-1 truncate">
+                  <p className="truncate text-xs font-medium text-gray-900 dark:text-white">{a.product.title}</p>
+                  <span className="truncate text-xs text-gray-500 dark:text-white/40">monetra.io/ref/{a.code}</span>
+                </div>
+                <button
+                  type="button"
+                  className="shrink-0 text-primary hover:underline text-xs font-medium ml-2 cursor-pointer"
+                  onClick={() => navigator.clipboard.writeText(`monetra.io/ref/${a.code}`)}
+                >
+                  Copiar
+                </button>
+              </div>
+            ))}
+            {affiliations.length === 0 && (
+              <p className="text-xs text-gray-500 dark:text-white/40 text-center py-3">
+            Afíliate a un producto para obtener tu enlace de referido
+              </p>
+            )}
           </div>
         </SectionCard>
       </div>

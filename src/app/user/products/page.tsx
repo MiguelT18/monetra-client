@@ -105,7 +105,7 @@ function Pagination({
         <button
           onClick={() => onPageChange(1)}
           disabled={page <= 1}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-white/10 dark:text-white/50"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-white/10 dark:text-white/50 cursor-pointer"
           aria-label="Primera página"
         >
           <FiChevronsLeft size={15} />
@@ -113,7 +113,7 @@ function Pagination({
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-white/10 dark:text-white/50"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-white/10 dark:text-white/50 cursor-pointer"
           aria-label="Página anterior"
         >
           <FiChevronLeft size={15} />
@@ -129,7 +129,7 @@ function Pagination({
               <button
                 key={p}
                 onClick={() => onPageChange(p)}
-                className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-all ${
+                className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-all cursor-pointer ${
                   p === page
                     ? "bg-primary text-white shadow-sm"
                     : "text-gray-600 hover:bg-gray-100 dark:text-white/60 dark:hover:bg-white/10"
@@ -148,7 +148,7 @@ function Pagination({
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-white/10 dark:text-white/50"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-white/10 dark:text-white/50 cursor-pointer"
           aria-label="Página siguiente"
         >
           <FiChevronRight size={15} />
@@ -156,7 +156,7 @@ function Pagination({
         <button
           onClick={() => onPageChange(totalPages)}
           disabled={page >= totalPages}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-white/10 dark:text-white/50"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-white/10 dark:text-white/50 cursor-pointer"
           aria-label="Última página"
         >
           <FiChevronsRight size={15} />
@@ -246,14 +246,14 @@ function ProductRow({
       <div className="flex gap-2 sm:hidden">
         <button
           onClick={() => onEdit(product)}
-          className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:text-white/60"
+          className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:text-white/60 cursor-pointer"
         >
           <FiEdit3 size={12} />
           Editar
         </button>
         <button
           onClick={() => onDelete(product)}
-          className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-red-400 hover:text-red-600 dark:text-white/60"
+          className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-red-400 hover:text-red-600 dark:text-white/60 cursor-pointer"
         >
           <FiTrash2 size={12} />
           Eliminar
@@ -290,6 +290,7 @@ export default function ProductsPage() {
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductResponse | undefined>(undefined);
   const [deleteTarget, setDeleteTarget] = useState<ProductResponse | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchProducts = useCallback(async (pageNum: number) => {
     if (role !== "CREATOR") return;
@@ -336,11 +337,13 @@ export default function ProductsPage() {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
+    setDeleting(true);
     const { ok } = await deleteProduct(deleteTarget.id);
     if (ok) {
       setDeleteTarget(null);
       fetchProducts(page);
     }
+    setDeleting(false);
   };
 
   const handleFormSuccess = () => {
@@ -357,6 +360,10 @@ export default function ProductsPage() {
   const activos = products.filter((p) => p.status === "PUBLISHED").length;
   const totalAffiliations = products.reduce(
     (sum, p) => sum + (p._count?.affiliations ?? 0),
+    0,
+  );
+  const totalRevenue = products.reduce(
+    (sum, p) => sum + (p._count?.orders ?? 0) * Number(p.price),
     0,
   );
 
@@ -424,10 +431,10 @@ export default function ProductsPage() {
         />
         <StatCard
           icon={FiDollarSign}
-          label="Ingresos (30 días)"
-          value="—"
-          hint="Conecta pagos para métricas"
-          tone="neutral"
+          label="Ingresos totales"
+          value={totalRevenue > 0 ? `$${totalRevenue.toFixed(2)}` : "$0"}
+          hint={totalRevenue > 0 ? "Ventas de todo el catálogo" : "Aún no hay ventas"}
+          tone={totalRevenue > 0 ? "violet" : "neutral"}
         />
         <StatCard
           icon={FiUsers}
@@ -534,15 +541,20 @@ export default function ProductsPage() {
           <div className="flex justify-end gap-3">
             <button
               onClick={() => setDeleteTarget(null)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-white/60 transition-colors hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
+              disabled={deleting}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-white/60 transition-colors hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-50 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               onClick={confirmDelete}
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+              disabled={deleting}
+              className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60 cursor-pointer"
             >
-              Eliminar
+              {deleting ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              ) : null}
+              {deleting ? "Eliminando..." : "Eliminar"}
             </button>
           </div>
         </div>

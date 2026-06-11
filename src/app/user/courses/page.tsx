@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useProfile } from "@/hooks/useProfile";
 import type { Role } from "@/types/user";
@@ -11,13 +12,24 @@ import {
   QuickLink,
   RoleBadge,
 } from "@/components/user/userShell";
+import { listMyEnrollments, type EnrollmentResponse } from "@/lib/enrollment-api";
 import { FiBookOpen, FiClock, FiAward, FiPlayCircle } from "react-icons/fi";
+import Link from "next/link";
 
 export default function UserCourses() {
   const { user, loading } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
+  const [enrollments, setEnrollments] = useState<EnrollmentResponse[]>([]);
   const firstName =
     user?.fullname?.split(/\s+/)[0] ?? user?.username ?? "usuario";
+
+  useEffect(() => {
+    if (!loading && role === "STUDENT") {
+      listMyEnrollments(1, 50).then(({ ok, result }) => {
+        if (ok && result.data?.enrollments) setEnrollments(result.data.enrollments);
+      });
+    }
+  }, [loading, role]);
 
   if (loading) {
     return (
@@ -55,6 +67,9 @@ export default function UserCourses() {
     );
   }
 
+  const inProgress = enrollments.filter((e) => e.progress > 0 && e.progress < 100).length;
+  const completed = enrollments.filter((e) => e.progress >= 100).length;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -64,7 +79,7 @@ export default function UserCourses() {
     >
       <UserPageHeader
         title={`Mis cursos — ${firstName}`}
-        description="Retoma donde lo dejaste, revisa el tiempo invertido y mantén tu racha de aprendizaje."
+        description="Retoma donde lo dejaste, revisa tu progreso y mantén tu racha de aprendizaje."
         badge={<RoleBadge label="Estudiante" tone="amber" />}
       />
 
@@ -72,22 +87,22 @@ export default function UserCourses() {
         <StatCard
           icon={FiBookOpen}
           label="Inscritos"
-          value="5"
-          hint="2 en progreso activo"
+          value={String(enrollments.length)}
+          hint={`${inProgress} en progreso, ${completed} completados`}
           tone="amber"
         />
         <StatCard
           icon={FiClock}
-          label="Esta semana"
-          value="3 h 20 m"
-          hint="Tiempo de video + prácticas"
+          label="Completados"
+          value={String(completed)}
+          hint={completed > 0 ? "Sigue así" : "Completa tu primer curso"}
           tone="neutral"
         />
         <StatCard
           icon={FiAward}
-          label="Insignias"
-          value="8"
-          hint="Desbloquea más completando módulos"
+          label="En progreso"
+          value={String(inProgress)}
+          hint="Mantén el ritmo para desbloquear insignias"
           tone="amber"
         />
       </div>
@@ -100,23 +115,27 @@ export default function UserCourses() {
               <QuickLink href="/user/explore" label="Explorar más" variant="outline" />
             }
           >
-            <div className="space-y-2">
-              <PlaceholderRow
-                title="Fundamentos de UX research"
-                subtitle="Lección 6 · Encuestas y entrevistas"
-                meta="72%"
-              />
-              <PlaceholderRow
-                title="TypeScript aplicado a React"
-                subtitle="Proyecto · Lista de tareas tipada"
-                meta="En curso"
-              />
-              <PlaceholderRow
-                title="Accesibilidad WCAG 2.2"
-                subtitle="Sin empezar · ~4 h"
-                meta="Nuevo"
-              />
-            </div>
+            {enrollments.length === 0 ? (
+              <p className="text-sm text-foreground/55 text-center py-6">
+                Aún no tienes cursos. <Link href="/user/explore" className="text-primary underline">Explorar catálogo</Link>
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {enrollments.slice(0, 5).map((e) => (
+                  <PlaceholderRow
+                    key={e.id}
+                    title={e.product.title}
+                    subtitle={e.progress > 0 ? `Progreso: ${e.progress}%` : "Sin empezar"}
+                    meta={e.progress >= 100 ? "Completado" : e.progress > 0 ? `${e.progress}%` : "Nuevo"}
+                  />
+                ))}
+                {enrollments.length > 5 && (
+                  <p className="text-xs text-center text-foreground/35 pt-1">
+                    +{enrollments.length - 5} curso{enrollments.length - 5 !== 1 ? "s" : ""} más
+                  </p>
+                )}
+              </div>
+            )}
           </SectionCard>
         </div>
         <SectionCard title="Atajos">

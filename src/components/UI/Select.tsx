@@ -39,7 +39,7 @@ export function Select({
         id={id}
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-transparent px-3 py-2 text-sm outline-none transition-colors hover:border-gray-400 focus:border-primary dark:hover:border-gray-500 ${className}`}
+        className={`flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-colors hover:border-primary/40 focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer ${className}`}
       >
         <span className={selected ? "text-inherit" : "text-gray-400 dark:text-white/30"}>
           {selected?.label ?? placeholder}
@@ -74,7 +74,7 @@ export function Select({
               setOpen(false);
             }}
             type="button"
-            className="flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-primary/5 dark:hover:bg-primary/10"
+            className="flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-primary/5 dark:hover:bg-primary/10 cursor-pointer"
           >
             <span className={value === opt.value ? "font-medium text-primary" : "text-gray-700 dark:text-white/80"}>
               {opt.label}

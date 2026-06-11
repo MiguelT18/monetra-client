@@ -7,15 +7,17 @@ import { useProfile } from "@/hooks/useProfile";
 import type { Notification, Role } from "@/types/user";
 
 const PAGE_SIZE = 5;
+const CACHE_DURATION = 30_000;
 
-function SenderInfo({ sender }: { sender: Notification["sender"] }) {
+function SenderInfo({ sender, currentUserRole }: { sender: Notification["sender"]; currentUserRole?: Role }) {
   if (!sender) return null;
-  const name = sender.fullname ?? sender.username ?? "Sistema";
-  const isAdmin = sender.role === "ADMIN";
+  const isCurrentUserAdmin = currentUserRole === "ADMIN";
+  const isAdminSender = sender.role === "ADMIN" || (!isCurrentUserAdmin && sender.fullname === "Equipo de Soporte");
+  const displayName = sender.fullname ?? sender.username ?? "Sistema";
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-xs text-gray-400 dark:text-white/40">{name}</span>
-      {isAdmin && (
+      <span className="text-xs text-gray-400 dark:text-white/40">{displayName}</span>
+      {isAdminSender && isCurrentUserAdmin && (
         <span className="inline-flex items-center gap-0.5 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600 dark:bg-red-500/15 dark:text-red-400">
           <FiShield size={8} />
           Admin
@@ -25,12 +27,42 @@ function SenderInfo({ sender }: { sender: Notification["sender"] }) {
   );
 }
 
+function SkeletonNotification() {
+  return (
+    <div className="flex items-start gap-3 border-b border-border px-4 py-3">
+      <div className="mt-0.5 h-6 w-6 shrink-0 rounded-full bg-gray-200 dark:bg-white/10 animate-pulse" />
+      <div className="min-w-0 flex-1 space-y-2.5">
+        <div className="h-3.5 w-3/4 rounded bg-gray-200 dark:bg-white/10 animate-pulse" />
+        <div className="h-3 w-full rounded bg-gray-200 dark:bg-white/10 animate-pulse" />
+        <div className="h-3 w-1/2 rounded bg-gray-200 dark:bg-white/10 animate-pulse" />
+        <div className="flex items-center gap-2">
+          <div className="h-2.5 w-16 rounded bg-gray-200 dark:bg-white/10 animate-pulse" />
+          <div className="h-2.5 w-12 rounded bg-gray-200 dark:bg-white/10 animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonList() {
+  return (
+    <>
+      <SkeletonNotification />
+      <SkeletonNotification />
+      <SkeletonNotification />
+      <SkeletonNotification />
+    </>
+  );
+}
+
 export function NotificationButton() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { user } = useProfile();
@@ -55,12 +87,23 @@ export function NotificationButton() {
       }
     } finally {
       setLoading(false);
+      setInitialLoading(false);
+      setLastFetchTime(Date.now());
     }
   };
 
   useEffect(() => {
     if (!open) return;
-    fetchNotifications(true);
+
+    const hasData = notifications.length > 0;
+    const isStale = Date.now() - lastFetchTime > CACHE_DURATION;
+
+    if (!hasData) {
+      setInitialLoading(true);
+      fetchNotifications(true);
+    } else if (isStale) {
+      fetchNotifications(true);
+    }
     if (unreadCount > 0) {
       fetch("/api/notifications/read-all", { method: "PATCH" });
       setUnreadCount(0);
@@ -158,7 +201,7 @@ export function NotificationButton() {
                 </span>
                 <button
                   onClick={handleDeleteAll}
-                  className="flex items-center gap-1 rounded px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                  className="flex items-center gap-1 rounded px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
                   title="Eliminar todas"
                 >
                   <FiTrash size={12} />
@@ -170,7 +213,9 @@ export function NotificationButton() {
         </div>
 
         <div className="max-h-96 overflow-y-auto">
-          {notifications.length === 0 ? (
+          {initialLoading ? (
+            <SkeletonList />
+          ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
               <div className="flex items-center justify-center rounded-full bg-gray-100 p-3 dark:bg-white/5">
                 <FiBell size={20} className="text-gray-400" />
@@ -209,7 +254,7 @@ export function NotificationButton() {
                         {n.message}
                       </p>
                       <div className="mt-1.5 flex items-center gap-2">
-                        <SenderInfo sender={n.sender} />
+                        <SenderInfo sender={n.sender} currentUserRole={user?.role} />
                         <span className="text-[11px] text-gray-400 dark:text-white/30">
                           {new Date(n.createdAt).toLocaleDateString("es-ES", {
                             day: "numeric",
@@ -229,7 +274,7 @@ export function NotificationButton() {
                       e.stopPropagation();
                       handleDelete(n.id);
                     }}
-                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded opacity-0 transition-all bg-white text-gray-400 shadow-sm ring-1 ring-gray-200 hover:bg-red-50 hover:text-red-500 hover:ring-red-200 group-hover/item:opacity-100 dark:bg-gray-800 dark:ring-gray-700 dark:hover:bg-red-500/10 dark:hover:ring-red-500/30"
+                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded opacity-0 transition-all bg-white text-gray-400 shadow-sm ring-1 ring-gray-200 hover:bg-red-50 hover:text-red-500 hover:ring-red-200 group-hover/item:opacity-100 dark:bg-gray-800 dark:ring-gray-700 dark:hover:bg-red-500/10 dark:hover:ring-red-500/30 cursor-pointer"
                     title="Eliminar"
                   >
                     <FiTrash2 size={14} />
@@ -240,7 +285,7 @@ export function NotificationButton() {
                 <button
                   onClick={() => fetchNotifications(false)}
                   disabled={loading}
-                  className="w-full border-t border-border px-4 py-2.5 text-center text-xs font-medium text-primary hover:bg-primary/5 transition-colors disabled:opacity-50"
+                  className="w-full border-t border-border px-4 py-2.5 text-center text-xs font-medium text-primary hover:bg-primary/5 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? "Cargando..." : `Cargar más (${notifications.length}/${total})`}
                 </button>

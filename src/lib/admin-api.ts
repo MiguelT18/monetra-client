@@ -56,6 +56,14 @@ export async function deleteTemplate(
   return { ok: res.ok, message: json.message };
 }
 
+export async function getXpRecommendation(
+  difficulty: "easy" | "medium" | "hard" | "epic",
+): Promise<{ ok: boolean; data?: { difficulty: string; xp: number }; message?: string }> {
+  const res = await fetch(`/api/gamification/xp-recommendation?difficulty=${difficulty}`);
+  const json = await res.json();
+  return { ok: res.ok, data: json.data, message: json.message };
+}
+
 export async function updateAchievementProgress(
   achievementKey: string,
   progress: number,

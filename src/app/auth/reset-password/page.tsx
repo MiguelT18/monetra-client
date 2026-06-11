@@ -188,7 +188,7 @@ export default function ResetPasswordPage() {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="flex h-[42px] min-w-[42px] items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-400 transition-colors hover:text-gray-600 dark:border-white/10 dark:bg-white/5 dark:hover:text-white/70"
+              className="flex h-[42px] min-w-[42px] items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-400 transition-colors hover:text-gray-600 dark:border-white/10 dark:bg-white/5 dark:hover:text-white/70 cursor-pointer"
               tabIndex={-1}
             >
               {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
@@ -227,7 +227,7 @@ export default function ResetPasswordPage() {
             <button
               type="button"
               onClick={() => setShowConfirm((prev) => !prev)}
-              className="flex h-[42px] min-w-[42px] items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-400 transition-colors hover:text-gray-600 dark:border-white/10 dark:bg-white/5 dark:hover:text-white/70"
+              className="flex h-[42px] min-w-[42px] items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-400 transition-colors hover:text-gray-600 dark:border-white/10 dark:bg-white/5 dark:hover:text-white/70 cursor-pointer"
               tabIndex={-1}
             >
               {showConfirm ? <FiEyeOff size={16} /> : <FiEye size={16} />}

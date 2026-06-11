@@ -1,5 +1,10 @@
 export type ProductStatus = "DRAFT" | "UNDER_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
 
+export type ModuleData = {
+  title: string;
+  lessons: { title: string; durationMinutes?: number }[];
+}[];
+
 export interface CreateProductInput {
   title: string;
   description: string;
@@ -8,6 +13,10 @@ export interface CreateProductInput {
   affiliateEnabled?: boolean;
   commissionRate?: number | null;
   affiliateCookieDays?: number;
+  introVideoUrl?: string | null;
+  duration?: number | null;
+  rating?: number | null;
+  modules?: ModuleData | null;
 }
 
 export interface UpdateProductInput {
@@ -18,6 +27,10 @@ export interface UpdateProductInput {
   affiliateEnabled?: boolean;
   commissionRate?: number | null;
   affiliateCookieDays?: number;
+  introVideoUrl?: string | null;
+  duration?: number | null;
+  rating?: number | null;
+  modules?: ModuleData | null;
 }
 
 export interface ProductResponse {
@@ -31,6 +44,10 @@ export interface ProductResponse {
   affiliateEnabled: boolean;
   commissionRate: number | null;
   affiliateCookieDays: number;
+  introVideoUrl?: string | null;
+  duration?: number | null;
+  rating?: number | null;
+  modules?: ModuleData | null;
   createdAt: string;
   updatedAt: string;
   producer?: {
@@ -44,6 +61,14 @@ export interface ProductResponse {
     enrollments: number;
     orders: number;
   };
+}
+
+export interface ProductPreviewResponse {
+  product: ProductResponse;
+  temperature: number;
+  temperatureLabel: string;
+  recentSales: number;
+  recentEnrollments: number;
 }
 
 export async function submitForReview(productId: string) {
@@ -108,5 +133,11 @@ export interface CatalogResult {
 export async function listCatalog(page = 1, limit = 12) {
   const res = await fetch(`/api/products/catalog?page=${page}&limit=${limit}`);
   const {ok, result} = await res.json().then(r => ({ok: res.ok, result: r}));
+  return { ok, result };
+}
+
+export async function getProductPreview(productId: string) {
+  const res = await fetch(`/api/products/${productId}/preview`);
+  const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
   return { ok, result };
 }

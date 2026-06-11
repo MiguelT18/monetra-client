@@ -1,3 +1,5 @@
+"use client";
+
 import type { IconType } from "react-icons";
 import { FiLock, FiTrendingUp } from "react-icons/fi";
 import Link from "next/link";
@@ -223,6 +225,8 @@ export function InfoProductCard({
   subtitle,
   highlights,
   actionLabel,
+  productId,
+  isEnrolled,
 }: {
   title: string;
   category: string;
@@ -234,39 +238,49 @@ export function InfoProductCard({
   subtitle?: string;
   highlights: { icon: IconType; label: string }[];
   actionLabel?: string;
+  productId?: string;
+  isEnrolled?: boolean;
 }) {
   const thumb = accentThumbnail[accent];
   const accentHex = accentColorHex[accent];
 
+  const href = productId
+    ? isEnrolled
+      ? "/user/courses"
+      : `/user/explore/${productId}`
+    : undefined;
+
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-md transition-all hover:shadow-xl hover:-translate-y-0.5">
-      <div
-        className={`relative aspect-16/10 overflow-hidden ${thumbnail ? "" : `bg-linear-to-br ${thumb.gradient}`}`}
-      >
-        {thumbnail ? (
-          <img
-            src={thumbnail}
-            alt={title}
-            className="h-full w-full object-cover transition group-hover:scale-105"
-          />
-        ) : (
-          <>
-            <div
-              className="pointer-events-none absolute inset-0 opacity-[0.35]"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle at 20% 80%, currentColor 1px, transparent 1px), radial-gradient(circle at 80% 20%, currentColor 1px, transparent 1px)",
-                backgroundSize: "24px 24px",
-              }}
-              aria-hidden
-            ></div>
-            <div
-              className={`absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm transition group-hover:scale-105 ${thumb.iconBg}`}
-            >
-              <Icon size={26} className={thumb.iconText} />
-            </div>
-          </>
-        )}
+      {href ? (
+        <Link
+          href={href}
+          className={`relative block aspect-16/10 overflow-hidden ${thumbnail ? "" : `bg-linear-to-br ${thumb.gradient}`}`}
+        >
+          {thumbnail ? (
+            <img
+              src={thumbnail}
+              alt={title}
+              className="h-full w-full object-cover transition group-hover:scale-105"
+            />
+          ) : (
+            <>
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.35]"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 20% 80%, currentColor 1px, transparent 1px), radial-gradient(circle at 80% 20%, currentColor 1px, transparent 1px)",
+                  backgroundSize: "24px 24px",
+                }}
+                aria-hidden
+              ></div>
+              <div
+                className={`absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm transition group-hover:scale-105 ${thumb.iconBg}`}
+              >
+                <Icon size={26} className={thumb.iconText} />
+              </div>
+            </>
+          )}
         {badge ? (
           <span className={`absolute ${promoLabel ? "left-2.5 top-2.5" : "right-2.5 top-2.5"} rounded-full bg-surface/95 px-2.5 py-1 text-[11px] font-bold text-primary shadow-md backdrop-blur-sm dark:bg-gray-900/90`}>
             {badge}
@@ -283,7 +297,40 @@ export function InfoProductCard({
         <span className="absolute bottom-2.5 left-2.5 rounded-md bg-black/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
           {category}
         </span>
-      </div>
+        </Link>
+      ) : (
+        <div
+          className={`relative block aspect-16/10 overflow-hidden ${thumbnail ? "" : `bg-linear-to-br ${thumb.gradient}`}`}
+        >
+          {thumbnail ? (
+            <img
+              src={thumbnail}
+              alt={title}
+              className="h-full w-full object-cover transition group-hover:scale-105"
+            />
+          ) : (
+            <>
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.35]"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 20% 80%, currentColor 1px, transparent 1px), radial-gradient(circle at 80% 20%, currentColor 1px, transparent 1px)",
+                  backgroundSize: "24px 24px",
+                }}
+                aria-hidden
+              ></div>
+              <div
+                className={`absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm transition group-hover:scale-105 ${thumb.iconBg}`}
+              >
+                <Icon size={26} className={thumb.iconText} />
+              </div>
+            </>
+          )}
+          <span className="absolute bottom-2.5 left-2.5 rounded-md bg-black/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+            {category}
+          </span>
+        </div>
+      )}
 
       <div
         className="flex flex-1 flex-col gap-3 p-4"
@@ -313,12 +360,21 @@ export function InfoProductCard({
         </ul>
 
         {actionLabel ? (
-          <button
-            type="button"
-            className="mt-auto w-full rounded-lg bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
-          >
-            {actionLabel}
-          </button>
+          href ? (
+            <Link
+              href={href}
+              className="mt-auto block w-full rounded-lg bg-primary py-2.5 text-center text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
+            >
+              {isEnrolled ? "Ver mis cursos" : actionLabel}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="mt-auto w-full rounded-lg bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
+            >
+              {actionLabel}
+            </button>
+          )
         ) : null}
       </div>
     </article>

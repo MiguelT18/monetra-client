@@ -17,8 +17,11 @@ import {
 } from "@/components/user/userShell";
 import { Modal } from "@/components/UI/Modal";
 import { ProductForm } from "@/components/UI/ProductForm";
-import { AreaChartCard, BarChartCard } from "@/components/ui/chart";
+import { BarChartCard } from "@/components/ui/chart";
 import { listMyProducts, type ProductResponse } from "@/lib/product-api";
+import { listMyEnrollments, type EnrollmentResponse } from "@/lib/enrollment-api";
+import { listMyAffiliations, type AffiliationResponse } from "@/lib/affiliation-api";
+import { getCommissionStats, type CommissionStats } from "@/lib/commission-api";
 import Link from "next/link";
 import {
   FiBookOpen,
@@ -36,28 +39,7 @@ import {
   FiShoppingCart,
 } from "react-icons/fi";
 
-const monthlyRevenue = [
-  { name: "Ene", ingresos: 1200, visitas: 340 },
-  { name: "Feb", ingresos: 1900, visitas: 520 },
-  { name: "Mar", ingresos: 2800, visitas: 680 },
-  { name: "Abr", ingresos: 2400, visitas: 590 },
-  { name: "May", ingresos: 3200, visitas: 810 },
-  { name: "Jun", ingresos: 4100, visitas: 940 },
-  { name: "Jul", ingresos: 3800, visitas: 870 },
-  { name: "Ago", ingresos: 4500, visitas: 1020 },
-  { name: "Sep", ingresos: 4200, visitas: 960 },
-  { name: "Oct", ingresos: 5100, visitas: 1100 },
-  { name: "Nov", ingresos: 4800, visitas: 1050 },
-  { name: "Dic", ingresos: 6200, visitas: 1280 },
-];
 
-const productPerformance = [
-  { name: "Curso A", ventas: 45, estudiantes: 38 },
-  { name: "Curso B", ventas: 32, estudiantes: 29 },
-  { name: "Curso C", ventas: 28, estudiantes: 24 },
-  { name: "Curso D", ventas: 18, estudiantes: 15 },
-  { name: "Curso E", ventas: 12, estudiantes: 10 },
-];
 
 function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" | "red" {
   if (role === "STUDENT") return "amber";
@@ -98,9 +80,10 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
   const totalAffiliates = products.reduce((acc, p) => acc + (p._count?.affiliations ?? 0), 0);
   const totalOrders = products.reduce((acc, p) => acc + (p._count?.orders ?? 0), 0);
 
-  const saldoDisponible = 3280.50;
-  const saldoCongelado = 1240.00;
-  const saldoTotal = saldoDisponible + saldoCongelado;
+  const totalRevenue = products.reduce((acc, p) => acc + (p._count?.orders ?? 0) * Number(p.price), 0);
+  const saldoTotal = totalRevenue;
+  const saldoDisponible = totalRevenue;
+  const saldoCongelado = 0;
 
   function mask(val: number) {
     return showBalance ? `$${val.toLocaleString("es", { minimumFractionDigits: 2 })}` : "••••••";
@@ -118,7 +101,7 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
                 </p>
                 <button
                   onClick={() => setShowBalance((v) => !v)}
-                  className="shrink-0 text-foreground/30 hover:text-foreground/70 transition-colors"
+                  className="shrink-0 text-foreground/30 hover:text-foreground/70 transition-colors cursor-pointer"
                 >
                   {showBalance ? <FiEyeOff size={13} /> : <FiEye size={13} />}
                 </button>
@@ -267,23 +250,28 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
       </div>
 
       <div className="mb-6 grid gap-6 lg:grid-cols-2">
-        <AreaChartCard
-          title="Ingresos"
-          subtitle="Evolución mensual de ingresos y visitas"
-          data={monthlyRevenue}
-          categories={[
-            { key: "ingresos", name: "Ingresos", color: "#7C3AED" },
-            { key: "visitas", name: "Visitas", color: "#A78BFA" },
-          ]}
-          formatter={(v) => `$${v.toLocaleString()}`}
-        />
         <BarChartCard
           title="Rendimiento por producto"
-          subtitle="Ventas y estudiantes por curso"
-          data={productPerformance}
+          subtitle="Órdenes y estudiantes por curso"
+          data={products.length > 0 ? products.slice(0, 8).map((p) => ({
+            name: p.title.length > 18 ? p.title.slice(0, 16) + "…" : p.title,
+            ventas: p._count?.orders ?? 0,
+            estudiantes: p._count?.enrollments ?? 0,
+          })) : [{ name: "Sin datos", ventas: 0, estudiantes: 0 }]}
           categories={[
             { key: "ventas", name: "Ventas", color: "#7C3AED" },
             { key: "estudiantes", name: "Estudiantes", color: "#A78BFA" },
+          ]}
+        />
+        <BarChartCard
+          title="Afiliados por producto"
+          subtitle="Afiliaciones activas por curso"
+          data={products.length > 0 ? products.slice(0, 8).map((p) => ({
+            name: p.title.length > 18 ? p.title.slice(0, 16) + "…" : p.title,
+            afiliados: p._count?.affiliations ?? 0,
+          })) : [{ name: "Sin datos", afiliados: 0 }]}
+          categories={[
+            { key: "afiliados", name: "Afiliados", color: "#A78BFA" },
           ]}
         />
       </div>
@@ -295,7 +283,7 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
             <div className="flex gap-2">
               <button
                 onClick={onNewProduct}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
               >
                 <FiPlus size={15} />
                 Nuevo
@@ -314,7 +302,7 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
               </p>
               <button
                 onClick={onNewProduct}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:opacity-90 cursor-pointer"
               >
                 <FiPlus size={16} />
                 Crear producto
@@ -417,20 +405,37 @@ export default function UserDashboard() {
   const { user, loading, refetch } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
   const [products, setProducts] = useState<ProductResponse[]>([]);
+  const [enrollments, setEnrollments] = useState<EnrollmentResponse[]>([]);
+  const [affiliations, setAffiliations] = useState<AffiliationResponse[]>([]);
+  const [commissionStats, setCommissionStats] = useState<CommissionStats | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
   const [productModalOpen, setProductModalOpen] = useState(false);
   const tone = roleTone(role);
 
-  const fetchProducts = async () => {
-    if (role !== "CREATOR") return;
-    const { ok, result } = await listMyProducts(1, 100);
-    if (ok && result.data?.products) {
-      setProducts(result.data.products);
+  const fetchData = async () => {
+    setDataLoading(true);
+    if (role === "CREATOR") {
+      const { ok, result } = await listMyProducts(1, 100);
+      if (ok && result.data?.products) setProducts(result.data.products);
     }
+    if (role === "STUDENT") {
+      const { ok, result } = await listMyEnrollments(1, 50);
+      if (ok && result.data?.enrollments) setEnrollments(result.data.enrollments);
+    }
+    if (role === "AFFILIATE") {
+      const [affRes, statsRes] = await Promise.all([
+        listMyAffiliations(1, 50),
+        getCommissionStats(),
+      ]);
+      if (affRes.ok && affRes.result.data?.affiliations) setAffiliations(affRes.result.data.affiliations);
+      if (statsRes.ok && statsRes.data) setCommissionStats(statsRes.data);
+    }
+    setDataLoading(false);
   };
 
   useEffect(() => {
     if (!loading) {
-      fetchProducts();
+      fetchData();
     }
   }, [loading, role]);
   const firstName =
@@ -479,146 +484,204 @@ export default function UserDashboard() {
       />
 
       {role === "STUDENT" && (
-        <>
-          <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <StatCard
-              icon={FiBookOpen}
-              label="Cursos activos"
-              value="3"
-              hint="Próxima entrega · Fundamentos de UX"
-              tone="amber"
-            />
-            <StatCard
-              icon={FiAward}
-              label="Nivel actual"
-              value={`Nv. ${level}`}
-              hint={`${xpInLevel} / ${nextXp} XP hacia el siguiente nivel`}
-              tone="neutral"
-            />
-            <StatCard
-              icon={FiTarget}
-              label="Meta semanal"
-              value={`${xpPct}%`}
-              hint="Mantén el ritmo para desbloquear insignias"
-              tone="amber"
-            />
+        dataLoading ? (
+          <div className="animate-pulse space-y-6">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-28 rounded-xl bg-gray-200 dark:bg-white/10" />
+              ))}
+            </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-44 rounded-xl bg-gray-200 dark:bg-white/10" />
+              ))}
+            </div>
           </div>
-          <div className="grid gap-6 lg:grid-cols-2">
-            <SectionCard
-              title="Continuar aprendiendo"
-              action={
-                <QuickLink href="/user/courses" label="Ver cursos" variant="outline" />
-              }
-            >
-              <div className="space-y-2">
-                <PlaceholderRow
-                  title="Diseño de interfaces con Tailwind"
-                  subtitle="Módulo 4 · Componentes reutilizables"
-                  meta="En curso"
-                />
-                <PlaceholderRow
-                  title="Introducción a Next.js"
-                  subtitle="Módulo 2 · Rutas y layouts"
-                  meta="65%"
-                />
-                <PlaceholderRow
-                  title="Accesibilidad web práctica"
-                  subtitle="Sin empezar"
-                  meta="Nuevo"
-                />
-              </div>
-            </SectionCard>
-            <SectionCard
-              title="Explorar"
-              action={
-                <QuickLink href="/user/explore" label="Ir al mercado" variant="outline" />
-              }
-            >
-              <p className="mb-3 text-sm text-foreground/55">
-                Descubre nuevos cursos alineados con tus intereses y nivel.
-              </p>
-              <QuickLink href="/user/explore" label="Explorar catálogo" variant="primary" />
-            </SectionCard>
-          </div>
-        </>
+        ) : (
+          <>
+            <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <StatCard
+                icon={FiBookOpen}
+                label="Cursos activos"
+                value={String(enrollments.length)}
+                hint={enrollments.length > 0 ? "Continúa tu aprendizaje" : "Explora el catálogo para empezar"}
+                tone="amber"
+              />
+              <StatCard
+                icon={FiAward}
+                label="Nivel actual"
+                value={`Nv. ${level}`}
+                hint={`${xpInLevel} / ${nextXp} XP hacia el siguiente nivel`}
+                tone="neutral"
+              />
+              <StatCard
+                icon={FiTarget}
+                label="Meta semanal"
+                value={`${xpPct}%`}
+                hint="Mantén el ritmo para desbloquear insignias"
+                tone="amber"
+              />
+            </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <SectionCard
+                title="Continuar aprendiendo"
+                action={
+                  <QuickLink href="/user/courses" label="Ver cursos" variant="outline" />
+                }
+              >
+                {enrollments.length === 0 ? (
+                  <p className="text-sm text-foreground/55 text-center py-6">
+                    Aún no tienes cursos. <Link href="/user/explore" className="text-primary underline">Explorar catálogo</Link>
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {enrollments.slice(0, 5).map((e) => (
+                      <PlaceholderRow
+                        key={e.id}
+                        title={e.product.title}
+                        subtitle={`Progreso: ${e.progress}%`}
+                        meta={e.progress >= 100 ? "Completado" : "En curso"}
+                      />
+                    ))}
+                    {enrollments.length > 5 && (
+                      <p className="text-xs text-center text-foreground/35 pt-1">
+                        +{enrollments.length - 5} curso{enrollments.length - 5 !== 1 ? "s" : ""} más
+                      </p>
+                    )}
+                  </div>
+                )}
+              </SectionCard>
+              <SectionCard
+                title="Explorar"
+                action={
+                  <QuickLink href="/user/explore" label="Ir al mercado" variant="outline" />
+                }
+              >
+                <p className="mb-3 text-sm text-foreground/55">
+                  Descubre nuevos cursos alineados con tus intereses y nivel.
+                </p>
+                <QuickLink href="/user/explore" label="Explorar catálogo" variant="primary" />
+              </SectionCard>
+            </div>
+          </>
+        )
       )}
 
       {role === "CREATOR" && (
-        <CreatorDashboard
-          products={products}
-          level={level}
-          xpInLevel={xpInLevel}
-          nextXp={nextXp}
-          onNewProduct={() => setProductModalOpen(true)}
-        />
+        dataLoading ? (
+          <div className="animate-pulse space-y-6">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-44 rounded-2xl bg-gray-200 dark:bg-white/10" />
+              ))}
+            </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-64 rounded-2xl bg-gray-200 dark:bg-white/10" />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <CreatorDashboard
+            products={products}
+            level={level}
+            xpInLevel={xpInLevel}
+            nextXp={nextXp}
+            onNewProduct={() => setProductModalOpen(true)}
+          />
+        )
       )}
 
       {role === "AFFILIATE" && (
-        <>
-          <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <StatCard
-              icon={FiDollarSign}
-              label="Comisiones pendientes"
-              value="—"
-              hint="Liquidación según calendario del creador"
-              tone="emerald"
-            />
-            <StatCard
-              icon={FiLink}
-              label="Enlaces activos"
-              value="—"
-              hint="Campañas con seguimiento UTM"
-              tone="neutral"
-            />
-            <StatCard
-              icon={FiUsers}
-              label="Clics (7 días)"
-              value="—"
-              hint="Tráfico atribuido a tus enlaces"
-              tone="emerald"
-            />
+        dataLoading ? (
+          <div className="animate-pulse space-y-6">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-28 rounded-xl bg-gray-200 dark:bg-white/10" />
+              ))}
+            </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-44 rounded-xl bg-gray-200 dark:bg-white/10" />
+              ))}
+            </div>
           </div>
-          <div className="grid gap-6 lg:grid-cols-2">
-            <SectionCard
-              title="Programas que promocionas"
-              action={
-                <QuickLink
-                  href="/user/affiliations"
-                  label="Afiliaciones"
-                  variant="outline"
-                />
-              }
-            >
-              <div className="space-y-2">
-                <PlaceholderRow
-                  title="Academia Monetra · Tier estándar"
-                  subtitle="15% por venta · cookie 30 días"
-                  meta="Activo"
-                />
-                <PlaceholderRow
-                  title="Curso avanzado de datos"
-                  subtitle="10% recurrente"
-                  meta="Pendiente"
-                />
-              </div>
-            </SectionCard>
-            <SectionCard
-              title="Próximos pasos"
-              action={
-                <QuickLink href="/user/explore" label="Buscar ofertas" variant="outline" />
-              }
-            >
-              <p className="text-sm text-foreground/55">
-                Explora productos con comisiones competitivas y pide acceso a
-                nuevos programas desde el mercado.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <QuickLink href="/user/explore" label="Explorar mercado" variant="primary" />
-                <QuickLink href="/user/settings" label="Datos de pago" variant="outline" />
-              </div>
-            </SectionCard>
-          </div>
-        </>
+        ) : (
+          <>
+            <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <StatCard
+                icon={FiDollarSign}
+                label="Comisiones pendientes"
+                value={commissionStats ? `$${commissionStats.pending.total.toFixed(2)}` : "—"}
+                hint={commissionStats ? `${commissionStats.pending.count} comisión(es) por cobrar` : "Cargando..."}
+                tone="emerald"
+              />
+              <StatCard
+                icon={FiDollarSign}
+                label="Comisiones pagadas"
+                value={commissionStats ? `$${commissionStats.paid.total.toFixed(2)}` : "—"}
+                hint={commissionStats ? `${commissionStats.paid.count} comisión(es) pagadas` : "Cargando..."}
+                tone="neutral"
+              />
+              <StatCard
+                icon={FiLink}
+                label="Programas activos"
+                value={String(affiliations.length)}
+                hint="Productos a los que estás afiliado"
+                tone="emerald"
+              />
+            </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <SectionCard
+                title="Programas que promocionas"
+                action={
+                  <QuickLink
+                    href="/user/affiliations"
+                    label="Afiliaciones"
+                    variant="outline"
+                  />
+                }
+              >
+                {affiliations.length === 0 ? (
+                  <p className="text-sm text-foreground/55 text-center py-6">
+                    Aún no tienes afiliaciones. <Link href="/user/explore" className="text-primary underline">Explorar productos</Link>
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {affiliations.slice(0, 5).map((a) => (
+                      <PlaceholderRow
+                        key={a.id}
+                        title={a.product.title}
+                        subtitle={`${a.product.commissionRate}% comisión · cookie ${a.product.affiliateCookieDays} días`}
+                        meta="Activo"
+                      />
+                    ))}
+                    {affiliations.length > 5 && (
+                      <p className="text-xs text-center text-foreground/35 pt-1">
+                        +{affiliations.length - 5} programa{affiliations.length - 5 !== 1 ? "s" : ""} más
+                      </p>
+                    )}
+                  </div>
+                )}
+              </SectionCard>
+              <SectionCard
+                title="Próximos pasos"
+                action={
+                  <QuickLink href="/user/explore" label="Buscar ofertas" variant="outline" />
+                }
+              >
+                <p className="text-sm text-foreground/55">
+                  Explora productos con comisiones competitivas y pide acceso a
+                  nuevos programas desde el mercado.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <QuickLink href="/user/explore" label="Explorar mercado" variant="primary" />
+                  <QuickLink href="/user/settings" label="Datos de pago" variant="outline" />
+                </div>
+              </SectionCard>
+            </div>
+          </>
+        )
       )}
       <Modal isOpen={productModalOpen} onClose={() => setProductModalOpen(false)}>
         <ProductForm
@@ -626,7 +689,7 @@ export default function UserDashboard() {
           onSuccess={() => {
             setProductModalOpen(false);
             refetch();
-            fetchProducts();
+            fetchData();
           }}
         />
       </Modal>

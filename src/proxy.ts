@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ROLE_ROUTES } from "@/lib/user";
 
-const PROTECTED_ROUTES = ["/user"];
+const PROTECTED_ROUTES = ["/user", "/profile"];
 const AUTH_ROUTES_REDIRECT_IF_SESSION = ["/auth/login", "/auth/register"];
 
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("access_token")?.value;
   const refreshToken = request.cookies.get("refresh_token")?.value;
@@ -45,5 +45,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/user/:path*", "/auth/:path*"],
+  matcher: ["/user/:path*", "/profile/:path*", "/auth/:path*"],
 };

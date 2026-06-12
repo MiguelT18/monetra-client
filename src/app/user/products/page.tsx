@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { useRouter } from "next/navigation";
 import { useProfile } from "@/hooks/useProfile";
 import type { Role } from "@/types/user";
 import {
@@ -176,6 +177,11 @@ function ProductRow({
   onDelete: (product: ProductResponse) => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  const router = useRouter();
+
+  const handleRowClick = () => {
+    router.push(`/user/products/${product.id}/edit`);
+  };
 
   return (
     <motion.div
@@ -185,6 +191,7 @@ function ProductRow({
       exit={{ opacity: 0, y: 6 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={handleRowClick}
       className="relative flex flex-col gap-3 rounded-xl border border-border bg-surface shadow-sm transition-all hover:shadow-md px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5 hover:dark:bg-white/4 cursor-pointer"
     >
       <div className="flex items-center gap-3 min-w-0">
@@ -227,14 +234,14 @@ function ProductRow({
           style={{ pointerEvents: hovered ? "auto" : "none" }}
         >
           <button
-            onClick={() => onEdit(product)}
+            onClick={(e) => { e.stopPropagation(); onEdit(product); }}
             className="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/15 cursor-pointer"
             title="Editar"
           >
             <FiEdit3 size={15} />
           </button>
           <button
-            onClick={() => onDelete(product)}
+            onClick={(e) => { e.stopPropagation(); onDelete(product); }}
             className="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 cursor-pointer"
             title="Eliminar"
           >
@@ -245,14 +252,14 @@ function ProductRow({
 
       <div className="flex gap-2 sm:hidden">
         <button
-          onClick={() => onEdit(product)}
+          onClick={(e) => { e.stopPropagation(); onEdit(product); }}
           className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:text-white/60 cursor-pointer"
         >
           <FiEdit3 size={12} />
           Editar
         </button>
         <button
-          onClick={() => onDelete(product)}
+          onClick={(e) => { e.stopPropagation(); onDelete(product); }}
           className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-red-400 hover:text-red-600 dark:text-white/60 cursor-pointer"
         >
           <FiTrash2 size={12} />

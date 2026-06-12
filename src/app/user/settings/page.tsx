@@ -497,7 +497,7 @@ export default function UserSettings() {
         )}
 
         {/* Save Bar */}
-        <div className="sticky bottom-0 -mx-1 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-surface to-primary/5 px-5 py-4 shadow-lg shadow-primary/5 backdrop-blur-md sm:px-6 dark:border-primary/10 dark:from-primary/10 dark:via-surface dark:to-primary/10">
+        <div className="sticky bottom-0 z-9999 -mx-1 rounded-2xl border border-primary/20 bg-linear-to-r from-primary/5 via-surface to-primary/5 px-5 py-4 shadow-lg shadow-primary/5 backdrop-blur-md sm:px-6 dark:border-primary/10 dark:from-primary/10 dark:via-surface dark:to-primary/10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               {feedback && (
@@ -522,7 +522,7 @@ export default function UserSettings() {
 
             <div className="flex items-center gap-2">
               <a
-                href={`/user/${user?.username ?? ""}`}
+                href={`/profile/${user?.username ?? ""}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background/60 px-3 py-2 text-xs font-medium text-gray-600 transition hover:border-primary/40 hover:bg-primary/5 dark:text-white/70 dark:hover:bg-primary/10 cursor-pointer"

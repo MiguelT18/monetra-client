@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { FiSearch, FiX, FiUser, FiStar } from "react-icons/fi";
 import Image from "next/image";
@@ -24,6 +25,7 @@ export function UserSearch() {
   const [results, setResults] = useState<SearchUser[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -126,7 +128,17 @@ export function UserSearch() {
               <ul className="py-2">
                 {results.map((user) => (
                   <li key={user.id}>
-                    <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors cursor-default">
+                    <button
+                      onClick={() => {
+                        if (user.username) {
+                          router.push(`/profile/${user.username}`);
+                          setQuery("");
+                          setResults([]);
+                          setOpen(false);
+                        }
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors cursor-pointer text-left"
+                    >
                       {user.avatar ? (
                         <Image
                           src={user.avatar}
@@ -162,7 +174,7 @@ export function UserSearch() {
                           </span>
                         )}
                       </div>
-                    </div>
+                    </button>
                   </li>
                 ))}
               </ul>

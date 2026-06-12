@@ -47,6 +47,7 @@ import {
   FiLink,
   FiCheckCircle,
   FiAlertCircle,
+  FiFileText,
 } from "react-icons/fi";
 
 function formatDuration(minutes: number): string {
@@ -743,7 +744,7 @@ export default function ProductPreviewPage({
                 </div>
               )}
 
-              {!isEnrolled && role !== "STUDENT" && (
+              {!isEnrolled && role !== "STUDENT" && role !== "AFFILIATE" && (
                 <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface py-3 text-sm font-medium text-gray-700 transition-all hover:border-primary/40 hover:bg-primary/5 dark:text-white/80 dark:hover:bg-primary/10">
                   <FiMail size={16} />
                   Enviar mensaje al creador
@@ -752,14 +753,29 @@ export default function ProductPreviewPage({
 
               {role === "AFFILIATE" && product.affiliateEnabled && (
                 <div className="space-y-2">
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-500/30 dark:bg-emerald-500/10">
-                    <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                      Comisión: {product.commissionRate}%
-                    </p>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-500">
-                      Gana ${(product.price * (product.commissionRate ?? 0)) / 100}{" "}
-                      por venta
-                    </p>
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FiDollarSign size={14} className="text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-[11px] font-medium uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+                        Comisión del curso
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                        {product.commissionRate}%
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-100/60 px-2.5 py-1.5 dark:bg-emerald-500/15">
+                      <span className="text-xs text-emerald-700 dark:text-emerald-300">
+                        Ganas
+                      </span>
+                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-200">
+                        ${(product.price * (product.commissionRate ?? 0)) / 100}
+                      </span>
+                      <span className="text-xs text-emerald-700 dark:text-emerald-300">
+                        por venta
+                      </span>
+                    </div>
                   </div>
 
                   {isAffiliated ? (
@@ -775,7 +791,7 @@ export default function ProductPreviewPage({
                   ) : affiliateEligible === false ? (
                     <button
                       disabled
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 py-3 text-sm font-medium text-gray-400 dark:border-white/10 dark:bg-white/5 dark:text-white/30"
+                      className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 py-3 text-sm font-medium text-gray-400 dark:border-white/10 dark:bg-white/5 dark:text-white/30"
                     >
                       <FiAlertCircle size={16} />
                       Afiliación no disponible
@@ -784,7 +800,7 @@ export default function ProductPreviewPage({
                     <button
                       onClick={handleJoinAffiliate}
                       disabled={joiningAffiliate}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 py-3 text-sm font-semibold text-primary transition-all hover:bg-primary/10 disabled:opacity-50"
+                      className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 py-3 text-sm font-semibold text-primary transition-all hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {joiningAffiliate ? (
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
@@ -814,11 +830,18 @@ export default function ProductPreviewPage({
                       </ul>
                     </div>
                   )}
+
+                  {!isEnrolled && (
+                    <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-surface py-3 text-sm font-medium text-gray-700 transition-all hover:border-primary/40 hover:bg-primary/5 dark:text-white/80 dark:hover:bg-primary/10">
+                      <FiMail size={16} />
+                      Enviar mensaje al creador
+                    </button>
+                  )}
                 </div>
               )}
 
               {role === "AFFILIATE" && !product.affiliateEnabled && (
-                <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface py-3 text-sm font-medium text-gray-700 transition-all hover:border-primary/40 hover:bg-primary/5 dark:text-white/80 dark:hover:bg-primary/10">
+                <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-surface py-3 text-sm font-medium text-gray-700 transition-all hover:border-primary/40 hover:bg-primary/5 dark:text-white/80 dark:hover:bg-primary/10">
                   <FiMail size={16} />
                   Enviar mensaje al creador
                 </button>

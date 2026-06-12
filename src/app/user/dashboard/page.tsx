@@ -311,8 +311,9 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
           ) : (
             <div className="space-y-2">
               {products.slice(0, 5).map((p) => (
-                <div
+                <Link
                   key={p.id}
+                  href={`/user/products/${p.id}/edit`}
                   className="flex items-center gap-3 rounded-xl border border-border px-4 py-3.5 hover:bg-primary/3 hover:border-primary/20 cursor-pointer transition-all"
                 >
                   <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg">
@@ -354,9 +355,9 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
                           ? "Borrador"
                           : "Archivado"}
                     </span>
-                  </div>
-                </div>
-              ))}
+                    </div>
+                  </Link>
+                ))}
               {products.length > 5 && (
                 <p className="text-xs text-center text-foreground/35 pt-1">
                   +{products.length - 5} producto{products.length - 5 !== 1 ? "s" : ""} más

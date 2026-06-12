@@ -190,7 +190,7 @@ export function PhoneInput({ value, onChange, className = "" }: PhoneInputProps)
         </button>
 
         {open && (
-          <div className="absolute top-full left-0 z-50 mt-1 max-h-60 w-72 overflow-auto rounded-xl border border-border bg-surface p-1 shadow-xl dark:shadow-black/40">
+          <div className="absolute top-full left-0 z-20 mt-1 max-h-60 w-72 overflow-auto rounded-xl border-2 border-border bg-surface p-1 shadow-xl dark:shadow-black/40">
             <input
               placeholder="Buscar país..."
               value={search}

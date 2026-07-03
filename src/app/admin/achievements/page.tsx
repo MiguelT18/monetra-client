@@ -36,15 +36,17 @@ const EMPTY_FORM: AchievementForm = {
   role: "STUDENT",
 };
 
-const ROLES = ["STUDENT", "CREATOR", "AFFILIATE"];
+const ROLES = ["ALL", "STUDENT", "CREATOR", "AFFILIATE"];
 
 const ROLE_LABELS: Record<string, string> = {
+  ALL: "Todos los roles",
   STUDENT: "Estudiante",
   CREATOR: "Creador",
   AFFILIATE: "Afiliado",
 };
 
 const ROLE_BADGE: Record<string, string> = {
+  ALL: "bg-gray-500/10 text-gray-600 dark:text-gray-400",
   STUDENT: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   CREATOR: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
   AFFILIATE: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",

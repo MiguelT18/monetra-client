@@ -7,7 +7,7 @@ import { UserNavbar } from "@/components/UI/navbar/UserNavbar";
 import { UserAside } from "@/components/UI/UserAside";
 import { useProfile } from "@/hooks/useProfile";
 
-const ADMIN_ROUTES = ["/user/explore"];
+const ADMIN_ROUTES = ["/admin"];
 
 export function UserLayoutClient({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,7 +24,7 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
     if (role !== "ADMIN") return;
     const allowed = ADMIN_ROUTES.some((r) => pathname === r || pathname.startsWith("/admin"));
     if (!allowed) {
-      router.replace("/user/explore");
+      router.replace("/admin/users");
     }
   }, [role, pathname, loading, router]);
 

@@ -95,7 +95,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
             </div>
           ) : (
             <Link
-              href="/user/settings"
+              href={`/profile/${user.username}`}
               className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
             >
               <div className="relative shrink-0">

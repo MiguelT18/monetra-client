@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "country-flag-icons": "^1.6.17",
+    "hls.js": "^1.6.16",
     "libphonenumber-js": "^1.13.4",
     "motion": "^12.38.0",
     "next": "16.2.4",

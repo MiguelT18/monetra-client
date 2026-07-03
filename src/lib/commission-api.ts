@@ -25,8 +25,32 @@ export async function listMyCommissions(page = 1, limit = 20) {
   return { ok, result };
 }
 
+export interface CommissionByProduct {
+  product: string;
+  total: number;
+  count: number;
+}
+
+export interface CommissionHistory {
+  month: string;
+  pending: number;
+  paid: number;
+}
+
 export async function getCommissionStats() {
   const res = await fetch("/api/commissions/stats");
   const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
   return { ok, data: result.data as CommissionStats | undefined };
+}
+
+export async function fetchCommissionByProduct() {
+  const res = await fetch("/api/commissions/by-product");
+  const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
+  return { ok, data: result.data as CommissionByProduct[] | undefined };
+}
+
+export async function fetchCommissionHistory(months = 6) {
+  const res = await fetch(`/api/commissions/history?months=${months}`);
+  const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
+  return { ok, data: result.data as CommissionHistory[] | undefined };
 }

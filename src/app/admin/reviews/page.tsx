@@ -2,16 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { FiInbox, FiCheck, FiX, FiImage, FiExternalLink } from "react-icons/fi";
+import { FiInbox, FiCheck, FiX, FiImage, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useNotification } from "@/hooks/useNotification";
 import type { ProductResponse } from "@/lib/product-api";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+const PAGE_SIZE = 10;
 
 export default function AdminReviewsPage() {
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
   const { notify } = useNotification();
+  const router = useRouter();
 
   const fetchPending = async () => {
     setLoading(true);
@@ -52,6 +57,9 @@ export default function AdminReviewsPage() {
     }
   };
 
+  const totalPages = Math.ceil(products.length / PAGE_SIZE);
+  const paged = products.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -86,59 +94,89 @@ export default function AdminReviewsPage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="flex items-center gap-4 rounded-2xl border border-border bg-background/60 p-4 shadow-sm dark:bg-white/3"
-            >
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl">
-                {product.thumbnail ? (
-                  <img src={product.thumbnail} alt={product.title} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-200 to-gray-100 dark:from-white/10 dark:to-white/5">
-                    <FiImage size={18} className="text-gray-400 dark:text-white/30" />
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">{product.title}</p>
-                <p className="text-xs text-foreground/45">
-                  ${Number(product.price).toFixed(2)}
-                  {product.producer && (
-                    <> · por {product.producer.fullname ?? product.producer.username ?? "—"}</>
-                  )}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleReview(product.id, "PUBLISHED")}
-                  disabled={actionLoading === product.id}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3.5 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60 cursor-pointer"
-                >
-                  {actionLoading === product.id ? (
-                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+        <>
+          <div className="space-y-3">
+            {paged.map((product) => (
+              <div
+                key={product.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => router.push(`/admin/reviews/${product.id}`)}
+                onKeyDown={(e) => { if (e.key === "Enter") router.push(`/admin/reviews/${product.id}`); }}
+                className="flex cursor-pointer items-center gap-4 rounded-2xl border border-border bg-background/60 p-4 shadow-sm transition-colors hover:bg-gray-50 dark:bg-white/3 dark:hover:bg-white/10"
+              >
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl">
+                  {product.thumbnail ? (
+                    <img src={product.thumbnail} alt={product.title} className="h-full w-full object-cover" />
                   ) : (
-                    <FiCheck size={14} />
+                    <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-200 to-gray-100 dark:from-white/10 dark:to-white/5">
+                      <FiImage size={18} className="text-gray-400 dark:text-white/30" />
+                    </div>
                   )}
-                  Aprobar
-                </button>
-                <button
-                  onClick={() => handleReview(product.id, "REJECTED")}
-                  disabled={actionLoading === product.id}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3.5 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 cursor-pointer"
-                >
-                  {actionLoading === product.id ? (
-                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
-                  ) : (
-                    <FiX size={14} />
-                  )}
-                  Rechazar
-                </button>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{product.title}</p>
+                  <p className="text-xs text-foreground/45">
+                    ${Number(product.price).toFixed(2)}
+                    {product.producer && (
+                      <> · por {product.producer.fullname ?? product.producer.username ?? "—"}</>
+                    )}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => handleReview(product.id, "PUBLISHED")}
+                    disabled={actionLoading === product.id}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3.5 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60 cursor-pointer"
+                  >
+                    {actionLoading === product.id ? (
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    ) : (
+                      <FiCheck size={14} />
+                    )}
+                    Aprobar
+                  </button>
+                  <button
+                    onClick={() => handleReview(product.id, "REJECTED")}
+                    disabled={actionLoading === product.id}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3.5 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 cursor-pointer"
+                  >
+                    {actionLoading === product.id ? (
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                    ) : (
+                      <FiX size={14} />
+                    )}
+                    Rechazar
+                  </button>
+                </div>
               </div>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground/60 transition-colors hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-white/5 cursor-pointer"
+              >
+                <FiChevronLeft size={14} />
+                Anterior
+              </button>
+              <span className="text-xs text-foreground/45">
+                {page + 1} de {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page >= totalPages - 1}
+                className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground/60 transition-colors hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-white/5 cursor-pointer"
+              >
+                Siguiente
+                <FiChevronRight size={14} />
+              </button>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </motion.div>
   );

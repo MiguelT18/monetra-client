@@ -26,28 +26,6 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(result, { status: res.ok ? 200 : res.status });
 }
 
-export async function POST(request: NextRequest) {
-  const accessToken = request.cookies.get("access_token")?.value;
-
-  if (!accessToken) {
-    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
-  }
-
-  const body = await request.json();
-
-  const res = await fetch(apiUrl("/api/notifications/send"), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: `access_token=${accessToken}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  const result = await res.json();
-  return NextResponse.json(result, { status: res.ok ? 201 : res.status });
-}
-
 export async function DELETE(request: NextRequest) {
   const accessToken = request.cookies.get("access_token")?.value;
 

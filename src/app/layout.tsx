@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Monetra — Tu Conocimiento es el Nuevo Oro",
   description:
-    "La primera plataforma educativa gamificada. Crea, vende y aprende cursos digitales mientras ganas XP, subes de nivel y construyes tu imperio digital. Alternativa inteligente a Hotmart.",
+    "La primera plataforma educativa gamificada. Crea tu producto, gestiona tu negocio y vende en todo el mundo mientras ganas XP, subes de nivel y construyes tu imperio digital.",
   openGraph: {
     title: "Monetra — Tu Conocimiento es el Nuevo Oro",
     description:

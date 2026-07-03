@@ -16,6 +16,7 @@ import { listMyEnrollments, type EnrollmentResponse } from "@/lib/enrollment-api
 import { FiBookOpen, FiClock, FiAward, FiPlayCircle } from "react-icons/fi";
 import Link from "next/link";
 
+
 export default function UserCourses() {
   const { user, loading } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
@@ -122,12 +123,17 @@ export default function UserCourses() {
             ) : (
               <div className="space-y-2">
                 {enrollments.slice(0, 5).map((e) => (
-                  <PlaceholderRow
+                  <Link
                     key={e.id}
-                    title={e.product.title}
-                    subtitle={e.progress > 0 ? `Progreso: ${e.progress}%` : "Sin empezar"}
-                    meta={e.progress >= 100 ? "Completado" : e.progress > 0 ? `${e.progress}%` : "Nuevo"}
-                  />
+                    href={`/user/courses/${e.id}`}
+                    className="block"
+                  >
+                    <PlaceholderRow
+                      title={e.product.title}
+                      subtitle={e.progress > 0 ? `Progreso: ${e.progress}%` : "Sin empezar"}
+                      meta={e.progress >= 100 ? "Completado" : e.progress > 0 ? `${e.progress}%` : "Nuevo"}
+                    />
+                  </Link>
                 ))}
                 {enrollments.length > 5 && (
                   <p className="text-xs text-center text-foreground/35 pt-1">

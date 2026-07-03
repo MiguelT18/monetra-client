@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { MdOutlineDashboard, MdOutlineSchool } from "react-icons/md";
 import type { Role } from "@/types/user";
@@ -15,12 +15,14 @@ import {
   FiTrendingUp,
   FiUsers,
   FiAward,
-  FiCompass,
+  FiShoppingCart,
   FiPackage,
   FiLink,
   FiSettings,
   FiShield,
   FiUserCheck,
+  FiFlag,
+  FiMail,
 } from "react-icons/fi";
 import Link from "next/link";
 import LogoIcon from "@/icons/Logo";
@@ -45,16 +47,22 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
-    label: "Explorar",
-    icon: FiCompass,
+    label: "Mercado",
+    icon: FiShoppingCart,
     href: "/user/explore",
-    roles: ["STUDENT", "CREATOR", "AFFILIATE", "ADMIN"],
+    roles: ["STUDENT", "CREATOR", "AFFILIATE"],
   },
   {
     label: "Dashboard",
     icon: MdOutlineDashboard,
     href: "/user/dashboard",
     roles: ["STUDENT", "CREATOR", "AFFILIATE"],
+  },
+  {
+    label: "Bandeja de entrada",
+    icon: FiMail,
+    href: "/user/inbox",
+    roles: ["STUDENT", "CREATOR", "AFFILIATE", "ADMIN"],
   },
   {
     label: "Mis cursos",
@@ -96,6 +104,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Usuarios",
     icon: FiUserCheck,
     href: "/admin/users",
+    roles: ["ADMIN"],
+  },
+  {
+    label: "Reportes",
+    icon: FiFlag,
+    href: "/admin/reports",
     roles: ["ADMIN"],
   },
   {
@@ -154,6 +168,7 @@ const ROLE_CONFIG: Record<
 export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsideProps) {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [roleLoading, setRoleLoading] = useState(false);
+  const [pendingReviews, setPendingReviews] = useState(0);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -162,6 +177,28 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
   const { notify } = useNotification();
 
   const role = (user?.role ?? "STUDENT") as Role;
+
+  useEffect(() => {
+    if (role !== "ADMIN") { setPendingReviews(0); return; }
+
+    const fetchPending = (signal: AbortSignal) => {
+      fetch("/api/products/admin/pending-reviews", { signal })
+        .then((r) => r.json())
+        .then((json) => {
+          const products = json.data?.products;
+          if (Array.isArray(products)) setPendingReviews(products.length);
+        })
+        .catch(() => {});
+    };
+
+    const controller = new AbortController();
+    fetchPending(controller.signal);
+
+    const onReviewsChanged = () => fetchPending(controller.signal);
+    window.addEventListener("pending-reviews-changed", onReviewsChanged);
+
+    return () => { controller.abort(); window.removeEventListener("pending-reviews-changed", onReviewsChanged); };
+  }, [role]);
 
   const visibleItems = loading
     ? NAV_ITEMS.filter((item) => item.roles.includes("STUDENT"))
@@ -265,6 +302,11 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
                         <span className="whitespace-nowrap overflow-hidden relative z-10 text-sm">
                           {item.label}
                         </span>
+                        {item.href === "/admin/reviews" && pendingReviews > 0 && (
+                          <span className="ml-auto relative z-10 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                            {pendingReviews > 99 ? "99+" : pendingReviews}
+                          </span>
+                        )}
                       </Link>
                     </li>
                   );

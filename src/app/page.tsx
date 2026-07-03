@@ -22,6 +22,9 @@ import {
 } from "react-icons/fi";
 import LogoIcon from "@/icons/Logo";
 import { useProfile } from "@/hooks/useProfile";
+import HeroParticles from "@/components/effects/HeroParticles";
+import { FiMoon, FiSun } from "react-icons/fi";
+import { useThemeContext } from "@/contexts/themeContext";
 
 
 const stats = [
@@ -67,7 +70,7 @@ const roles = [
     shadow: "shadow-violet-500/25",
     points: [
       "Crea cursos con gamificación integrada que retienen alumnos",
-      "Comisiones justas — mucho más bajas que Hotmart",
+      "Comisiones justas — las más competitivas del mercado",
       "Construye una comunidad engagada que vuelve por más",
       "Analíticas en tiempo real de retención y rendimiento",
     ],
@@ -80,7 +83,7 @@ const roles = [
     gradient: "from-emerald-500 to-teal-600",
     shadow: "shadow-emerald-500/25",
     points: [
-      "Comisiones generosas con cookies de 30 días",
+      "Comisiones generosas con 30 cookie days",
       "Links de referido únicos con tracking en tiempo real",
       "Catálogo de cursos de alta conversión listos para promocionar",
       "Escala tus ingresos sin límites ni topes",
@@ -157,6 +160,7 @@ const fadeInUp: Variants = {
 
 export default function Home() {
   const { user, loading } = useProfile();
+  const { theme, toggle } = useThemeContext();
 
   return (
     <div className="flex flex-col">
@@ -173,28 +177,52 @@ export default function Home() {
           {!loading && (
             <div className="flex items-center gap-3">
               {user ? (
-                <Link
-                  href="/user/dashboard"
-                  className="flex items-center gap-2.5 rounded-lg border border-border bg-background/60 px-3 py-1.5 transition-all hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm"
-                >
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.fullname ?? user.username}
-                      className="h-7 w-7 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-[11px] font-bold text-primary">
-                      {(user.fullname ?? user.username).charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <span className="hidden sm:inline text-sm font-medium text-foreground/80">
-                    {user.fullname ?? user.username}
-                  </span>
-                  <FiArrowRight size={14} className="text-foreground/40" />
-                </Link>
+                <>
+                  <button
+                    onClick={toggle}
+                    className="relative p-2 rounded-lg border border-border bg-background/60 hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer"
+                    aria-label="Cambiar tema"
+                  >
+                    {theme === "dark" ? (
+                      <FiSun size={16} className="text-foreground/70" />
+                    ) : (
+                      <FiMoon size={16} className="text-foreground/70" />
+                    )}
+                  </button>
+                  <Link
+                    href="/user/dashboard"
+                    className="flex items-center gap-2.5 rounded-lg border border-border bg-background/60 px-3 py-1.5 transition-all hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm"
+                  >
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.fullname ?? user.username}
+                        className="h-7 w-7 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-[11px] font-bold text-primary">
+                        {(user.fullname ?? user.username).charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="hidden sm:inline text-sm font-medium text-foreground/80">
+                      {user.fullname ?? user.username}
+                    </span>
+                    <FiArrowRight size={14} className="text-foreground/40" />
+                  </Link>
+                </>
               ) : (
                 <>
+                  <button
+                    onClick={toggle}
+                    className="relative p-2 rounded-lg border border-border bg-background/60 hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer"
+                    aria-label="Cambiar tema"
+                  >
+                    {theme === "dark" ? (
+                      <FiSun size={16} className="text-foreground/70" />
+                    ) : (
+                      <FiMoon size={16} className="text-foreground/70" />
+                    )}
+                  </button>
                   <Link
                     href="/auth/login"
                     className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
@@ -217,8 +245,8 @@ export default function Home() {
       {/* ─── HERO ─── */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-background to-background dark:from-primary/10" />
-        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-primary/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-40 w-[500px] h-[500px] bg-violet-500/15 rounded-full blur-3xl" />
+
+        <HeroParticles />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -233,7 +261,7 @@ export default function Home() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8"
           >
             <FiZap className="w-4 h-4" />
-            <span>Alternativa inteligente a Hotmart</span>
+            <span>Crea, Gestiona y Vende</span>
           </motion.div>
 
           <motion.h1
@@ -256,12 +284,13 @@ export default function Home() {
             transition={{ delay: 0.35, duration: 0.6 }}
             className="max-w-3xl mx-auto text-lg sm:text-xl text-foreground/60 leading-relaxed mb-10"
           >
+            Crea tu producto, gestiona tu negocio y vende en todo el mundo.
             La primera plataforma educativa gamificada donde{" "}
             <strong className="text-foreground font-semibold">creadores</strong>,{" "}
             <strong className="text-foreground font-semibold">afiliados</strong> y{" "}
             <strong className="text-foreground font-semibold">estudiantes</strong>{" "}
-            ganan mientras crecen. Crea, promociona y aprende con mecánicas de
-            juego que multiplican el engagement y los ingresos.
+            ganan mientras crecen con mecánicas de juego que multiplican el
+            engagement y los ingresos.
           </motion.p>
 
           <motion.div
@@ -388,9 +417,12 @@ export default function Home() {
       {/* ─── ROLES / HOW IT WORKS ─── */}
       <section
         id="como-funciona"
-        className="py-24 bg-surface/50 border-y border-border"
+        className="relative py-24 bg-surface/50 border-y border-border overflow-hidden"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="absolute top-1/4 -left-48 w-[500px] h-[500px] bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 -right-48 w-[500px] h-[500px] bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -399,7 +431,7 @@ export default function Home() {
           >
             <motion.h2
               variants={fadeInUp}
-              className="text-3xl sm:text-4xl font-bold mb-4"
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4"
             >
               Tres Formas de{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">
@@ -408,11 +440,15 @@ export default function Home() {
             </motion.h2>
             <motion.p
               variants={fadeInUp}
-              className="max-w-2xl mx-auto text-lg text-foreground/60"
+              className="max-w-2xl mx-auto text-lg text-foreground/60 mb-6"
             >
               Sea cual sea tu perfil, Monetra tiene un camino diseñado para ti.
               Todos ganan en este ecosistema.
             </motion.p>
+            <motion.div
+              variants={fadeInUp}
+              className="mx-auto w-24 h-1 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500"
+            />
           </motion.div>
 
           <motion.div
@@ -422,25 +458,37 @@ export default function Home() {
             variants={containerVariants}
             className="grid lg:grid-cols-3 gap-8"
           >
-            {roles.map((role) => (
+            {roles.map((role, idx) => (
               <motion.div
                 key={role.title}
                 variants={cardVariants}
-                className="group relative rounded-2xl border border-border bg-background overflow-hidden hover:shadow-xl hover:shadow-primary/5 transition-all flex flex-col"
+                className="group relative rounded-2xl border border-border bg-background overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 flex flex-col"
               >
-                <div
-                  className={`bg-gradient-to-r ${role.gradient} p-6 text-white`}
-                >
-                  <role.icon className="w-10 h-10 mb-3" />
-                  <h3 className="text-2xl font-bold">{role.title}</h3>
-                  <p className="text-white/80 mt-1">{role.subtitle}</p>
+                <div className="absolute top-4 right-4 text-4xl font-black text-white/10 select-none pointer-events-none">
+                  {String(idx + 1).padStart(2, "0")}
                 </div>
 
-                <div className="p-6 space-y-3 flex-1">
+                <div
+                  className={`relative bg-gradient-to-r ${role.gradient} p-8 text-white overflow-hidden`}
+                >
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] pointer-events-none" />
+                  <role.icon className="w-12 h-12 mb-4 relative" />
+                  <h3 className="text-2xl font-bold relative">{role.title}</h3>
+                  <p className="text-white/80 mt-1 relative">
+                    {role.subtitle}
+                  </p>
+                </div>
+
+                <div className="p-6 space-y-4 flex-1">
                   {role.points.map((point) => (
-                    <div key={point} className="flex items-start gap-3">
-                      <FiCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                      <span className="text-sm text-foreground/70">
+                    <div
+                      key={point}
+                      className="flex items-start gap-3 group/point"
+                    >
+                      <div className="mt-1 shrink-0 w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                        <FiCheck className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-sm text-foreground/70 leading-relaxed group-hover/point:text-foreground/90 transition-colors">
                         {point}
                       </span>
                     </div>
@@ -450,9 +498,10 @@ export default function Home() {
                 <div className="px-6 pb-6">
                   <Link
                     href="/auth/register"
-                    className={`block w-full text-center py-3 rounded-lg font-semibold bg-gradient-to-r ${role.gradient} text-white hover:opacity-90 transition-all shadow-lg ${role.shadow}`}
+                    className={`group/btn block w-full text-center py-3.5 rounded-xl font-semibold bg-gradient-to-r ${role.gradient} text-white hover:opacity-90 transition-all shadow-lg ${role.shadow} hover:shadow-xl flex items-center justify-center gap-2`}
                   >
                     {role.cta}
+                    <FiArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               </motion.div>

@@ -13,6 +13,29 @@ export interface AffiliationResponse {
   };
 }
 
+export interface AffiliationDetailProduct {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  thumbnail: string | null;
+  affiliateEnabled: boolean;
+  commissionRate: number;
+  affiliateCookieDays: number;
+  affiliateDescription: string | null;
+  affiliateVideoUrl: string | null;
+  producerId: string;
+}
+
+export interface AffiliationDetailResponse {
+  id: string;
+  productId: string;
+  affiliateId: string;
+  code: string;
+  commissionId: string;
+  product: AffiliationDetailProduct;
+}
+
 export async function listMyAffiliations(page = 1, limit = 20) {
   const res = await fetch(`/api/affiliations?page=${page}&limit=${limit}`);
   const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
@@ -29,6 +52,12 @@ export async function joinProductAsAffiliate(productId: string) {
 
 export async function checkAffiliateEligibility(productId: string) {
   const res = await fetch(`/api/products/${productId}/affiliate-eligibility`);
+  const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
+  return { ok, result };
+}
+
+export async function getAffiliation(id: string) {
+  const res = await fetch(`/api/affiliations/${id}`);
   const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
   return { ok, result };
 }

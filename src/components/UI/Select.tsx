@@ -41,7 +41,7 @@ export function Select({
         onClick={() => setOpen((prev) => !prev)}
         className={`flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-colors hover:border-primary/40 focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer ${className}`}
       >
-        <span className={selected ? "text-inherit" : "text-gray-400 dark:text-white/30"}>
+        <span className={`truncate ${selected ? "text-inherit" : "text-gray-400 dark:text-white/30"}`}>
           {selected?.label ?? placeholder}
         </span>
         <motion.span

@@ -238,7 +238,10 @@ export default function UserSettings() {
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
             {/* Avatar */}
             <div className="flex flex-col items-center gap-3">
-              <div className="relative h-24 w-24 overflow-hidden rounded-2xl border-2 border-border bg-gray-100 dark:bg-white/5 shadow-sm">
+              <div
+                className="group relative h-24 w-24 overflow-hidden rounded-2xl border-2 border-border bg-gray-100 dark:bg-white/5 shadow-sm cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 {avatar ? (
                   <Image
                     src={avatar}
@@ -255,6 +258,10 @@ export default function UserSettings() {
                     />
                   </div>
                 )}
+                <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  <FiCamera size={14} />
+                  <span className="text-[11px] font-medium">Cambiar</span>
+                </div>
               </div>
 
               <input

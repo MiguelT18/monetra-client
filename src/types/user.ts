@@ -15,7 +15,13 @@ export interface UserProfile {
   avatar: string | null;
   phone: string | null;
   banned?: boolean;
+  lastSeenAt?: string | null;
+  publishedProducts?: number;
+  rejectedProducts?: number;
   gamifications: Gamifications;
+  _count?: {
+    products: number;
+  };
 }
 
 export interface ProfileResponse {
@@ -42,6 +48,7 @@ export interface Notification {
   senderId: string | null;
   title: string;
   message: string;
+  link?: string | null;
   read: boolean;
   createdAt: string;
   sender?: {

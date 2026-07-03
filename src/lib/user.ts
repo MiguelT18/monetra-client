@@ -8,6 +8,29 @@ export const ROLE_ROUTES: Record<string, string[]> = {
   "/user/products": ["CREATOR"],
 };
 
+export interface ProfileProduct {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  thumbnail: string | null;
+  category: string | null;
+  rating: number | null;
+  duration: number | null;
+  createdAt: string;
+}
+
+export interface ProfileAchievement {
+  key: string;
+  title: string;
+  description: string;
+  icon: string;
+  xpReward: number;
+  status: string;
+  progress: number;
+  unlockedAt: string | null;
+}
+
 export interface PublicProfile {
   id: string;
   username: string | null;
@@ -17,10 +40,13 @@ export interface PublicProfile {
   role: string;
   createdAt: string;
   gamifications: { xp: number; level: number } | null;
+  products: ProfileProduct[];
+  achievements: ProfileAchievement[];
   _count: {
     enrollments: number;
     products: number;
     affiliations: number;
+    reviews: number;
   };
 }
 

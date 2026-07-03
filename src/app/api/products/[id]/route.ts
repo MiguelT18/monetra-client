@@ -8,6 +8,28 @@ function authHeaders(accessToken: string) {
   };
 }
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const accessToken = request.cookies.get("access_token")?.value;
+
+  const { id } = await params;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers.Cookie = `access_token=${accessToken}`;
+  }
+
+  const res = await fetch(apiUrl(`/api/products/${id}`), { headers });
+
+  const result = await res.json();
+  const status = res.ok ? 200 : res.status;
+  return NextResponse.json(result, { status });
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

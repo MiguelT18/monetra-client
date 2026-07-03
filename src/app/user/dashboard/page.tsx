@@ -653,7 +653,7 @@ export default function UserDashboard() {
                       <PlaceholderRow
                         key={a.id}
                         title={a.product.title}
-                        subtitle={`${a.product.commissionRate}% comisión · cookie ${a.product.affiliateCookieDays} días`}
+                        subtitle={`${a.product.commissionRate}% comisión · ${a.product.affiliateCookieDays} cookie days`}
                         meta="Activo"
                       />
                     ))}

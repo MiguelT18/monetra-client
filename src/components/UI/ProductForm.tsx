@@ -6,11 +6,17 @@ import { motion } from "motion/react";
 import {
   createProduct,
   updateProduct,
-  submitForReview,
   type CreateProductInput,
   type ProductResponse,
 } from "@/lib/product-api";
-import { FiX, FiCheck, FiImage, FiTrash2, FiSend, FiUpload } from "react-icons/fi";
+import { CATEGORIES } from "@/lib/categories";
+import {
+  FiX,
+  FiCheck,
+  FiImage,
+  FiTrash2,
+  FiUpload,
+} from "react-icons/fi";
 import { resizeThumbnailFile } from "@/lib/resizeImage";
 import { useNotification } from "@/hooks/useNotification";
 
@@ -23,18 +29,18 @@ interface ProductFormProps {
 export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProps) {
   const isEditing = !!editProduct;
   const [submitting, setSubmitting] = useState(false);
-  const [submittingReview, setSubmittingReview] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     editProduct?.thumbnail ?? null,
   );
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [category, setCategory] = useState(editProduct?.category ?? "");
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
-    watch,
+    setError: formSetError,
     formState: { errors },
   } = useForm<CreateProductInput>({
     defaultValues: {
@@ -42,22 +48,16 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
       description: editProduct?.description ?? "",
       price: editProduct?.price ?? 0,
       affiliateEnabled: editProduct?.affiliateEnabled ?? false,
-      commissionRate: editProduct?.commissionRate ?? null,
-      affiliateCookieDays: editProduct?.affiliateCookieDays ?? 30,
     },
   });
 
   const { notify } = useNotification();
-
-  const watchedAffiliate = watch("affiliateEnabled");
-  const canSubmitReview = editProduct && (editProduct.status === "DRAFT" || editProduct.status === "REJECTED");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
-      setThumbnailFile(file);
       const dataUrl = await resizeThumbnailFile(file);
       setThumbnailPreview(dataUrl);
     } catch (err: any) {
@@ -67,22 +67,23 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
 
   const handleRemoveThumbnail = () => {
     setThumbnailPreview(null);
-    setThumbnailFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  const saveDraft = async (data: CreateProductInput) => {
+  const saveProduct = async (data: CreateProductInput) => {
     setSubmitting(true);
     setError(null);
+    setCategoryError(null);
 
     const payload: any = {
       ...data,
       price: Number(data.price),
+      category: category,
       thumbnail: thumbnailPreview || null,
-      commissionRate: data.affiliateEnabled ? Number(data.commissionRate) : null,
-      affiliateCookieDays: data.affiliateEnabled ? Number(data.affiliateCookieDays) : undefined,
+      commissionRate: data.affiliateEnabled ? 15 : null,
+      affiliateCookieDays: data.affiliateEnabled ? 30 : undefined,
     };
 
     if (isEditing && thumbnailPreview === null && editProduct?.thumbnail) {
@@ -94,7 +95,17 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
       : await createProduct(payload);
 
     if (!ok) {
-      setError(result.message ?? "Error al guardar el producto");
+      if (result.errors) {
+        for (const err of result.errors) {
+          if (err.field === "category") {
+            setCategoryError(err.message);
+          } else {
+            formSetError(err.field as any, { message: err.message });
+          }
+        }
+      } else {
+        setError(result.message ?? "Error al guardar el producto");
+      }
       setSubmitting(false);
       return;
     }
@@ -103,56 +114,12 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
     onSuccess();
   };
 
-  const saveAndSubmit = async (data: CreateProductInput) => {
-    setSubmittingReview(true);
-    setError(null);
-
-    const payload: any = {
-      ...data,
-      price: Number(data.price),
-      thumbnail: thumbnailPreview || null,
-      commissionRate: data.affiliateEnabled ? Number(data.commissionRate) : null,
-      affiliateCookieDays: data.affiliateEnabled ? Number(data.affiliateCookieDays) : undefined,
-    };
-
-    if (isEditing && thumbnailPreview === null && editProduct?.thumbnail) {
-      payload.thumbnail = null;
-    }
-
-    const { ok, result } = isEditing
-      ? await updateProduct(editProduct!.id, payload)
-      : await createProduct(payload);
-
-    if (!ok) {
-      setError(result.message ?? "Error al guardar el producto");
-      setSubmittingReview(false);
-      return;
-    }
-
-    const productId = isEditing ? editProduct!.id : result.data?.product?.id;
-    if (!productId) {
-      setError("Error al obtener el producto");
-      setSubmittingReview(false);
-      return;
-    }
-
-    const reviewRes = await submitForReview(productId);
-    if (!reviewRes.ok) {
-      setError(reviewRes.result?.message ?? "Error al enviar a revisión");
-      setSubmittingReview(false);
-      return;
-    }
-
-    notify("success", "Producto enviado a revisión correctamente");
-    onSuccess();
-  };
-
   const inputBase =
     "w-full rounded-xl border border-border bg-background/40 px-3.5 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400 focus:border-primary/60 focus:bg-background focus:shadow-[0_0_0_3px] focus:shadow-primary/10 dark:placeholder:text-white/30";
 
   const labelBase = "text-sm font-semibold text-gray-700 dark:text-white/80";
 
-  const fieldError = (msg?: string) =>
+  const fieldError = (msg: string | null | undefined) =>
     msg ? <p className="mt-1.5 text-xs font-medium text-red-500">{msg}</p> : null;
 
   const loadingSpinner = (white?: boolean) => (
@@ -240,6 +207,27 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
       </div>
 
       <div className="flex flex-col gap-1.5">
+        <label className={labelBase}>Categoría</label>
+        <div className="flex flex-wrap gap-1.5">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => { setCategory(category === cat.id ? "" : cat.id); setCategoryError(null); }}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                category === cat.id
+                  ? "bg-primary text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+        {fieldError(categoryError)}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
         <label className={labelBase}>Miniatura</label>
         <div className="flex items-start gap-4">
           <div
@@ -323,51 +311,6 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
         </div>
       </div>
 
-      {watchedAffiliate && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          className="flex flex-col gap-4 pl-2 border-l-2 border-primary/20"
-        >
-          <div className="flex flex-col gap-1.5">
-            <label className={labelBase}>Comisión (%)</label>
-            <input
-              type="number"
-              {...register("commissionRate", {
-                valueAsNumber: true,
-                min: { value: 0, message: "Mínimo 0%" },
-                max: { value: 100, message: "Máximo 100%" },
-              })}
-              className={`${inputBase} max-w-32`}
-              placeholder="15"
-            />
-            {fieldError(errors.commissionRate?.message)}
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className={labelBase}>Días de cookie</label>
-            <p className="text-xs text-foreground/45 leading-relaxed">
-              Ventana de tiempo (en días) durante la que el afiliado recibe
-              comisión si el usuario compra después de hacer clic en su enlace.
-              Por ejemplo: 30 días significa que si un usuario compra hasta 30
-              días después del clic, el afiliado gana su comisión.
-            </p>
-            <input
-              type="number"
-              {...register("affiliateCookieDays", {
-                valueAsNumber: true,
-                min: { value: 1, message: "Mínimo 1 día" },
-                max: { value: 365, message: "Máximo 365 días" },
-              })}
-              className={`${inputBase} max-w-32`}
-              placeholder="30"
-            />
-            {fieldError(errors.affiliateCookieDays?.message)}
-          </div>
-        </motion.div>
-      )}
-
       <div className="flex items-center justify-between gap-3 border-t border-border pt-5">
         <button
           type="button"
@@ -376,38 +319,19 @@ export function ProductForm({ onClose, onSuccess, editProduct }: ProductFormProp
         >
           Cancelar
         </button>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleSubmit(saveDraft)}
-            disabled={submitting || submittingReview}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-foreground/70 shadow-sm transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
-          >
-            {submitting ? (
-              loadingSpinner()
-            ) : (
-              <FiCheck size={16} className="shrink-0" />
-            )}
-            {submitting ? "Guardando..." : "Borrador"}
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit(saveAndSubmit)}
-            disabled={submitting || submittingReview}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
-          >
-            {submittingReview ? (
-              loadingSpinner(true)
-            ) : (
-              <FiSend size={16} className="shrink-0" />
-            )}
-            {submittingReview
-              ? "Enviando..."
-              : isEditing && canSubmitReview
-                ? "Enviar a revisión"
-                : "Guardar y enviar a revisión"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleSubmit(saveProduct)}
+          disabled={submitting}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
+        >
+          {submitting ? (
+            loadingSpinner(true)
+          ) : (
+            <FiCheck size={16} className="shrink-0" />
+          )}
+          {submitting ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear producto"}
+        </button>
       </div>
     </form>
   );

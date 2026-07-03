@@ -1,7 +1,7 @@
 "use client";
 
 import type { IconType } from "react-icons";
-import { FiLock, FiTrendingUp } from "react-icons/fi";
+import { FiLock, FiTrendingUp, FiStar, FiClock, FiEye, FiThermometer, FiEdit3 } from "react-icons/fi";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -227,6 +227,14 @@ export function InfoProductCard({
   actionLabel,
   productId,
   isEnrolled,
+  isAffiliateView,
+  priceDisplay,
+  commissionDisplay,
+  onAffiliateClick,
+  temperatureValue,
+  temperatureColor,
+  temperatureLabel,
+  isOwner,
 }: {
   title: string;
   category: string;
@@ -240,6 +248,14 @@ export function InfoProductCard({
   actionLabel?: string;
   productId?: string;
   isEnrolled?: boolean;
+  isAffiliateView?: boolean;
+  priceDisplay?: string;
+  commissionDisplay?: string;
+  onAffiliateClick?: (productId: string) => void;
+  temperatureValue?: number;
+  temperatureColor?: string;
+  temperatureLabel?: string;
+  isOwner?: boolean;
 }) {
   const thumb = accentThumbnail[accent];
   const accentHex = accentColorHex[accent];
@@ -251,62 +267,80 @@ export function InfoProductCard({
     : undefined;
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-md transition-all hover:shadow-xl hover:-translate-y-0.5">
+    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/20">
+      {/* Accent gradient bar at top */}
+      <div
+        className="absolute inset-x-0 top-0 z-10 h-1 shrink-0"
+        style={{ background: `linear-gradient(90deg, ${accentHex}, ${accentHex}88, ${accentHex}44)` }}
+      />
+
+      {/* Thumbnail area */}
       {href ? (
         <Link
           href={href}
-          className={`relative block aspect-16/10 overflow-hidden ${thumbnail ? "" : `bg-linear-to-br ${thumb.gradient}`}`}
+          className={`relative block aspect-[16/10] overflow-hidden ${thumbnail ? "" : `bg-linear-to-br ${thumb.gradient}`}`}
         >
-          {thumbnail ? (
-            <img
-              src={thumbnail}
-              alt={title}
-              className="h-full w-full object-cover transition group-hover:scale-105"
+        {thumbnail ? (
+          <img
+            src={thumbnail}
+            alt={title}
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <>
+            <div
+              className="pointer-events-none absolute inset-0 opacity-[0.35]"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 80%, currentColor 1px, transparent 1px), radial-gradient(circle at 80% 20%, currentColor 1px, transparent 1px)",
+                backgroundSize: "24px 24px",
+              }}
+              aria-hidden
             />
-          ) : (
-            <>
+            <div className="absolute inset-0 flex items-center justify-center">
               <div
-                className="pointer-events-none absolute inset-0 opacity-[0.35]"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle at 20% 80%, currentColor 1px, transparent 1px), radial-gradient(circle at 80% 20%, currentColor 1px, transparent 1px)",
-                  backgroundSize: "24px 24px",
-                }}
-                aria-hidden
-              ></div>
-              <div
-                className={`absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm transition group-hover:scale-105 ${thumb.iconBg}`}
+                className={`flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-white/20 shadow-lg backdrop-blur-sm transition duration-300 group-hover:scale-110 group-hover:rotate-3 ${thumb.iconBg}`}
               >
                 <Icon size={26} className={thumb.iconText} />
               </div>
-            </>
-          )}
-        {badge ? (
-          <span className={`absolute ${promoLabel ? "left-2.5 top-2.5" : "right-2.5 top-2.5"} rounded-full bg-surface/95 px-2.5 py-1 text-[11px] font-bold text-primary shadow-md backdrop-blur-sm dark:bg-gray-900/90`}>
+            </div>
+          </>
+        )}
+
+        {/* Badge */}
+        {badge && (
+          <span className="absolute right-3 top-3 z-10 rounded-full bg-surface/90 px-3 py-1.5 text-xs font-bold shadow-md backdrop-blur-sm dark:bg-gray-900/80"
+            style={{ color: accentHex }}
+          >
             {badge}
           </span>
-        ) : null}
-        {promoLabel ? (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 pb-3 pt-8">
+        )}
+
+        {/* Promo label */}
+        {promoLabel && (
+          <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 pb-3 pt-8">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-white shadow-lg">
               <FiTrendingUp size={12} />
               {promoLabel}
             </span>
           </div>
-        ) : null}
-        <span className="absolute bottom-2.5 left-2.5 rounded-md bg-black/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+        )}
+
+        {/* Category tag */}
+        <span className="absolute bottom-2.5 left-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-black/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/90 backdrop-blur-sm">
+          <FiClock size={10} />
           {category}
         </span>
-        </Link>
+      </Link>
       ) : (
         <div
-          className={`relative block aspect-16/10 overflow-hidden ${thumbnail ? "" : `bg-linear-to-br ${thumb.gradient}`}`}
+          className={`relative block aspect-[16/10] overflow-hidden ${thumbnail ? "" : `bg-linear-to-br ${thumb.gradient}`}`}
         >
           {thumbnail ? (
             <img
               src={thumbnail}
               alt={title}
-              className="h-full w-full object-cover transition group-hover:scale-105"
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
           ) : (
             <>
@@ -318,40 +352,89 @@ export function InfoProductCard({
                   backgroundSize: "24px 24px",
                 }}
                 aria-hidden
-              ></div>
-              <div
-                className={`absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm transition group-hover:scale-105 ${thumb.iconBg}`}
-              >
-                <Icon size={26} className={thumb.iconText} />
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div
+                  className={`flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-white/20 shadow-lg backdrop-blur-sm transition duration-300 group-hover:scale-110 group-hover:rotate-3 ${thumb.iconBg}`}
+                >
+                  <Icon size={26} className={thumb.iconText} />
+                </div>
               </div>
             </>
           )}
-          <span className="absolute bottom-2.5 left-2.5 rounded-md bg-black/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+
+          {badge && (
+            <span className="absolute right-3 top-3 z-10 rounded-full bg-surface/90 px-3 py-1.5 text-xs font-bold shadow-md backdrop-blur-sm dark:bg-gray-900/80"
+              style={{ color: accentHex }}
+            >
+              {badge}
+            </span>
+          )}
+
+          {promoLabel && (
+            <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 pb-3 pt-8">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-white shadow-lg">
+                <FiTrendingUp size={12} />
+                {promoLabel}
+              </span>
+            </div>
+          )}
+
+          <span className="absolute bottom-2.5 left-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-black/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/90 backdrop-blur-sm">
+            <FiClock size={10} />
             {category}
           </span>
         </div>
       )}
 
-      <div
-        className="flex flex-1 flex-col gap-3 p-4"
-        style={{ borderTop: `3px solid ${accentHex}18` }}
-      >
-        <div className="min-w-0 space-y-1">
-          <h3 className="line-clamp-2 text-sm font-bold leading-snug text-gray-900 dark:text-white">
-            {title}
-          </h3>
-          {subtitle ? (
-            <p className="truncate text-xs font-medium text-gray-500 dark:text-white/45">
+      {/* Content */}
+      <div className="flex flex-1 flex-col gap-3 p-4 pt-3.5">
+        <div className="min-w-0 space-y-1.5">
+          <div className="flex items-start gap-2">
+            <h3 className="line-clamp-2 text-sm font-bold leading-snug text-gray-900 dark:text-white group-hover:text-primary transition-colors">
+              {title}
+            </h3>
+            {category && category !== "Producto digital" && (
+              <span className="shrink-0 rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary leading-5">
+                {category}
+              </span>
+            )}
+          </div>
+          {subtitle && (
+            <p className="flex items-center gap-1 truncate text-xs font-medium text-gray-500 dark:text-white/45">
+              <FiEye size={11} className="shrink-0" />
               {subtitle}
             </p>
-          ) : null}
+          )}
+          {priceDisplay && (
+            <div className="flex items-baseline gap-2 pt-0.5">
+              <span className="text-lg font-bold text-gray-900 dark:text-white">
+                {priceDisplay}
+              </span>
+              {commissionDisplay && (
+                <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                  {commissionDisplay}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
+        {/* Highlights */}
         <ul className="flex flex-wrap gap-1.5">
+          {temperatureValue != null && temperatureColor && (
+            <li
+              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-medium shadow-sm"
+              style={{ backgroundColor: `${temperatureColor}18`, color: temperatureColor, borderColor: `${temperatureColor}30` }}
+            >
+              <FiThermometer size={12} className="shrink-0" />
+              {temperatureValue}
+            </li>
+          )}
           {highlights.map(({ icon: Hi, label }) => (
             <li
               key={label}
-              className="inline-flex items-center gap-1 rounded-lg border border-border/80 bg-background/50 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:bg-white/4 dark:text-white/60"
+              className="inline-flex items-center gap-1 rounded-lg border border-border/60 bg-background/60 px-2.5 py-1 text-[11px] font-medium text-gray-600 shadow-sm transition-colors group-hover:bg-background dark:bg-white/[0.03] dark:text-white/60"
             >
               <Hi size={12} className="shrink-0" />
               {label}
@@ -359,22 +442,55 @@ export function InfoProductCard({
           ))}
         </ul>
 
-        {actionLabel ? (
-          href ? (
+        {/* CTA */}
+        {isOwner ? (
+          <div className="mt-auto flex gap-2">
             <Link
-              href={href}
-              className="mt-auto block w-full rounded-lg bg-primary py-2.5 text-center text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
+              href={`/user/explore/${productId}`}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 py-2.5 text-xs font-semibold text-primary transition-all duration-200 hover:bg-primary/10 active:scale-[0.98]"
             >
-              {isEnrolled ? "Ver mis cursos" : actionLabel}
+              <FiEye size={13} />
+              Ver detalle
             </Link>
-          ) : (
+            <Link
+              href={`/user/products/${productId}/edit`}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:opacity-90 active:scale-[0.98]"
+            >
+              <FiEdit3 size={13} />
+              Editar producto
+            </Link>
+          </div>
+        ) : actionLabel && isAffiliateView ? (
+          <div className="mt-auto flex gap-2">
+            <Link
+              href={`/user/explore/${productId}`}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 py-2.5 text-xs font-semibold text-primary transition-all duration-200 hover:bg-primary/10 active:scale-[0.98]"
+            >
+              Ver producto
+            </Link>
             <button
               type="button"
-              className="mt-auto w-full rounded-lg bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
+              onClick={() => onAffiliateClick?.(productId!)}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:opacity-90 active:scale-[0.98]"
             >
               {actionLabel}
             </button>
-          )
+          </div>
+        ) : actionLabel && href ? (
+          <Link
+            href={href}
+            className="mt-auto inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:opacity-90 active:scale-[0.98]"
+          >
+            {isEnrolled ? "Ver mis cursos" : actionLabel}
+          </Link>
+        ) : actionLabel ? (
+          <button
+            type="button"
+            onClick={() => onAffiliateClick?.(productId!)}
+            className="mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:opacity-90 active:scale-[0.98]"
+          >
+            {actionLabel}
+          </button>
         ) : null}
       </div>
     </article>
@@ -383,19 +499,21 @@ export function InfoProductCard({
 
 export function InfoProductCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-sm">
+      <div className="h-1 bg-gradient-to-r from-gray-200 to-gray-100 dark:from-white/10 dark:to-white/5" />
       <div className="aspect-16/10 animate-pulse bg-gray-200 dark:bg-white/10" />
-      <div className="space-y-3 p-4">
-        <div className="h-4 w-4/5 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
+      <div className="space-y-3 p-4 pt-3.5">
+        <div className="h-4 w-4/5 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
         <div className="h-3 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
         <div className="flex gap-1.5">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-6 w-16 animate-pulse rounded-md bg-gray-200 dark:bg-white/10"
+              className="h-6 w-16 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10"
             />
           ))}
         </div>
+        <div className="h-9 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
       </div>
     </div>
   );

@@ -152,6 +152,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         window.localStorage?.setItem("previousRole", role);
       }
 
+      // redirigir al cambiar a ADMIN
+      if (role === "ADMIN") {
+        router.push("/admin/users");
+        return { ok: true, message: result.message };
+      }
+
       // redirigir si la ruta actual no está permitida para el nuevo rol
       const matchedRoute = Object.keys(ROLE_ROUTES).find((route) =>
         pathname.startsWith(route),

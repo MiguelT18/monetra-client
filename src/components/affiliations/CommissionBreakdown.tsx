@@ -1,38 +1,46 @@
 "use client";
 
-import { FiDollarSign, FiClock, FiXCircle } from "react-icons/fi";
+import { FiDollarSign, FiClock, FiXCircle, FiMinusCircle } from "react-icons/fi";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import type { CommissionStats } from "@/lib/commission-api";
 
 const tiers = [
   {
-    key: "pending" as const,
-    label: "Pendientes",
-    color: "amber",
-    icon: FiClock,
-    barClass: "bg-amber-500",
-    bgClass: "bg-amber-500/10",
-    textClass: "text-amber-700 dark:text-amber-300",
-    dotClass: "bg-amber-500",
-  },
-  {
     key: "paid" as const,
     label: "Pagadas",
-    color: "emerald",
     icon: FiDollarSign,
     barClass: "bg-emerald-500",
     bgClass: "bg-emerald-500/10",
-    textClass: "text-emerald-700 dark:text-emerald-300",
-    dotClass: "bg-emerald-500",
+    textClass: "text-emerald-600 dark:text-emerald-400",
+    badgeClass: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+  },
+  {
+    key: "pending" as const,
+    label: "Pendientes",
+    icon: FiClock,
+    barClass: "bg-amber-500",
+    bgClass: "bg-amber-500/10",
+    textClass: "text-amber-600 dark:text-amber-400",
+    badgeClass: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
   },
   {
     key: "rejected" as const,
     label: "Rechazadas",
-    color: "red",
     icon: FiXCircle,
     barClass: "bg-red-500",
     bgClass: "bg-red-500/10",
-    textClass: "text-red-700 dark:text-red-300",
-    dotClass: "bg-red-500",
+    textClass: "text-red-600 dark:text-red-400",
+    badgeClass: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
+  },
+  {
+    key: "canceled" as const,
+    label: "Canceladas / Devueltas",
+    icon: FiMinusCircle,
+    barClass: "bg-gray-400 dark:bg-gray-600",
+    bgClass: "bg-gray-500/10",
+    textClass: "text-gray-500 dark:text-gray-400",
+    badgeClass: "bg-gray-500/10 text-gray-700 dark:text-gray-300 border-gray-500/20",
   },
 ];
 
@@ -41,56 +49,57 @@ export function CommissionBreakdown({
 }: {
   stats: CommissionStats;
 }) {
-  const total = stats.pending.total + stats.paid.total + stats.rejected.total;
+  const total = stats.pending.total + stats.paid.total + stats.rejected.total + stats.canceled.total;
 
   return (
-    <section className="rounded-2xl border border-border bg-background/60 shadow-sm dark:bg-white/3">
-      <div className="border-b border-border px-5 py-3.5 sm:px-6">
-        <h2 className="text-base font-semibold text-foreground">
-          Resumen de comisiones
-        </h2>
-        <p className="mt-0.5 text-sm text-foreground/50">
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle>Resumen de comisiones</CardTitle>
+        <CardDescription>
           {total > 0
             ? `$${total.toFixed(2)} total generado`
             : "Aún no has generado comisiones"}
-        </p>
-      </div>
-      <div className="space-y-4 p-5 sm:p-6">
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5">
         {tiers.map((tier) => {
           const stat = stats[tier.key];
           const pct = total > 0 ? (stat.total / total) * 100 : 0;
           const Icon = tier.icon;
           return (
             <div key={tier.key}>
-              <div className="mb-1.5 flex items-center justify-between">
+              <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span
                     className={`flex h-6 w-6 items-center justify-center rounded-lg ${tier.bgClass} ${tier.textClass}`}
                   >
                     <Icon size={13} />
                   </span>
-                  <span className="text-sm font-medium text-gray-700 dark:text-white/80">
+                  <span className="text-sm font-medium text-foreground">
                     {tier.label}
                   </span>
+                  <Badge variant="outline" className={tier.badgeClass}>
+                    {stat.count}
+                  </Badge>
                 </div>
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                <span className="text-sm font-semibold text-foreground tabular-nums">
                   ${stat.total.toFixed(2)}
                 </span>
               </div>
-              <div className="relative h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/5">
+              <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
                   className={`h-full rounded-full transition-all duration-700 ${tier.barClass}`}
                   style={{ width: `${Math.max(pct, 2)}%` }}
                 />
               </div>
-              <div className="mt-0.5 flex justify-between text-xs text-gray-400 dark:text-white/35">
+              <div className="mt-1 flex justify-between text-xs text-muted-foreground">
                 <span>{stat.count} comisión(es)</span>
                 <span>{pct.toFixed(1)}%</span>
               </div>
             </div>
           );
         })}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }

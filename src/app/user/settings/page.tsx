@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import type { Role } from "@/types/user";
 import { useProfile } from "@/hooks/useProfile";
-import { UserPageHeader, RoleBadge } from "@/components/user/userShell";
+import { UserPageHeader, RoleBadge, roleTone, roleLabel } from "@/components/user/userShell";
 import {
   FiUser,
   FiLock,
@@ -26,20 +26,6 @@ import { resizeImageFile } from "@/lib/resizeImage";
 import { PhoneInput } from "@/components/UI/PhoneInput";
 
 const BIO_MAX = 160;
-
-function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" | "red" {
-  if (role === "STUDENT") return "amber";
-  if (role === "CREATOR") return "violet";
-  if (role === "ADMIN") return "red";
-  return "emerald";
-}
-
-function roleLabel(role: Role) {
-  if (role === "STUDENT") return "Estudiante";
-  if (role === "CREATOR") return "Creador";
-  if (role === "ADMIN") return "Admin";
-  return "Afiliado";
-}
 
 function roleSettingsIntro(role: Role) {
   if (role === "STUDENT")
@@ -235,7 +221,7 @@ export default function UserSettings() {
           title="Perfil público"
           description="Tu foto, nombre y descripción se muestran en la plataforma"
         >
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
             {/* Avatar */}
             <div className="flex flex-col items-center gap-3">
               <div

@@ -1247,7 +1247,7 @@ export default function EditProductPage({
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
             <h2 className="mb-4 text-base font-bold text-gray-900 dark:text-white">
@@ -1500,7 +1500,7 @@ export default function EditProductPage({
             </div>
 
             {modules.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-background/40 px-4 py-10 text-center dark:bg-white/2">
+              <div className="rounded-xl border border-dashed border-border bg-background/40 px-4 py-8 text-center dark:bg-white/2">
                 <FiFileText
                   size={28}
                   className="mx-auto mb-2 text-gray-300 dark:text-white/20"

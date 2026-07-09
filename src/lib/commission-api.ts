@@ -17,6 +17,7 @@ export interface CommissionStats {
   pending: { total: number; count: number };
   paid: { total: number; count: number };
   rejected: { total: number; count: number };
+  canceled: { total: number; count: number };
 }
 
 export async function listMyCommissions(page = 1, limit = 20) {

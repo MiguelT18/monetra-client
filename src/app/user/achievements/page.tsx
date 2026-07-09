@@ -14,6 +14,8 @@ import {
   QuickLink,
   PlaceholderRow,
   RoleBadge,
+  roleTone,
+  roleLabel,
   XpProgressPanel,
   AchievementBadgeCard,
   type InfoProductAccent,
@@ -35,20 +37,6 @@ import { achievementIcon } from "@/lib/achievement-icons";
 const ACCENTS: InfoProductAccent[] = [
   "blue", "emerald", "violet", "amber", "rose", "cyan",
 ];
-
-function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" | "red" {
-  if (role === "STUDENT") return "amber";
-  if (role === "CREATOR") return "violet";
-  if (role === "ADMIN") return "red";
-  return "emerald";
-}
-
-function roleLabel(role: Role) {
-  if (role === "STUDENT") return "Estudiante";
-  if (role === "CREATOR") return "Creador";
-  if (role === "ADMIN") return "Admin";
-  return "Afiliado";
-}
 
 function byStatus(items: Achievement[], status: string) {
   return items.filter((a) => a.status === status);

@@ -122,7 +122,7 @@ export default function ResetPasswordPage() {
       >
         <Link
           href="/auth/login"
-          className="inline-flex w-full justify-center rounded-lg border border-gray-300 py-2.5 text-sm font-medium text-gray-800 transition hover:border-[#7C3AED]/50 dark:border-white/10 dark:text-white"
+          className="inline-flex w-full justify-center rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-800 transition hover:border-[#7C3AED]/50 dark:border-white/10 dark:text-white"
         >
           Ir a iniciar sesión
         </Link>

@@ -41,28 +41,28 @@ export function AuthCard({
   footer?: ReactNode;
 }) {
   return (
-    <section className="relative flex w-full min-h-dvh items-center justify-center bg-gray-50 py-10 dark:bg-[#0B0F14]">
+    <section className="relative flex w-full min-h-dvh items-center justify-center bg-gray-50 py-8 dark:bg-[#0B0F14]">
       <AuthBackground />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="relative z-10 w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-xl max-md:mx-5 max-md:p-4 dark:border-white/10 dark:bg-white/5 dark:shadow-black/30"
+        className="relative z-10 w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-xl max-md:mx-4 max-md:p-5 dark:border-white/10 dark:bg-white/5 dark:shadow-black/30"
       >
-        <div className="mb-6 flex items-center gap-3">
+        <div className="mb-4 flex items-center gap-3">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1, duration: 0.35 }}
             className="rounded-lg border border-gray-200 bg-gray-100 p-2 text-black dark:border-white/10 dark:bg-white/5 dark:text-white"
           >
-            <LogoIcon width={32} height={32} />
+            <LogoIcon width={28} height={28} />
           </motion.div>
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
             {title}
           </h1>
           {subtitle ? (
@@ -70,8 +70,8 @@ export function AuthCard({
           ) : null}
         </div>
 
-        <div className="mt-6">{children}</div>
-        {footer ? <div className="mt-6">{footer}</div> : null}
+        <div className="mt-5">{children}</div>
+        {footer ? <div className="mt-5">{footer}</div> : null}
       </motion.div>
     </section>
   );
@@ -134,7 +134,7 @@ export function SocialAuthButtons() {
           whileHover={{ scale: loadingProvider ? 1 : 1.02 }}
           whileTap={{ scale: loadingProvider ? 1 : 0.98 }}
           onClick={() => handleOAuth(provider)}
-          className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 transition hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/5 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:text-white/85 dark:hover:border-[#7C3AED]/50 dark:hover:bg-[#7C3AED]/10 cursor-pointer"
+          className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/5 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:text-white/85 dark:hover:border-[#7C3AED]/50 dark:hover:bg-[#7C3AED]/10 cursor-pointer"
         >
           {icon}
           {loadingProvider === provider ? "Conectando…" : label}
@@ -159,7 +159,7 @@ export function AuthSubmitButton({
       disabled={loading}
       whileHover={{ scale: loading ? 1 : 1.03 }}
       whileTap={{ scale: loading ? 1 : 0.97 }}
-      className="w-full cursor-pointer rounded-lg bg-[#7C3AED] py-2.5 font-medium text-white shadow-lg shadow-[#7C3AED]/30 hover:bg-[#6D28D9] disabled:cursor-not-allowed disabled:opacity-70"
+      className="w-full cursor-pointer rounded-lg bg-[#7C3AED] py-2 text-sm font-medium text-white shadow-md shadow-[#7C3AED]/30 hover:bg-[#6D28D9] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {loading ? loadingLabel : label}
     </motion.button>

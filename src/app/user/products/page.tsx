@@ -466,14 +466,14 @@ export default function ProductsPage() {
         badge={<RoleBadge label="Creador" tone="violet" />}
       />
 
-      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         <section className="flex flex-col rounded-2xl border border-border bg-background/60 p-4 shadow-md dark:bg-white/3 sm:p-5">
           <div className="flex items-start justify-between gap-2 sm:gap-3">
             <div className="min-w-0 space-y-2 sm:space-y-3">
               <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-white/45 sm:text-xs">
                 Productos
               </p>
-              <p className="truncate text-xl font-bold text-gray-900 dark:text-white sm:text-2xl lg:text-3xl">
+              <p className="truncate text-lg font-bold text-gray-900 dark:text-white sm:text-xl lg:text-2xl">
                 {total}
               </p>
             </div>
@@ -545,7 +545,7 @@ export default function ProductsPage() {
               <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-white/45 sm:text-xs">
                 Rendimiento
               </p>
-              <p className="truncate text-xl font-bold text-gray-900 dark:text-white sm:text-2xl lg:text-3xl">
+              <p className="truncate text-lg font-bold text-gray-900 dark:text-white sm:text-xl lg:text-2xl">
                 {totalStudents}
               </p>
             </div>
@@ -610,7 +610,7 @@ export default function ProductsPage() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/5">
               <FiInbox size={20} className="text-gray-400 dark:text-white/40" />
             </div>

@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion, type Variants } from "motion/react";
+import { useForm } from "react-hook-form";
 import {
   FiArrowRight,
   FiAward,
@@ -19,12 +21,96 @@ import {
   FiPercent,
   FiTarget,
   FiHeart,
+  FiMail,
 } from "react-icons/fi";
 import LogoIcon from "@/icons/Logo";
 import { useProfile } from "@/hooks/useProfile";
 import HeroParticles from "@/components/effects/HeroParticles";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { useThemeContext } from "@/contexts/themeContext";
+
+
+function NewsletterForm() {
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<{ email: string }>({
+    mode: "onBlur",
+  });
+
+  async function onSubmit() {
+    setStatus("loading");
+    try {
+      await new Promise((r) => setTimeout(r, 1000));
+      setStatus("success");
+      reset();
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.55, duration: 0.6 }}
+      className="mt-7 w-full max-w-md mx-auto rounded-2xl border border-border/70 bg-surface/40 backdrop-blur-sm px-4 py-3"
+    >
+      <p className="text-xs text-foreground/40 mb-2">
+        Recibe contenido exclusivo y novedades
+      </p>
+      {status === "success" ? (
+        <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium text-center py-1">
+          ¡Gracias por suscribirte!
+        </p>
+      ) : (
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-2"
+        >
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
+              <input
+                type="email"
+                placeholder="tu@email.com"
+                {...register("email", {
+                  required: "El correo es obligatorio",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Ingresa un correo válido",
+                  },
+                })}
+                className="w-full pl-10 pr-4 py-2 text-sm rounded-lg border border-border bg-background/80 text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:opacity-90 disabled:opacity-60 transition-all whitespace-nowrap"
+            >
+              {isSubmitting ? "Enviando..." : "Suscribirme"}
+            </button>
+          </div>
+          {errors.email && (
+            <p className="text-xs text-red-500">
+              {errors.email.message}
+            </p>
+          )}
+        </form>
+      )}
+      {status === "error" && (
+        <p className="text-xs text-red-500 mt-1">
+          Algo salió mal. Intenta de nuevo.
+        </p>
+      )}
+    </motion.div>
+  );
+}
 
 
 const stats = [
@@ -243,84 +329,90 @@ export default function Home() {
       </nav>
 
       {/* ─── HERO ─── */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+      <section className="relative min-h-[100svh] flex flex-col overflow-hidden pt-16 pb-6">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-background to-background dark:from-primary/10" />
 
         <HeroParticles />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.15, duration: 0.4 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8"
-          >
-            <FiZap className="w-4 h-4" />
-            <span>Crea, Gestiona y Vende</span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.6 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
-          >
-            Tu Conocimiento es{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">
-              el Nuevo Oro
-            </span>
-            <br />
-            Nosotros lo Potenciamos
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.6 }}
-            className="max-w-3xl mx-auto text-lg sm:text-xl text-foreground/60 leading-relaxed mb-10"
-          >
-            Crea tu producto, gestiona tu negocio y vende en todo el mundo.
-            La primera plataforma educativa gamificada donde{" "}
-            <strong className="text-foreground font-semibold">creadores</strong>,{" "}
-            <strong className="text-foreground font-semibold">afiliados</strong> y{" "}
-            <strong className="text-foreground font-semibold">estudiantes</strong>{" "}
-            ganan mientras crecen con mecánicas de juego que multiplican el
-            engagement y los ingresos.
-          </motion.p>
-
+        {/* Main content — vertically centered */}
+        <div className="flex-1 flex flex-col items-center justify-center min-h-0 text-center relative z-10 pt-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45, duration: 0.6 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
           >
-            <Link
-              href="/auth/register"
-              className="group px-8 py-4 text-lg font-semibold rounded-lg bg-primary text-white hover:opacity-90 transition-all shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 flex items-center gap-2"
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-5"
             >
-              Comenzar Gratis
-              <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="#como-funciona"
-              className="px-8 py-4 text-lg font-semibold rounded-lg border border-border hover:bg-surface transition-all flex items-center gap-2"
-            >
-              <FiPlay className="w-5 h-5" />
-              Ver Cómo Funciona
-            </Link>
-          </motion.div>
-        </motion.div>
+              <FiZap className="w-4 h-4" />
+              <span>Crea, Gestiona y Vende</span>
+            </motion.div>
 
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.6 }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05] mb-3"
+            >
+              Tu Conocimiento es{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">
+                el Nuevo Oro
+              </span>
+              <br />
+              Nosotros lo Potenciamos
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35, duration: 0.6 }}
+              className="max-w-3xl mx-auto text-sm sm:text-base text-foreground/60 leading-relaxed mb-6"
+            >
+              Crea tu producto, gestiona tu negocio y vende en todo el mundo.
+              La primera plataforma educativa gamificada donde{" "}
+              <strong className="text-foreground font-semibold">creadores</strong>,{" "}
+              <strong className="text-foreground font-semibold">afiliados</strong> y{" "}
+              <strong className="text-foreground font-semibold">estudiantes</strong>{" "}
+              ganan mientras crecen con mecánicas de juego que multiplican el
+              engagement y los ingresos.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.6 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            >
+              <Link
+                href="/auth/register"
+                className="group px-6 py-2.5 text-base font-semibold rounded-lg bg-primary text-white hover:opacity-90 transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 flex items-center gap-2"
+              >
+                Comenzar Gratis
+                <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="#como-funciona"
+                className="px-6 py-2.5 text-base font-semibold rounded-lg border border-border hover:bg-surface transition-all flex items-center gap-2"
+              >
+                <FiPlay className="w-5 h-5" />
+                Ver Cómo Funciona
+              </Link>
+            </motion.div>
+
+            <NewsletterForm />
+          </motion.div>
+        </div>
+
+        {/* Chevron — pinned bottom */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.6 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          className="flex justify-center pt-2 mt-auto max-[700px]:hidden relative z-10"
         >
           <motion.div
             animate={{ y: [0, 8, 0] }}
@@ -338,10 +430,10 @@ export default function Home() {
         viewport={{ once: true, amount: 0.5 }}
         className="border-y border-border bg-surface/50"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <motion.div
             variants={containerVariants}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
           >
             {stats.map((stat) => (
               <motion.div
@@ -349,7 +441,7 @@ export default function Home() {
                 variants={cardVariants}
                 className="text-center"
               >
-                <div className="text-3xl sm:text-4xl font-bold text-primary mb-1">
+                <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
                   {stat.value}
                 </div>
                 <div className="text-sm text-foreground/60">{stat.label}</div>
@@ -360,17 +452,17 @@ export default function Home() {
       </motion.section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="py-24">
+      <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
-            className="text-center mb-16"
-          >
-            <motion.h2
-              variants={fadeInUp}
-              className="text-3xl sm:text-4xl font-bold mb-4"
+              className="text-center mb-12"
+            >
+              <motion.h2
+                variants={fadeInUp}
+                className="text-2xl sm:text-3xl font-bold mb-3"
             >
               ¿Cansado de plataformas que{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
@@ -380,7 +472,7 @@ export default function Home() {
             </motion.h2>
             <motion.p
               variants={fadeInUp}
-              className="max-w-2xl mx-auto text-lg text-foreground/60"
+              className="max-w-2xl mx-auto text-base text-foreground/60"
             >
               Las plataformas tradicionales están obsoletas. Te cobran fortunas,
               no retienen estudiantes y ofrecen cero diferenciación.{" "}
@@ -393,7 +485,7 @@ export default function Home() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
             variants={containerVariants}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid md:grid-cols-2 xl:grid-cols-4 gap-6"
           >
             {pains.map((pain) => (
               <motion.div
@@ -417,7 +509,7 @@ export default function Home() {
       {/* ─── ROLES / HOW IT WORKS ─── */}
       <section
         id="como-funciona"
-        className="relative py-24 bg-surface/50 border-y border-border overflow-hidden"
+        className="relative py-16 bg-surface/50 border-y border-border overflow-hidden scroll-mt-20"
       >
         <div className="absolute top-1/4 -left-48 w-[500px] h-[500px] bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 -right-48 w-[500px] h-[500px] bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -431,7 +523,7 @@ export default function Home() {
           >
             <motion.h2
               variants={fadeInUp}
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4"
+              className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3"
             >
               Tres Formas de{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">
@@ -440,7 +532,7 @@ export default function Home() {
             </motion.h2>
             <motion.p
               variants={fadeInUp}
-              className="max-w-2xl mx-auto text-lg text-foreground/60 mb-6"
+              className="max-w-2xl mx-auto text-base text-foreground/60 mb-4"
             >
               Sea cual sea tu perfil, Monetra tiene un camino diseñado para ti.
               Todos ganan en este ecosistema.
@@ -472,14 +564,14 @@ export default function Home() {
                   className={`relative bg-gradient-to-r ${role.gradient} p-8 text-white overflow-hidden`}
                 >
                   <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] pointer-events-none" />
-                  <role.icon className="w-12 h-12 mb-4 relative" />
-                  <h3 className="text-2xl font-bold relative">{role.title}</h3>
+                  <role.icon className="w-10 h-10 mb-3 relative" />
+                  <h3 className="text-xl font-bold relative">{role.title}</h3>
                   <p className="text-white/80 mt-1 relative">
                     {role.subtitle}
                   </p>
                 </div>
 
-                <div className="p-6 space-y-4 flex-1">
+                <div className="p-5 space-y-3 flex-1">
                   {role.points.map((point) => (
                     <div
                       key={point}
@@ -488,17 +580,17 @@ export default function Home() {
                       <div className="mt-1 shrink-0 w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
                         <FiCheck className="w-3 h-3 text-white" />
                       </div>
-                      <span className="text-sm text-foreground/70 leading-relaxed group-hover/point:text-foreground/90 transition-colors">
+                      <span className="text-xs sm:text-sm text-foreground/70 leading-relaxed group-hover/point:text-foreground/90 transition-colors">
                         {point}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <div className="px-6 pb-6">
+                <div className="px-5 pb-5">
                   <Link
                     href="/auth/register"
-                    className={`group/btn block w-full text-center py-3.5 rounded-xl font-semibold bg-gradient-to-r ${role.gradient} text-white hover:opacity-90 transition-all shadow-lg ${role.shadow} hover:shadow-xl flex items-center justify-center gap-2`}
+                    className={`group/btn block w-full text-center py-3 rounded-lg font-semibold bg-gradient-to-r ${role.gradient} text-white hover:opacity-90 transition-all shadow-lg ${role.shadow} hover:shadow-xl flex items-center justify-center gap-2`}
                   >
                     {role.cta}
                     <FiArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -511,17 +603,17 @@ export default function Home() {
       </section>
 
       {/* ─── GAMIFICATION ─── */}
-      <section className="py-24">
+      <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
-            className="text-center mb-16"
+            className="text-center mb-12"
           >
             <motion.h2
               variants={fadeInUp}
-              className="text-3xl sm:text-4xl font-bold mb-4"
+              className="text-2xl sm:text-3xl font-bold mb-3"
             >
               La Educación se Convierte en{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">
@@ -530,7 +622,7 @@ export default function Home() {
             </motion.h2>
             <motion.p
               variants={fadeInUp}
-              className="max-w-2xl mx-auto text-lg text-foreground/60"
+              className="max-w-2xl mx-auto text-base text-foreground/60"
             >
               Olvídate de cursos aburridos con 0% de retención. Monetra
               transforma el aprendizaje en una experiencia adictiva con
@@ -543,7 +635,7 @@ export default function Home() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
             variants={containerVariants}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid md:grid-cols-2 xl:grid-cols-4 gap-6"
           >
             {gamificationFeatures.map((feature) => (
               <motion.div
@@ -552,11 +644,11 @@ export default function Home() {
                 className="p-6 rounded-2xl bg-surface border border-border text-center hover:border-primary/30 transition-all group"
               >
                 <div
-                  className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mx-auto mb-5 shadow-lg`}
+                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mx-auto mb-4 shadow-lg`}
                 >
-                  <feature.icon className="w-8 h-8 text-white" />
+                  <feature.icon className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
+                <h3 className="text-base font-bold mb-2">{feature.title}</h3>
                 <p className="text-sm text-foreground/60 leading-relaxed">
                   {feature.desc}
                 </p>
@@ -567,17 +659,17 @@ export default function Home() {
       </section>
 
       {/* ─── ADDITIONAL BENEFITS ─── */}
-      <section className="py-24 bg-surface/50 border-y border-border">
+      <section className="py-16 bg-surface/50 border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
-            className="text-center mb-16"
+            className="text-center mb-12"
           >
             <motion.h2
               variants={fadeInUp}
-              className="text-3xl sm:text-4xl font-bold mb-4"
+              className="text-2xl sm:text-3xl font-bold mb-3"
             >
               Todo lo que Necesitas en{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">
@@ -586,7 +678,7 @@ export default function Home() {
             </motion.h2>
             <motion.p
               variants={fadeInUp}
-              className="max-w-2xl mx-auto text-lg text-foreground/60"
+              className="max-w-2xl mx-auto text-base text-foreground/60"
             >
               Herramientas profesionales para que te enfoques en lo que importa:
               crear, crecer y generar ingresos.
@@ -651,7 +743,7 @@ export default function Home() {
       </section>
 
       {/* ─── FINAL CTA ─── */}
-      <section className="py-24 bg-gradient-to-br from-primary/20 via-background to-background dark:from-primary/10 relative overflow-hidden">
+      <section className="py-16 bg-gradient-to-br from-primary/20 via-background to-background dark:from-primary/10 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-3xl" />
 
         <motion.div
@@ -665,20 +757,20 @@ export default function Home() {
           </motion.div>
           <motion.h2
             variants={fadeInUp}
-            className="text-4xl sm:text-5xl font-bold mb-4"
+            className="text-3xl sm:text-4xl font-bold mb-3"
           >
             Tu Viaje Empieza Ahora
           </motion.h2>
           <motion.p
             variants={fadeInUp}
-            className="text-xl text-foreground/60 mb-4"
+            className="text-base sm:text-lg text-foreground/60 mb-3"
           >
             Es <strong className="text-primary">completamente gratis</strong>.
             Sin tarjetas de crédito. Sin compromisos.
           </motion.p>
           <motion.p
             variants={fadeInUp}
-            className="text-base text-foreground/40 mb-10"
+            className="text-sm text-foreground/40 mb-8"
           >
             Únete a miles que ya están transformando su futuro con Monetra.
           </motion.p>
@@ -688,14 +780,14 @@ export default function Home() {
           >
             <Link
               href="/auth/register"
-              className="group px-10 py-5 text-xl font-bold rounded-2xl bg-primary text-white hover:opacity-90 transition-all shadow-2xl shadow-primary/40 hover:shadow-[0_0_40px_-8px_rgba(124,58,237,0.5)] flex items-center gap-3"
+              className="group px-8 py-4 text-lg font-bold rounded-xl bg-primary text-white hover:opacity-90 transition-all shadow-xl shadow-primary/40 hover:shadow-[0_0_40px_-8px_rgba(124,58,237,0.5)] flex items-center gap-2"
             >
               Crear mi cuenta gratis
-              <FiArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               href="/auth/login"
-              className="px-10 py-5 text-lg font-semibold rounded-2xl border border-border hover:bg-surface transition-all"
+              className="px-8 py-4 text-base font-semibold rounded-xl border border-border hover:bg-surface transition-all"
             >
               Ya tengo cuenta
             </Link>

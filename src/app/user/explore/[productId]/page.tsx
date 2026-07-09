@@ -201,7 +201,7 @@ export default function ProductPreviewPage({
         <div className="animate-pulse space-y-4">
           <div className="h-6 w-32 rounded bg-gray-200 dark:bg-white/10" />
           <div className="h-64 rounded-2xl bg-gray-200 dark:bg-white/10" />
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-3">
               <div className="h-8 w-3/4 rounded bg-gray-200 dark:bg-white/10" />
               <div className="h-4 w-full rounded bg-gray-200 dark:bg-white/10" />
@@ -262,7 +262,7 @@ export default function ProductPreviewPage({
       </button>
 
       {/* ─── TWO-COLUMN LAYOUT ─── */}
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
 
         {/* LEFT COLUMN: Main content */}
         <div className="space-y-8 lg:col-span-2">
@@ -276,13 +276,13 @@ export default function ProductPreviewPage({
           {/* Highlights cards */}
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-border bg-background/60 p-4 text-center dark:bg-white/3">
-              <p className="text-2xl font-bold text-primary">{modules?.length ?? 0}</p>
+              <p className="text-xl font-bold text-primary">{modules?.length ?? 0}</p>
               <p className="mt-1 text-xs text-gray-500 dark:text-white/45">
                 Módulo{modules?.length !== 1 ? "s" : ""}
               </p>
             </div>
             <div className="rounded-xl border border-border bg-background/60 p-4 text-center dark:bg-white/3">
-              <p className="text-2xl font-bold text-violet-500">
+              <p className="text-xl font-bold text-violet-500">
                 {modules?.reduce((a, m) => a + m.lessons.length, 0) ?? 0}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-white/45">
@@ -290,7 +290,7 @@ export default function ProductPreviewPage({
               </p>
             </div>
             <div className="rounded-xl border border-border bg-background/60 p-4 text-center dark:bg-white/3">
-              <p className="text-2xl font-bold text-emerald-500">
+              <p className="text-xl font-bold text-emerald-500">
                 {product._count?.enrollments ?? 0}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-white/45">

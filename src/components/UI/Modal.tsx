@@ -39,7 +39,7 @@ export function Modal({ isOpen, onClose, children, className = "" }: ModalProps)
             exit={{ opacity: 0, scale: 0.85 }}
             transition={{ type: "spring", stiffness: 350, damping: 30, mass: 0.8 }}
             onClick={(e) => e.stopPropagation()}
-            className={`bg-surface border border-border rounded-xl shadow-xl dark:shadow-black/40 w-[95vw] sm:max-w-lg lg:max-w-xl max-h-[85vh] overflow-y-auto ${className}`}
+            className={`glass rounded-xl shadow-xl dark:shadow-black/40 w-[95vw] sm:max-w-lg lg:max-w-xl max-h-[85vh] overflow-y-auto ${className}`}
           >
             {children}
           </motion.div>

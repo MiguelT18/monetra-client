@@ -580,7 +580,7 @@ function EvaluationView({
           ) : (
             <FiX size={48} className="mx-auto text-red-500" />
           )}
-          <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-white">
             {passed ? "¡Evaluación aprobada!" : "Evaluación no aprobada"}
           </h2>
           <p className={`mt-2 text-lg font-semibold ${

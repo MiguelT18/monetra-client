@@ -34,8 +34,8 @@ export default function HeroParticles() {
         x,
         y,
         size,
-        speedX: (Math.random() - 0.5) * 0.2,
-        speedY: (Math.random() - 0.5) * 0.2,
+        speedX: (Math.random() - 0.5) * 0.8,
+        speedY: (Math.random() - 0.5) * 0.8,
         opacity: Math.random() * 0.25 + 0.2,
         baseX: x,
         baseY: y,
@@ -87,16 +87,25 @@ export default function HeroParticles() {
           p.y -= Math.sin(angle) * force * 2;
         }
 
-        const targetX = p.baseX + scrollOffset * (p.baseX / window.innerWidth - 0.5) * 2;
-        const targetY = p.baseY + scrollOffset * (p.baseY / window.innerHeight - 0.5) * 2;
-        p.x += (targetX - p.x) * 0.02;
-        p.y += (targetY - p.y) * 0.02;
-
         p.x += p.speedX;
         p.y += p.speedY;
 
         if (p.x < 0 || p.x > window.innerWidth) p.speedX *= -1;
         if (p.y < 0 || p.y > window.innerHeight) p.speedY *= -1;
+
+        const targetX = p.baseX + scrollOffset * (p.baseX / window.innerWidth - 0.5) * 2;
+        const targetY = p.baseY + scrollOffset * (p.baseY / window.innerHeight - 0.5) * 2;
+        p.x += (targetX - p.x) * 0.002;
+        p.y += (targetY - p.y) * 0.002;
+
+        p.speedX += (Math.random() - 0.5) * 0.02;
+        p.speedY += (Math.random() - 0.5) * 0.02;
+        const maxSpeed = 0.8;
+        const spd = Math.sqrt(p.speedX * p.speedX + p.speedY * p.speedY);
+        if (spd > maxSpeed) {
+          p.speedX = (p.speedX / spd) * maxSpeed;
+          p.speedY = (p.speedY / spd) * maxSpeed;
+        }
 
         ctx!.beginPath();
         ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);

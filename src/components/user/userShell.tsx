@@ -4,6 +4,7 @@ import type { IconType } from "react-icons";
 import { FiLock, FiTrendingUp, FiStar, FiClock, FiEye, FiThermometer, FiEdit3 } from "react-icons/fi";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import type { Role } from "@/types/user";
 
 export function xpForNextLevel(level: number): number {
   const linear = 50 * level;
@@ -42,6 +43,17 @@ export function abbreviateXP(xp: number): string {
 
 export type AchievementStatus = "unlocked" | "in_progress" | "locked";
 
+export function roleTone(role: Role): "role" {
+  return "role";
+}
+
+export function roleLabel(role: Role): string {
+  if (role === "STUDENT") return "Estudiante";
+  if (role === "CREATOR") return "Creador";
+  if (role === "ADMIN") return "Admin";
+  return "Afiliado";
+}
+
 export function UserPageHeader({
   title,
   description,
@@ -52,10 +64,10 @@ export function UserPageHeader({
   badge?: ReactNode;
 }) {
   return (
-    <header className="mb-8 sm:mb-10 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <header className="mb-6 sm:mb-8 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0 space-y-1.5">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+          <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
             {title}
           </h1>
           {badge}
@@ -79,7 +91,7 @@ export function StatCard({
   label: string;
   value: string;
   hint?: string;
-  tone?: "neutral" | "blue" | "emerald" | "violet" | "amber" | "red";
+  tone?: "neutral" | "blue" | "emerald" | "violet" | "amber" | "red" | "role";
 }) {
   const toneRing =
     tone === "blue"
@@ -88,11 +100,13 @@ export function StatCard({
         ? "border-emerald-200/80 dark:border-emerald-500/20 bg-emerald-500/[0.04] dark:bg-emerald-500/10"
         : tone === "violet"
           ? "border-violet-200/80 dark:border-violet-500/20 bg-violet-500/[0.04] dark:bg-violet-500/10"
-          : tone === "amber"
-            ? "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10"
-            : tone === "red"
-              ? "border-red-200/80 dark:border-red-500/20 bg-red-500/[0.04] dark:bg-red-500/10"
-              : "border-border bg-background/60 dark:bg-white/3";
+        : tone === "amber"
+          ? "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10"
+        : tone === "red"
+          ? "border-red-200/80 dark:border-red-500/20 bg-red-500/[0.04] dark:bg-red-500/10"
+        : tone === "role"
+          ? "border-role-accent/20 bg-role-accent/[0.04] dark:bg-role-accent/10"
+          : "border-border bg-background/60 dark:bg-white/3";
 
   const iconClass =
     tone === "blue"
@@ -101,11 +115,13 @@ export function StatCard({
         ? "text-emerald-600 dark:text-emerald-400"
         : tone === "violet"
           ? "text-violet-600 dark:text-violet-400"
-          : tone === "amber"
-            ? "text-amber-600 dark:text-amber-400"
-            : tone === "red"
-              ? "text-red-600 dark:text-red-400"
-              : "text-gray-500 dark:text-white/50";
+        : tone === "amber"
+          ? "text-amber-600 dark:text-amber-400"
+        : tone === "red"
+          ? "text-red-600 dark:text-red-400"
+        : tone === "role"
+          ? "text-role-accent"
+          : "text-gray-500 dark:text-white/50";
 
   return (
     <div
@@ -116,17 +132,17 @@ export function StatCard({
           <p className="text-xs sm:text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
             {label}
           </p>
-          <p className="truncate text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+          <p className="truncate text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
             {value}
           </p>
           {hint ? (
             <p className="text-xs text-gray-500 dark:text-white/40">{hint}</p>
           ) : null}
         </div>
-        <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm ${iconClass}`}
-        >
-          <Icon size={20} />
+          <div
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm ${iconClass}`}
+          >
+            <Icon size={16} />
         </div>
       </div>
     </div>
@@ -526,7 +542,7 @@ export function XpProgressPanel({
 }: {
   level: number;
   xp: number;
-  tone?: "blue" | "emerald" | "violet" | "amber" | "red";
+  tone?: "blue" | "emerald" | "violet" | "amber" | "red" | "role";
 }) {
   const currentLevelXp = totalXpForLevel(level);
   const xpInLevel = Math.max(0, xp - currentLevelXp);
@@ -540,9 +556,11 @@ export function XpProgressPanel({
         ? "bg-emerald-500"
         : tone === "violet"
           ? "bg-violet-500"
-          : tone === "red"
-            ? "bg-red-500"
-            : "bg-amber-500";
+        : tone === "red"
+          ? "bg-red-500"
+        : tone === "role"
+          ? "bg-role-accent"
+          : "bg-amber-500";
   const ringClass =
     tone === "blue"
       ? "border-blue-200/80 dark:border-blue-500/20 bg-blue-500/[0.04] dark:bg-blue-500/10"
@@ -550,9 +568,11 @@ export function XpProgressPanel({
         ? "border-emerald-200/80 dark:border-emerald-500/20 bg-emerald-500/[0.04] dark:bg-emerald-500/10"
         : tone === "violet"
           ? "border-violet-200/80 dark:border-violet-500/20 bg-violet-500/[0.04] dark:bg-violet-500/10"
-          : tone === "red"
-            ? "border-red-200/80 dark:border-red-500/20 bg-red-500/[0.04] dark:bg-red-500/10"
-            : "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10";
+        : tone === "red"
+          ? "border-red-200/80 dark:border-red-500/20 bg-red-500/[0.04] dark:bg-red-500/10"
+        : tone === "role"
+          ? "border-role-accent/20 bg-role-accent/[0.04] dark:bg-role-accent/10"
+          : "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10";
 
   return (
     <div className={`mb-6 rounded-2xl border p-5 shadow-md ${ringClass}`}>
@@ -561,7 +581,7 @@ export function XpProgressPanel({
           <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
             Tu progreso
           </p>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
             Nivel {level}
           </p>
         </div>
@@ -729,7 +749,7 @@ export function RoleBadge({
   tone,
 }: {
   label: string;
-  tone: "blue" | "emerald" | "violet" | "amber" | "red";
+  tone: "blue" | "emerald" | "violet" | "amber" | "red" | "role";
 }) {
   const cls =
     tone === "blue"
@@ -738,9 +758,11 @@ export function RoleBadge({
         ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
         : tone === "violet"
           ? "bg-violet-500/15 text-violet-700 dark:text-violet-300"
-          : tone === "red"
-            ? "bg-red-500/15 text-red-700 dark:text-red-300"
-            : "bg-amber-500/15 text-amber-700 dark:text-amber-300";
+        : tone === "red"
+          ? "bg-red-500/15 text-red-700 dark:text-red-300"
+        : tone === "role"
+          ? "bg-role-accent/15 text-role-accent"
+          : "bg-amber-500/15 text-amber-700 dark:text-amber-300";
 
   return (
     <span

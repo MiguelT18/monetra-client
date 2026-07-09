@@ -25,7 +25,16 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
   const { theme, toggle } = useThemeContext();
 
   return (
-    <nav className="col-start-2 bg-surface rounded-2xl p-3 shadow-sm">
+    <nav className="glass col-start-2 bg-surface rounded-2xl p-2 shadow-sm relative">
+      {/* Spotlight overlay */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 rounded-2xl"
+        style={{
+          background: `radial-gradient(ellipse 100% 100% at 100% 0%, var(--role-accent) 0%, transparent 65%)`,
+          opacity: 0.06,
+        }}
+        aria-hidden="true"
+      />
       {/* Desktop navbar */}
       <div className="max-md:hidden flex items-center gap-4">
         <UserSearch />
@@ -120,28 +129,28 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
                 <p className="text-gray-900 dark:text-white text-sm font-medium leading-tight truncate">
                   {user.fullname?.split(" ").slice(0, 2).join(" ") ?? user.username}
                 </p>
-                  {(() => {
-                    const lvl = calculateLevel(user.gamifications.xp);
-                    const xpInLevel = user.gamifications.xp - totalXpForLevel(lvl);
-                    return (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-semibold text-primary dark:text-primary/90 uppercase tracking-wider">
-                          Nv.{lvl}
-                        </span>
-                        <div className="h-1 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden w-14">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all"
-                            style={{
-                              width: `${Math.min((xpInLevel / xpForNextLevel(lvl)) * 100, 100)}%`,
-                            }}
-                          />
-                        </div>
-                        <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium tabular-nums">
-                          {abbreviateXP(xpInLevel)} XP
-                        </span>
+                {(() => {
+                  const lvl = calculateLevel(user.gamifications.xp);
+                  const xpInLevel = user.gamifications.xp - totalXpForLevel(lvl);
+                  return (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-semibold text-primary dark:text-primary/90 uppercase tracking-wider">
+                        Nv.{lvl}
+                      </span>
+                      <div className="h-1 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden w-14">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-role-accent to-role-accent/60 transition-all"
+                          style={{
+                            width: `${Math.min((xpInLevel / xpForNextLevel(lvl)) * 100, 100)}%`,
+                          }}
+                        />
                       </div>
-                    );
-                  })()}
+                      <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium tabular-nums">
+                        {abbreviateXP(xpInLevel)} XP
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
               <FiChevronRight
                 size={12}

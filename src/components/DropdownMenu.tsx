@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface DropdownMenuProps {
   isOpen: boolean;
@@ -93,7 +94,10 @@ export function DropdownMenu({
     };
   }, [isOpen, onClose, anchorRef, align, side, offset]);
 
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const menu = (
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -118,4 +122,6 @@ export function DropdownMenu({
       )}
     </AnimatePresence>
   );
+
+  return mounted ? createPortal(menu, document.body) : null;
 }

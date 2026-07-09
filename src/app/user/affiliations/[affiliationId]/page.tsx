@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -27,6 +27,7 @@ import {
   FiPercent,
   FiVideo,
   FiInfo,
+  FiRefreshCw,
 } from "react-icons/fi";
 
 export default function AffiliationDetailPage({
@@ -41,19 +42,32 @@ export default function AffiliationDetailPage({
   const role = (user?.role ?? "STUDENT") as Role;
   const [affiliation, setAffiliation] = useState<AffiliationDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const loadAffiliation = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { ok, result } = await getAffiliation(affiliationId);
+      if (ok && result?.data) {
+        setAffiliation(result.data);
+      } else {
+        setAffiliation(null);
+        setError(result?.message ?? "Afiliación no encontrada");
+      }
+    } catch {
+      setAffiliation(null);
+      setError("Error al cargar la afiliación");
+    } finally {
+      setLoading(false);
+    }
+  }, [affiliationId]);
 
   useEffect(() => {
     if (profileLoading || role !== "AFFILIATE") return;
-    const load = async () => {
-      const { ok, result } = await getAffiliation(affiliationId);
-      if (ok && result.data) {
-        setAffiliation(result.data);
-      }
-      setLoading(false);
-    };
-    load();
-  }, [affiliationId, profileLoading, role]);
+    loadAffiliation();
+  }, [profileLoading, role, loadAffiliation]);
 
   const copyToClipboard = async (text: string, field: string) => {
     try {
@@ -75,20 +89,41 @@ export default function AffiliationDetailPage({
     );
   }
 
-  if (role !== "AFFILIATE" || !affiliation) {
+  if (role !== "AFFILIATE" || error || !affiliation) {
+    const isNotFound = error === "Afiliación no encontrada" || (!affiliation && !error);
     return (
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         className="mx-auto max-w-lg rounded-2xl border border-border bg-background/60 p-6 text-center dark:bg-white/3"
       >
+        <div className="mb-3 flex justify-center">
+          <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${isNotFound ? "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" : "bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400"}`}>
+            {isNotFound ? <FiInfo size={20} /> : <FiRefreshCw size={20} />}
+          </div>
+        </div>
         <p className="text-sm font-medium text-gray-900 dark:text-white">
-          Afiliación no encontrada
+          {error ?? "Afiliación no encontrada"}
         </p>
-        <div className="mt-4 flex justify-center">
+        <p className="mt-1 text-xs text-muted-foreground">
+          {isNotFound
+            ? "El enlace no existe o no tienes acceso a esta afiliación"
+            : "Revisa tu conexión e inténtalo de nuevo"}
+        </p>
+        <div className="mt-4 flex items-center justify-center gap-2">
+          {!isNotFound && (
+            <button
+              type="button"
+              onClick={loadAffiliation}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:opacity-90 cursor-pointer"
+            >
+              <FiRefreshCw size={14} />
+              Reintentar
+            </button>
+          )}
           <Link
             href="/user/affiliations"
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
+            className="inline-flex items-center justify-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
           >
             Mis afiliaciones
           </Link>
@@ -108,7 +143,7 @@ export default function AffiliationDetailPage({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="mx-auto flex max-w-6xl flex-col gap-6"
+      className="mx-auto flex max-w-6xl flex-col gap-4"
     >
       <button
         onClick={() => router.push("/user/affiliations")}
@@ -121,10 +156,10 @@ export default function AffiliationDetailPage({
       <UserPageHeader
         title={product.title}
         description={`Afiliado · Código: ${code}`}
-        badge={<RoleBadge label="Afiliado" tone="emerald" />}
+        badge={<RoleBadge label="Afiliado" tone="role" />}
       />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           {product.thumbnail && (
             <div className="overflow-hidden rounded-2xl border border-border">
@@ -141,7 +176,7 @@ export default function AffiliationDetailPage({
               {product.description}
             </p>
             <div className="mt-4 flex items-center gap-2">
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
                 ${product.price.toFixed(2)}
               </span>
               <Link
@@ -197,7 +232,7 @@ export default function AffiliationDetailPage({
               label="Tu comisión"
               value={`${product.commissionRate}%`}
               hint={`$${earningsPerSale.toFixed(2)} por venta`}
-              tone="emerald"
+              tone="role"
             />
             <StatCard
               icon={FiClock}
@@ -211,7 +246,7 @@ export default function AffiliationDetailPage({
               label="Ganancia potencial"
               value={`$${earningsPerSale.toFixed(2)}`}
               hint="Por cada venta referida"
-              tone="emerald"
+              tone="role"
             />
           </div>
 

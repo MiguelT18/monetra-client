@@ -4,12 +4,34 @@ export interface AffiliationResponse {
   affiliateId: string;
   code: string;
   commissionId: string;
+  createdAt: string;
   product: {
     id: string;
     title: string;
+    description: string | null;
     thumbnail: string | null;
     commissionRate: number;
     affiliateCookieDays: number;
+  };
+}
+
+export interface AffiliationProductStat {
+  id: string;
+  code: string;
+  createdAt: string;
+  product: {
+    id: string;
+    title: string;
+    description: string | null;
+    thumbnail: string | null;
+    commissionRate: number;
+    affiliateCookieDays: number;
+  };
+  stats: {
+    sales: number;
+    paid: number;
+    pending: number;
+    returns: number;
   };
 }
 
@@ -42,6 +64,12 @@ export async function listMyAffiliations(page = 1, limit = 20) {
   return { ok, result };
 }
 
+export async function listMyAffiliationProducts(page = 1, limit = 50) {
+  const res = await fetch(`/api/affiliations/products?page=${page}&limit=${limit}`);
+  const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
+  return { ok, result };
+}
+
 export async function joinProductAsAffiliate(productId: string) {
   const res = await fetch(`/api/products/${productId}/affiliate`, {
     method: "POST",
@@ -57,7 +85,11 @@ export async function checkAffiliateEligibility(productId: string) {
 }
 
 export async function getAffiliation(id: string) {
-  const res = await fetch(`/api/affiliations/${id}`);
-  const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
-  return { ok, result };
+  try {
+    const res = await fetch(`/api/affiliations/${id}`);
+    const result = await res.json();
+    return { ok: res.ok, result };
+  } catch {
+    return { ok: false, result: null };
+  }
 }

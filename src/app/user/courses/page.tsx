@@ -81,16 +81,16 @@ export default function UserCourses() {
       <UserPageHeader
         title={`Mis cursos — ${firstName}`}
         description="Retoma donde lo dejaste, revisa tu progreso y mantén tu racha de aprendizaje."
-        badge={<RoleBadge label="Estudiante" tone="amber" />}
+        badge={<RoleBadge label="Estudiante" tone="role" />}
       />
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+      <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <StatCard
           icon={FiBookOpen}
           label="Inscritos"
           value={String(enrollments.length)}
           hint={`${inProgress} en progreso, ${completed} completados`}
-          tone="amber"
+          tone="role"
         />
         <StatCard
           icon={FiClock}
@@ -104,11 +104,11 @@ export default function UserCourses() {
           label="En progreso"
           value={String(inProgress)}
           hint="Mantén el ritmo para desbloquear insignias"
-          tone="amber"
+          tone="role"
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <SectionCard
             title="Continuar"

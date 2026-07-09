@@ -135,9 +135,9 @@ const ROLE_CONFIG: Record<
     label: "Estudiante",
     description: "Accede a cursos y contenido educativo.",
     icon: FiBookOpen,
-    colorClass: "bg-blue-500",
-    bgClass: "bg-blue-500/10 dark:bg-blue-500/10",
-    textClass: "text-blue-600 dark:text-blue-400",
+    colorClass: "bg-amber-500",
+    bgClass: "bg-amber-500/10 dark:bg-amber-500/10",
+    textClass: "text-amber-600 dark:text-amber-400",
   },
   CREATOR: {
     label: "Creador",
@@ -151,9 +151,9 @@ const ROLE_CONFIG: Record<
     label: "Afiliado",
     description: "Promociona productos y gana comisiones.",
     icon: FiUsers,
-    colorClass: "bg-violet-500",
-    bgClass: "bg-violet-500/10 dark:bg-violet-500/10",
-    textClass: "text-violet-600 dark:text-violet-400",
+    colorClass: "bg-emerald-500",
+    bgClass: "bg-emerald-500/10 dark:bg-emerald-500/10",
+    textClass: "text-emerald-600 dark:text-emerald-400",
   },
   ADMIN: {
     label: "Admin",
@@ -188,7 +188,7 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
           const products = json.data?.products;
           if (Array.isArray(products)) setPendingReviews(products.length);
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     const controller = new AbortController();
@@ -237,8 +237,17 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
       ref={asideRef}
       animate={{ width: isOpen ? 256 : 56 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="row-start-1 row-span-2 max-md:hidden bg-surface rounded-2xl overflow-hidden flex flex-col shadow-sm"
+      className="glass row-start-1 row-span-2 max-md:hidden bg-surface rounded-2xl overflow-hidden flex flex-col shadow-sm"
     >
+      {/* Spotlight overlay */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: `radial-gradient(ellipse 150% 100% at 0% 0%, var(--role-accent) 0%, transparent 65%)`,
+          opacity: 0.06,
+        }}
+        aria-hidden="true"
+      />
       <div className="flex flex-col flex-1 p-2 min-h-0 justify-between">
         {/* Top section */}
         <div className="space-y-1">
@@ -253,10 +262,10 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
               {/* Logo */}
               <Link href="/" className="mb-5 mt-2 block">
                 <div className="flex items-center gap-2.5 px-2">
-                  <span className="text-primary shrink-0">
+                  <span className="text-role-accent shrink-0 drop-shadow-[0_0_10px_var(--role-accent)]">
                     <LogoIcon width={30} height={30} />
                   </span>
-                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  <span className="text-base font-bold text-gray-900 dark:text-white">
                     Monetra
                   </span>
                 </div>
@@ -274,23 +283,23 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
                       <Link
                         href={item.href}
                         className={`
-                      relative flex items-center p-3 rounded-lg transition-all gap-2.5 justify-start
+                      relative flex items-center p-2.5 rounded-lg transition-all gap-2 justify-start
                       ${isActive
-                            ? "text-primary cursor-not-allowed"
-                            : "text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/15 cursor-pointer"
+                            ? "text-role-accent cursor-not-allowed"
+                            : "text-gray-500 dark:text-gray-400 hover:text-role-accent hover:bg-role-accent/5 dark:hover:bg-role-accent/15 cursor-pointer"
                           }
                     `}
                       >
                         {isActive && (
                           <motion.div
                             layoutId="active-bar"
-                            className="absolute left-0 top-1 bottom-1 w-1 bg-primary rounded-r-sm"
+                            className="absolute left-0 top-1 bottom-1 w-1 bg-role-accent rounded-r-sm"
                           />
                         )}
                         {isActive && (
                           <motion.div
                             layoutId="active-pill"
-                            className="absolute inset-0 bg-primary/15 rounded-md"
+                            className="absolute inset-0 bg-role-accent/15 rounded-md"
                             transition={{
                               type: "spring",
                               stiffness: 300,
@@ -298,8 +307,8 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
                             }}
                           />
                         )}
-                        <Icon size={20} className="shrink-0 relative z-10" />
-                        <span className="whitespace-nowrap overflow-hidden relative z-10 text-sm">
+                        <Icon size={18} className="shrink-0 relative z-10" />
+                        <span className="whitespace-nowrap overflow-hidden relative z-10 text-xs lg:text-sm">
                           {item.label}
                         </span>
                         {item.href === "/admin/reviews" && pendingReviews > 0 && (
@@ -318,16 +327,16 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
 
         {/* Bottom: perfil + logout - visible only when expanded */}
         {isOpen && (
-          <div className="pt-2 border-t border-border space-y-1">
-            <div className="px-2 py-3 space-y-3">
+          <div className="pt-2 space-y-1 rounded-lg">
+            <div className="px-2 py-2 space-y-2">
               <div className="flex items-center gap-2.5">
                 {user?.avatar ? (
                   <Image
                     src={user.avatar}
                     alt={`Foto de perfil de ${user.fullname}`}
-                    width={40}
-                    height={40}
-                    className="rounded-full size-10 object-cover border-2 border-gray-200 dark:border-white/10"
+                    width={36}
+                    height={36}
+                    className="rounded-full size-9 object-cover border-2 border-gray-200 dark:border-white/10"
                   />
                 ) : (
                   <div className="bg-gray-200 dark:bg-white/10 rounded-full p-2 border-2 border-gray-200 dark:border-white/10">
@@ -345,7 +354,7 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-gray-500 dark:text-white/45">
                     Nv. {computedLevel}
@@ -354,7 +363,7 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
                     Nv. {computedLevel + 1}
                   </span>
                 </div>
-                <div className="h-2 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${xpProgress}%` }}
@@ -364,7 +373,7 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
                       damping: 20,
                       delay: 0.1,
                     }}
-                    className="h-full rounded-full bg-primary"
+                    className="h-full rounded-full bg-role-accent"
                   />
                 </div>
                 <p className="text-xs text-gray-400 dark:text-white/30 text-center">

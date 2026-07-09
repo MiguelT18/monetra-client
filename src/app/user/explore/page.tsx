@@ -10,6 +10,8 @@ import {
   SectionCard,
   QuickLink,
   RoleBadge,
+  roleTone,
+  roleLabel,
   InfoProductCard,
   InfoProductCardSkeleton,
   type InfoProductAccent,
@@ -52,7 +54,7 @@ type TemperatureFilter = "all" | "hot" | "cold";
 type SortBy = "none" | "students" | "interaction";
 
 interface ActiveFilters {
-  selectedCategory: string | null;
+  selectedCategory: string[];
   temperature: TemperatureFilter;
   sortBy: SortBy;
 }
@@ -212,20 +214,6 @@ function ExploreGrid({ items, onAffiliateClick }: { items: ExploreItem[]; onAffi
   );
 }
 
-function roleTone(role: Role): "blue" | "emerald" | "violet" | "amber" | "red" {
-  if (role === "STUDENT") return "amber";
-  if (role === "CREATOR") return "violet";
-  if (role === "ADMIN") return "red";
-  return "emerald";
-}
-
-function roleLabel(role: Role) {
-  if (role === "STUDENT") return "Estudiante";
-  if (role === "CREATOR") return "Creador";
-  if (role === "ADMIN") return "Admin";
-  return "Afiliado";
-}
-
 export default function ExplorePage() {
   const { user, loading: profileLoading } = useProfile();
   const role = (user?.role ?? "STUDENT") as Role;
@@ -246,7 +234,7 @@ export default function ExplorePage() {
   const [affiliateError, setAffiliateError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
-    selectedCategory: null,
+    selectedCategory: [],
     temperature: "all",
     sortBy: "none",
   });
@@ -367,9 +355,9 @@ export default function ExplorePage() {
     : searchedProducts;
 
   const filteredProducts = roleFiltered.filter((p) => {
-    if (activeFilters.selectedCategory) {
+    if (activeFilters.selectedCategory.length > 0) {
       const cats = detectProductCategories(p);
-      if (!cats.includes(activeFilters.selectedCategory)) return false;
+      if (!cats.some((cat) => activeFilters.selectedCategory.includes(cat))) return false;
     }
     if (activeFilters.temperature !== "all") {
       const temp = computeTemperature(p);
@@ -390,7 +378,7 @@ export default function ExplorePage() {
     });
   }
 
-  const hasActiveFilters = !!activeFilters.selectedCategory || activeFilters.temperature !== "all" || activeFilters.sortBy !== "none";
+  const hasActiveFilters = activeFilters.selectedCategory.length > 0 || activeFilters.temperature !== "all" || activeFilters.sortBy !== "none";
 
   const publishedCount = sortedProducts.length;
   const affiliateCount = sortedProducts.filter((p) => p.affiliateEnabled).length;
@@ -430,7 +418,7 @@ export default function ExplorePage() {
       className="mx-auto flex max-w-6xl flex-col"
     >
       {/* Hero Header */}
-      <div className="relative mb-8 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/[0.04] via-background to-primary/[0.02] p-6 sm:p-8 dark:from-primary/[0.06] dark:to-primary/[0.02]">
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/[0.04] via-background to-primary/[0.02] p-5 sm:p-6 dark:from-primary/[0.06] dark:to-primary/[0.02]">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl dark:bg-primary/10" />
           <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-amber-500/5 blur-3xl dark:bg-amber-500/10" />
@@ -448,7 +436,7 @@ export default function ExplorePage() {
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                  <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
                     Mercado
                   </h1>
                   <RoleBadge label={roleLabel(role)} tone={tone} />
@@ -554,9 +542,9 @@ export default function ExplorePage() {
         <div className="overflow-x-auto scrollbar-none">
           <div className="flex gap-1.5 pb-1">
             <button
-              onClick={() => setActiveFilters((prev) => ({ ...prev, selectedCategory: null }))}
+              onClick={() => setActiveFilters((prev) => ({ ...prev, selectedCategory: [] }))}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                !activeFilters.selectedCategory
+                activeFilters.selectedCategory.length === 0
                   ? "bg-primary text-white shadow-sm"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
               }`}
@@ -566,9 +554,16 @@ export default function ExplorePage() {
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setActiveFilters((prev) => ({ ...prev, selectedCategory: prev.selectedCategory === cat.id ? null : cat.id }))}
+                onClick={() =>
+                  setActiveFilters((prev) => ({
+                    ...prev,
+                    selectedCategory: prev.selectedCategory.includes(cat.id)
+                      ? prev.selectedCategory.filter((id) => id !== cat.id)
+                      : [...prev.selectedCategory, cat.id],
+                  }))
+                }
                 className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                  activeFilters.selectedCategory === cat.id
+                  activeFilters.selectedCategory.includes(cat.id)
                     ? "bg-primary text-white shadow-sm"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
                 }`}
@@ -588,17 +583,22 @@ export default function ExplorePage() {
               exit={{ opacity: 0, height: 0 }}
               className="flex flex-wrap items-center gap-1.5"
             >
-              {activeFilters.selectedCategory && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
-                  {categoryLabel(activeFilters.selectedCategory)}
+              {activeFilters.selectedCategory.map((catId) => (
+                <span key={catId} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
+                  {categoryLabel(catId)}
                   <button
-                    onClick={() => setActiveFilters((prev) => ({ ...prev, selectedCategory: null }))}
+                    onClick={() =>
+                      setActiveFilters((prev) => ({
+                        ...prev,
+                        selectedCategory: prev.selectedCategory.filter((id) => id !== catId),
+                      }))
+                    }
                     className="ml-0.5 hover:text-primary/70 cursor-pointer"
                   >
                     <FiX size={11} />
                   </button>
                 </span>
-              )}
+              ))}
               {activeFilters.temperature !== "all" && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
                   Temp: {activeFilters.temperature === "hot" ? "Alta" : "Baja"}
@@ -622,7 +622,7 @@ export default function ExplorePage() {
                 </span>
               )}
               <button
-                onClick={() => setActiveFilters({ selectedCategory: null, temperature: "all", sortBy: "none" })}
+                onClick={() => setActiveFilters({ selectedCategory: [], temperature: "all", sortBy: "none" })}
                 className="text-[11px] font-medium text-gray-400 hover:text-gray-600 dark:hover:text-white/60 cursor-pointer"
               >
                 Limpiar todo
@@ -700,7 +700,7 @@ export default function ExplorePage() {
         </div>
       ) : products.length === 0 ? (
         <SectionCard title="Productos disponibles">
-          <div className="flex flex-col items-center gap-3 py-10 text-center">
+          <div className="flex flex-col items-center gap-3 py-8 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/5">
               <FiInbox size={20} className="text-gray-400 dark:text-white/40" />
             </div>
@@ -716,7 +716,7 @@ export default function ExplorePage() {
         </SectionCard>
       ) : catalogItems.length === 0 ? (
         <SectionCard title="Sin resultados">
-          <div className="flex flex-col items-center gap-3 py-10 text-center">
+          <div className="flex flex-col items-center gap-3 py-8 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/5">
               <FiSearch size={20} className="text-gray-400 dark:text-white/40" />
             </div>

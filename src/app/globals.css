@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -7,13 +9,37 @@
   --foreground: #0f172a;
   --surface: #f1f7ff;
   --border: #d4e4ff;
-
   --primary: #7c3aed;
-
+  --autofill-bg: #ffffff;
+  --autofill-text: #0f172a;
   --scrollbar-track: #e8efff;
   --scrollbar-thumb: #b8c9ef;
   --scrollbar-thumb-hover: #9f7aea;
   --scrollbar-thumb-active: #7c3aed;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f7ff;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f7ff;
+  --muted-foreground: #64748b;
+  --accent: #f1f7ff;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --input: #d4e4ff;
+  --ring: #7c3aed;
+  --radius: 0.625rem;
+  --chart-1: #7c3aed;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #8b5cf6;
+  --role-accent: #7c3aed;
+  --glass-bg: rgba(255,255,255,0.55);
+  --glass-border: rgba(255,255,255,0.6);
+  --glass-blur: 12px;
 }
 
 html.dark,
@@ -22,28 +48,103 @@ html.dark,
   --foreground: #f1f5f9;
   --surface: #121221;
   --border: #2d2d44;
-
+  --primary: #7c3aed;
+  --autofill-bg: #171b1f;
+  --autofill-text: #f1f5f9;
   --scrollbar-track: #1a1a2e;
   --scrollbar-thumb: #4a4a6a;
   --scrollbar-thumb-hover: #6d5acd;
   --scrollbar-thumb-active: #8b5cf6;
+  --card: #121221;
+  --card-foreground: #f1f5f9;
+  --popover: #121221;
+  --popover-foreground: #f1f5f9;
+  --primary-foreground: #ffffff;
+  --secondary: #1a1a2e;
+  --secondary-foreground: #f1f5f9;
+  --muted: #1a1a2e;
+  --muted-foreground: #94a3b8;
+  --accent: #1a1a2e;
+  --accent-foreground: #f1f5f9;
+  --destructive: #ef4444;
+  --input: #2d2d44;
+  --ring: #7c3aed;
+  --chart-1: #7c3aed;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #8b5cf6;
+  --role-accent: #8b5cf6;
+  --glass-bg: rgba(18,18,33,0.45);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-blur: 12px;
 }
 
 @theme inline {
-  --color-primary: var(--primary);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-border: var(--border);
-
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-role-accent: var(--role-accent);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
+/* ─── Role accent colors ─── */
+
+[data-role="affiliate"] { --role-accent: #059669; }
+[data-role="student"]   { --role-accent: #d97706; }
+[data-role="creator"]   { --role-accent: #7c3aed; }
+[data-role="admin"]     { --role-accent: #ef4444; }
+
+.dark [data-role="affiliate"] { --role-accent: #34d399; }
+.dark [data-role="student"]   { --role-accent: #f59e0b; }
+.dark [data-role="creator"]   { --role-accent: #8b5cf6; }
+.dark [data-role="admin"]     { --role-accent: #f87171; }
+
+.glass {
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
@@ -51,10 +152,24 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar — contenedores que hacen scroll (html, body y .app-scrollbar) */
-html,
-body,
-.app-scrollbar {
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--autofill-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--autofill-bg) inset !important;
+  -webkit-text-fill-color: var(--autofill-text) !important;
+  color: var(--autofill-text) !important;
+  caret-color: var(--autofill-text);
+  transition: background-color 0s 5999999s, color 0s 5999999s !important;
+}
+
+html, body, .app-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
@@ -102,7 +217,27 @@ body::-webkit-scrollbar-corner,
   background: var(--scrollbar-track);
 }
 
+@keyframes role-ambient-drift {
+  0%   { background-position: 0% 0%; }
+  20%  { background-position: 80% 20%; }
+  40%  { background-position: 100% 60%; }
+  60%  { background-position: 40% 100%; }
+  80%  { background-position: 0% 60%; }
+  100% { background-position: 0% 0%; }
+}
+
+.role-ambient-bg {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 60% 45% at 15% 10%, color-mix(in srgb, var(--role-accent, #7c3aed) 35%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 45% 55% at 85% 20%, color-mix(in srgb, var(--role-accent, #7c3aed) 28%, transparent) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, color-mix(in srgb, var(--role-accent, #7c3aed) 22%, transparent) 0%, transparent 60%);
+  background-size: 150% 150%;
+  animation: role-ambient-drift 18s linear infinite;
+}
+
 html {
-  font-size: 18px;
+  font-size: 16px;
+  scroll-padding-top: 5rem;
   scrollbar-gutter: stable;
 }

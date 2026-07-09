@@ -12,9 +12,10 @@ import {
 } from "recharts";
 import { useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 
-const accent = "#7C3AED";
-const accentLight = "#A78BFA";
-const accentDark = "#9F7AEA";
+function useRoleAccent() {
+  const accent = useCssVar("--role-accent", "#7C3AED");
+  return { accent, accentLight: accent, accentDark: accent };
+}
 
 function useCssVar(name: string, fallback: string): string {
   const [value, setValue] = useState(fallback);
@@ -155,6 +156,7 @@ export function AreaChartCard({
 }) {
   const colors = useChartColors();
   const isDark = useIsDark();
+  const { accent, accentDark } = useRoleAccent();
   const { containerRef, width, height } = useContainerSize();
 
   return (
@@ -235,6 +237,7 @@ export function BarChartCard({
 }) {
   const colors = useChartColors();
   const isDark = useIsDark();
+  const { accentLight, accentDark } = useRoleAccent();
   const { containerRef, width, height } = useContainerSize();
 
   return (

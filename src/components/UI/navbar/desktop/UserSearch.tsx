@@ -70,7 +70,7 @@ export function UserSearch() {
 
   return (
     <div ref={containerRef} className="relative flex-1 max-w-md">
-      <div className="relative">
+      <div className="role-surface rounded-xl">
         <FiSearch
           size={16}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/40 pointer-events-none"
@@ -81,7 +81,7 @@ export function UserSearch() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar usuarios..."
-          className="w-full rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 pl-9 pr-8 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition hover:border-primary/50 shadow-sm"
+          className="w-full rounded-xl bg-transparent border border-transparent pl-9 pr-8 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-role-accent focus:ring-1 focus:ring-role-accent transition hover:border-role-accent/50 shadow-sm relative z-10"
         />
         {query && (
           <button

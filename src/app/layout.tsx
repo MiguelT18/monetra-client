@@ -44,6 +44,12 @@ export default function RootLayout({
             <ProfileProvider>{children}</ProfileProvider>
           </NotificationProvider>
         </ThemeProvider>
+        <svg aria-hidden="true" style={{position:'absolute',width:0,height:0,overflow:'hidden'}}>
+          <filter id="glass-noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" stitchTiles="stitch"/>
+            <feColorMatrix type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.07 0"/>
+          </filter>
+        </svg>
       </body>
     </html>
   );

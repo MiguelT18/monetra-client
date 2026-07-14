@@ -9,7 +9,7 @@ import type { Role } from "@/types/user";
 import { DropdownMenu } from "@/components/DropdownMenu";
 
 const ROLE_COLORS: Record<Role, { bar: string; ring: string; text: string }> = {
-  STUDENT: { bar: "bg-amber-500", ring: "ring-amber-500/30", text: "text-amber-600 dark:text-amber-400" },
+  STUDENT: { bar: "bg-blue-600", ring: "ring-blue-500/30", text: "text-blue-600 dark:text-blue-400" },
   CREATOR: { bar: "bg-violet-500", ring: "ring-violet-500/30", text: "text-violet-600 dark:text-violet-400" },
   AFFILIATE: { bar: "bg-emerald-500", ring: "ring-emerald-500/30", text: "text-emerald-600 dark:text-emerald-400" },
   ADMIN: { bar: "bg-red-500", ring: "ring-red-500/30", text: "text-red-600 dark:text-red-400" },
@@ -109,10 +109,10 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
         onClick={() => {
           if (!updating) setOpen((prev) => !prev);
         }}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 transition-all text-sm text-gray-700 dark:text-white/80 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed"
+        className="role-surface flex items-center gap-2 px-3 py-1.5 rounded-lg hover:border-role-accent/50 dark:hover:border-role-accent/50 transition-all text-sm text-gray-700 dark:text-white/80 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <span className={`h-4 w-1 rounded-full ${ROLE_COLORS[selected].bar}`} />
-        <span className="group-hover:text-primary">{selectedRole.label}</span>
+        <span className="group-hover:text-role-accent">{selectedRole.label}</span>
 
         <AnimatePresence mode="wait" initial={false}>
           {updating ? (
@@ -156,7 +156,7 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
             >
               <FiChevronDown
                 size={14}
-                className="text-gray-400 dark:text-white/40 group-hover:text-primary"
+                className="text-gray-400 dark:text-white/40 group-hover:text-role-accent"
               />
             </motion.span>
           )}
@@ -183,7 +183,7 @@ export function RoleSelect({ currentRole }: { currentRole: Role }) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.06, duration: 0.2, ease: "easeOut" }}
               onClick={() => handleSelect(role.value)}
-              className={`w-full flex items-start gap-3 px-4 py-3 transition-colors text-left cursor-pointer group relative ${isSelected ? "bg-primary/4" : "hover:bg-primary/5 dark:hover:bg-primary/10"}`}
+              className={`w-full flex items-start gap-3 px-4 py-3 transition-colors text-left cursor-pointer group relative ${isSelected ? "bg-role-accent/5" : "hover:bg-role-accent/5 dark:hover:bg-role-accent/10"}`}
             >
               <div className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full ${colors.bar} ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-60"}`} />
               <div className="flex-1 min-w-0 pl-1">

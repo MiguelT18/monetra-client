@@ -5,7 +5,6 @@ import { motion } from "motion/react";
 import { useProfile } from "@/hooks/useProfile";
 import type { Role } from "@/types/user";
 import {
-  UserPageHeader,
   StatCard,
   SectionCard,
   PlaceholderRow,
@@ -16,16 +15,23 @@ import {
   totalXpForLevel,
   xpForNextLevel,
   calculateLevel,
+  rankForLevel,
+  AuroraBackdrop,
+  AchievementsCard,
+  BankGlassCard,
+  InfoProductCard,
+  type InfoProductAccent,
 } from "@/components/user/userShell";
 import { Modal } from "@/components/UI/Modal";
 import { ProductForm } from "@/components/UI/ProductForm";
 import { BarChartCard, AreaChartCard } from "@/components/ui/chart";
-import { CommissionBreakdown } from "@/components/affiliations/CommissionBreakdown";
-import { listMyProducts, type ProductResponse, listCatalog } from "@/lib/product-api";
+import { listMyProducts, type ProductResponse, listCatalog, getRecommendations, type RecommendationMode } from "@/lib/product-api";
 import { RecommendedProductsCarousel } from "@/components/user/RecommendedProductsCarousel";
 import { listMyEnrollments, type EnrollmentResponse } from "@/lib/enrollment-api";
 import { listMyAffiliations, type AffiliationResponse } from "@/lib/affiliation-api";
 import { getCommissionStats, type CommissionStats, fetchCommissionByProduct, type CommissionByProduct, fetchCommissionHistory, type CommissionHistory } from "@/lib/commission-api";
+import { getMyAchievements } from "@/lib/achievement-api";
+import { CATEGORIES } from "@/lib/categories";
 import Link from "next/link";
 import {
   FiBookOpen,
@@ -38,18 +44,229 @@ import {
   FiPlus,
   FiInbox,
   FiImage,
-  FiEye,
-  FiEyeOff,
   FiShoppingCart,
-  FiClock,
-  FiCheckCircle,
   FiGrid,
   FiExternalLink,
   FiShoppingBag,
   FiBarChart2,
+  FiZap,
+  FiClock,
+  FiEye,
 } from "react-icons/fi";
+import type { IconType } from "react-icons";
+import type { Achievement } from "@/types/user";
 
+const ACCENTS: InfoProductAccent[] = ["blue", "emerald", "violet", "amber", "rose", "cyan"];
+const ICONS: IconType[] = [FiBookOpen, FiGrid, FiTrendingUp, FiUsers, FiTarget, FiDollarSign, FiAward, FiZap];
 
+function categoryLabel(id?: string | null): string {
+  if (!id) return "Producto digital";
+  return CATEGORIES.find((c) => c.id === id)?.label ?? id;
+}
+
+function DashboardHero({ firstName, role, tone, level, xp }: { firstName: string; role: Role; tone: "role"; level: number; xp: number }) {
+  const currentLevelXp = totalXpForLevel(level);
+  const xpInLevel = Math.max(0, xp - currentLevelXp);
+  const neededXp = xpForNextLevel(level);
+  const pct = Math.min(100, Math.round((xpInLevel / neededXp) * 100));
+  const remaining = Math.max(0, neededXp - xpInLevel);
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-role-accent/20 bg-gradient-to-br from-role-accent/[0.06] via-background to-role-accent/[0.02] p-5 shadow-sm sm:p-6">
+      <AuroraBackdrop />
+      <div className="relative flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+                Dashboard
+              </h1>
+              <RoleBadge label={roleLabel(role)} tone={tone} />
+            </div>
+            <p className="max-w-2xl text-sm text-gray-500 dark:text-white/55 sm:text-base">
+              Hola, {firstName} 👋
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block text-right">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                {rankForLevel(level)}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-white/45">
+                Nivel {level}
+              </p>
+            </div>
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border-2 border-role-accent/30 bg-background text-3xl font-extrabold text-role-accent shadow-sm">
+              {level}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-1.5 flex items-center justify-between gap-2 text-xs">
+            <span className="font-medium text-gray-500 dark:text-white/45">
+              Progreso al nivel {level + 1}
+            </span>
+            <span className="tabular-nums text-gray-600 dark:text-white/55">
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {xpInLevel}
+              </span>{" "}
+              / {neededXp} XP
+            </span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-role-accent/15">
+            <div
+              className="h-full rounded-full bg-role-accent transition-all duration-500"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-gray-500 dark:text-white/40">
+            {remaining === 0
+              ? "Listo para subir de nivel."
+              : `Faltan ${remaining} XP para el nivel ${level + 1}`}
+            {" · "}
+            {xp} XP en total
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function productToCardItem(product: ProductResponse, index: number, role?: Role) {
+  const isAffiliate = role === "AFFILIATE";
+  const highlights: { icon: IconType; label: string }[] = [];
+  if (isAffiliate && product.affiliateEnabled && product.commissionRate) {
+    highlights.push({ icon: FiTrendingUp, label: `${product.commissionRate}% comisión` });
+  }
+  const daysOld = Math.floor((Date.now() - new Date(product.createdAt).getTime()) / 86400000);
+  highlights.push({ icon: daysOld < 14 ? FiZap : FiClock, label: daysOld < 14 ? "Nuevo" : `${daysOld} días` });
+
+  return {
+    title: product.title,
+    category: categoryLabel(product.category),
+    accent: ACCENTS[index % ACCENTS.length],
+    icon: ICONS[index % ICONS.length],
+    thumbnail: product.thumbnail,
+    highlights,
+    actionLabel: "Ver detalle",
+    productId: product.id,
+    priceDisplay: `$${Number(product.price).toFixed(2)}`,
+    isEnrolled: false,
+  };
+}
+
+function StudentRecommendations({ role }: { role: Role }) {
+  const [items, setItems] = useState<ProductResponse[]>([]);
+  const [mode, setMode] = useState<RecommendationMode>("recent");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+     const { ok, result } = await getRecommendations(page + 1, 10);
+     if (ok && result) {
+       setItems((prev) => [...prev, ...(result.products ?? [])]);
+       setTotalPages(result.totalPages);
+       setPage(result.page);
+     }
+    setLoadingMore(false);
+  };
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { ok, result } = await getRecommendations(1, 10);
+      if (!active) return;
+      if (ok && result) {
+        setItems(result.products ?? []);
+        setMode(result.mode);
+        setTotalPages(result.totalPages);
+        setPage(1);
+      }
+      setLoading(false);
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const meta =
+    {
+      interests: {
+        title: "Recomendado para ti",
+        subtitle: "Elegido según tus intereses y los cursos que has tomado",
+      },
+      best_sellers: {
+        title: "Más vendidos",
+        subtitle: "Los productos con más ventas de la comunidad",
+      },
+      recent: {
+        title: "Novedades",
+        subtitle: "Los últimos productos publicados en el mercado",
+      },
+    }[mode] ?? {
+      title: "Recomendado para ti",
+      subtitle: "Cargando recomendaciones para ti…",
+    };
+
+  return (
+    <SectionCard
+      aurora
+      title={meta.title}
+      action={
+        <div className="flex items-center gap-2">
+          <span className="hidden text-xs text-gray-500 dark:text-white/45 sm:inline">
+            {meta.subtitle}
+          </span>
+          <QuickLink href="/user/explore" label="Ir al mercado" variant="outline" />
+        </div>
+      }
+    >
+      {loading ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-56 animate-pulse rounded-2xl bg-gray-200 dark:bg-white/10" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5">
+            <FiInbox size={20} className="text-gray-400 dark:text-white/40" />
+          </div>
+          <p className="text-sm text-gray-500 dark:text-white/45">
+            Aún no hay productos publicados. Explora el mercado más adelante.
+          </p>
+          <QuickLink href="/user/explore" label="Ir al mercado" variant="primary" />
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {items.map((p, i) => (
+              <InfoProductCard key={p.id} {...productToCardItem(p, i, role)} />
+            ))}
+          </div>
+          {page < totalPages && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => loadMore()}
+                disabled={loadingMore}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50 dark:text-white/80 dark:hover:bg-primary/10 cursor-pointer"
+              >
+                {loadingMore ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+                ) : null}
+                {loadingMore ? "Cargando..." : "Cargar más productos"}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </SectionCard>
+  );
+}
 
 function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: {
   products: ProductResponse[];
@@ -58,20 +275,10 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
   nextXp: number;
   onNewProduct: () => void;
 }) {
-  const [showBalance, setShowBalance] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const stored = localStorage.getItem("monetra_show_balance");
-    return stored !== null ? stored === "true" : true;
-  });
-
-  useEffect(() => {
-    localStorage.setItem("monetra_show_balance", String(showBalance));
-  }, [showBalance]);
   const publishedCount = products.filter((p) => p.status === "PUBLISHED").length;
   const underReviewCount = products.filter((p) => p.status === "UNDER_REVIEW").length;
   const draftCount = products.filter((p) => p.status === "DRAFT").length;
   const rejectedCount = products.filter((p) => p.status === "REJECTED").length;
-  const archivedCount = products.filter((p) => p.status === "ARCHIVED").length;
   const totalStudents = products.reduce((acc, p) => acc + (p._count?.enrollments ?? 0), 0);
   const totalAffiliates = products.reduce((acc, p) => acc + (p._count?.affiliations ?? 0), 0);
   const totalOrders = products.reduce((acc, p) => acc + (p._count?.orders ?? 0), 0);
@@ -81,171 +288,47 @@ function CreatorDashboard({ products, level, xpInLevel, nextXp, onNewProduct }: 
   const saldoDisponible = totalRevenue;
   const saldoCongelado = 0;
 
-  function mask(val: number) {
-    return showBalance ? `$${val.toLocaleString("es", { minimumFractionDigits: 2 })}` : "••••••";
-  }
-
   return (
     <>
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-        <section className="flex flex-col rounded-2xl border border-violet-200/80 bg-violet-500/[0.04] p-4 shadow-md dark:border-violet-500/20 dark:bg-violet-500/10 sm:p-5">
-          <div className="flex items-start justify-between gap-2 sm:gap-3">
-            <div className="min-w-0 space-y-2 sm:space-y-3">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-white/45 sm:text-xs">
-                  Saldo total
-                </p>
-                <button
-                  onClick={() => setShowBalance((v) => !v)}
-                  className="shrink-0 text-foreground/30 hover:text-foreground/70 transition-colors cursor-pointer"
-                >
-                  {showBalance ? <FiEyeOff size={13} /> : <FiEye size={13} />}
-                </button>
-              </div>
-              <p className="truncate text-lg font-bold text-gray-900 dark:text-white sm:text-xl lg:text-2xl">
-                {mask(saldoTotal)}
-              </p>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm text-violet-600 dark:text-violet-400 sm:h-12 sm:w-12">
-              <FiDollarSign size={18} />
-            </div>
-          </div>
-          <div className="mt-auto pt-3 sm:pt-4">
-            <div className="h-px bg-violet-200/50 dark:bg-violet-500/15 mb-2 sm:mb-3" />
-            <div className="space-y-1.5 sm:space-y-2">
-              <div className="flex items-center justify-between min-w-0 gap-2">
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-violet-500" />
-                  <span className="text-[11px] text-gray-500 dark:text-white/40 sm:text-xs truncate">Disponible</span>
-                </div>
-                <span className="shrink-0 text-xs font-semibold text-gray-900 dark:text-white sm:text-sm">
-                  {mask(saldoDisponible)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between min-w-0 gap-2">
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-amber-400" />
-                  <span className="text-[11px] text-gray-500 dark:text-white/40 sm:text-xs truncate">Congelado</span>
-                </div>
-                <span className="shrink-0 text-xs font-semibold text-amber-600 dark:text-amber-400 sm:text-sm">
-                  {mask(saldoCongelado)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section className="flex flex-col rounded-2xl border border-border bg-background/60 p-4 shadow-md dark:bg-white/3 sm:p-5">
-          <div className="flex items-start justify-between gap-2 sm:gap-3">
-            <div className="min-w-0 space-y-2 sm:space-y-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-white/45 sm:text-xs">
-                Productos
-              </p>
-              <p className="truncate text-lg font-bold text-gray-900 dark:text-white sm:text-xl lg:text-2xl">
-                {products.length}
-              </p>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm text-gray-500 dark:text-white/50 sm:h-12 sm:w-12">
-              <FiBookOpen size={18} />
-            </div>
-          </div>
-          <div className="mt-auto pt-3 sm:pt-4">
-            <div className="h-px bg-border dark:bg-white/10 mb-2 sm:mb-3" />
-            <div className="space-y-1 sm:space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] sm:text-xs min-w-0 gap-2">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
-                  <span className="text-gray-500 dark:text-white/40 truncate">Activos</span>
-                </div>
-                <span className="shrink-0 font-medium text-emerald-600 dark:text-emerald-400">{publishedCount}</span>
-              </div>
-              <div className="flex items-center justify-between text-[11px] sm:text-xs min-w-0 gap-2">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-blue-500" />
-                  <span className="text-gray-500 dark:text-white/40 truncate">En revisión</span>
-                </div>
-                <span className="shrink-0 font-medium text-blue-600 dark:text-blue-400">{underReviewCount}</span>
-              </div>
-              <div className="flex items-center justify-between text-[11px] sm:text-xs min-w-0 gap-2">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-amber-500" />
-                  <span className="text-gray-500 dark:text-white/40 truncate">Borradores</span>
-                </div>
-                <span className="shrink-0 font-medium text-amber-600 dark:text-amber-400">{draftCount}</span>
-              </div>
-              <div className="flex items-center justify-between text-[11px] sm:text-xs min-w-0 gap-2">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-red-500" />
-                  <span className="text-gray-500 dark:text-white/40 truncate">Rechazados</span>
-                </div>
-                <span className="shrink-0 font-medium text-red-600 dark:text-red-400">{rejectedCount}</span>
-              </div>
-            </div>
-            {products.length > 0 && (
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10 flex sm:mt-3">
-                {[
-                  { count: publishedCount, color: "bg-emerald-500" },
-                  { count: underReviewCount, color: "bg-blue-500" },
-                  { count: draftCount, color: "bg-amber-500" },
-                  { count: rejectedCount, color: "bg-red-500" },
-                ].map((seg) =>
-                  seg.count > 0 ? (
-                    <div
-                      key={seg.color}
-                      className={`h-full ${seg.color} transition-all`}
-                      style={{ width: `${(seg.count / products.length) * 100}%` }}
-                    />
-                  ) : null
-                )}
-              </div>
-            )}
-            {archivedCount > 0 && (
-              <p className="mt-1 text-[11px] text-gray-400 dark:text-white/35 text-right sm:mt-1.5">
-                +{archivedCount} archivado{archivedCount !== 1 ? "s" : ""}
-              </p>
-            )}
-          </div>
-        </section>
-        <section className="flex flex-col rounded-2xl border border-violet-200/80 bg-violet-500/[0.04] p-4 shadow-md dark:border-violet-500/20 dark:bg-violet-500/10 sm:p-5">
-          <div className="flex items-start justify-between gap-2 sm:gap-3">
-            <div className="min-w-0 space-y-2 sm:space-y-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-white/45 sm:text-xs">
-                Estudiantes
-              </p>
-              <p className="truncate text-lg font-bold text-gray-900 dark:text-white sm:text-xl lg:text-2xl">
-                {totalStudents}
-              </p>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface shadow-sm text-violet-600 dark:text-violet-400 sm:h-12 sm:w-12">
-              <FiUsers size={18} />
-            </div>
-          </div>
-          <div className="mt-auto pt-3 sm:pt-4">
-            <div className="h-px bg-violet-200/50 dark:bg-violet-500/15 mb-2 sm:mb-3" />
-            <div className="space-y-1.5 sm:space-y-2">
-              <div className="flex items-center justify-between min-w-0 gap-2">
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-violet-500" />
-                  <span className="text-[11px] text-gray-500 dark:text-white/40 sm:text-xs truncate">Afiliados totales</span>
-                </div>
-                <span className="shrink-0 text-xs font-semibold text-gray-900 dark:text-white sm:text-sm">
-                  {totalAffiliates}
-                </span>
-              </div>
-              <div className="flex items-center justify-between min-w-0 gap-2">
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-violet-300" />
-                  <span className="text-[11px] text-gray-500 dark:text-white/40 sm:text-xs truncate">Ventas completadas</span>
-                </div>
-                <span className="shrink-0 text-xs font-semibold text-gray-900 dark:text-white sm:text-sm">
-                  {totalOrders}
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
+      <BankGlassCard
+        label="Saldo total"
+        amount={saldoTotal}
+        icon={FiDollarSign}
+        breakdown={[
+          { label: "Disponible", value: saldoDisponible, color: "#8B5CF6" },
+          { label: "Congelado", value: saldoCongelado, color: "#F59E0B" },
+        ]}
+        defaultHidden={false}
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard
+          icon={FiBookOpen}
+          label="Productos"
+          value={String(products.length)}
+          hint={`${publishedCount} activos · ${underReviewCount} en revisión`}
+          tone="role"
+          aurora
+        />
+        <StatCard
+          icon={FiUsers}
+          label="Estudiantes"
+          value={String(totalStudents)}
+          hint={`${totalAffiliates} afiliados · ${totalOrders} ventas`}
+          tone="role"
+          aurora
+        />
+        <StatCard
+          icon={FiBarChart2}
+          label="Estado"
+          value={`${draftCount} borradores`}
+          hint={`${rejectedCount} rechazados`}
+          tone="neutral"
+          aurora
+        />
       </div>
 
-      <div className="mb-4 grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <BarChartCard
           title="Rendimiento por producto"
           subtitle="Órdenes y estudiantes por curso"
@@ -407,13 +490,18 @@ export default function UserDashboard() {
   const [byProduct, setByProduct] = useState<CommissionByProduct[]>([]);
   const [history, setHistory] = useState<CommissionHistory[]>([]);
   const [catalog, setCatalog] = useState<ProductResponse[]>([]);
-  const [showTotals, setShowTotals] = useState(true);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [productModalOpen, setProductModalOpen] = useState(false);
   const tone = roleTone(role);
 
   const fetchData = async () => {
     setDataLoading(true);
+    const [achRes] = await Promise.allSettled([getMyAchievements()]);
+    if (achRes.status === "fulfilled" && achRes.value.ok && achRes.value.data) {
+      setAchievements(achRes.value.data);
+    }
+
     if (role === "CREATOR") {
       const { ok, result } = await listMyProducts(1, 100);
       if (ok && result.data?.products) setProducts(result.data.products);
@@ -446,20 +534,17 @@ export default function UserDashboard() {
   };
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("aff_show_totals");
-      setShowTotals(stored !== null ? stored === "true" : true);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("aff_show_totals", String(showTotals));
-  }, [showTotals]);
-
-  useEffect(() => {
-    if (!loading) {
-      fetchData();
-    }
+    if (loading) return;
+    let active = true;
+    (async () => {
+      await Promise.resolve();
+      await fetchData();
+      if (!active) return;
+    })();
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, role]);
   const firstName =
     user?.fullname?.split(/\s+/)[0] ?? user?.username ?? "tu cuenta";
@@ -473,8 +558,8 @@ export default function UserDashboard() {
   if (loading) {
     return (
       <div className="animate-pulse space-y-6">
-        <div className="h-8 w-2/3 max-w-md rounded-lg bg-gray-200 dark:bg-white/10" />
-        <div className="h-4 w-full max-w-lg rounded bg-gray-200 dark:bg-white/10" />
+        <div className="h-28 rounded-2xl bg-gray-200 dark:bg-white/10" />
+        <div className="h-40 rounded-2xl bg-gray-200 dark:bg-white/10" />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <div
@@ -492,59 +577,54 @@ export default function UserDashboard() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="mx-auto flex max-w-6xl flex-col"
+      className="mx-auto flex max-w-6xl flex-col gap-6"
     >
-      <UserPageHeader
-        title={`Hola, ${firstName}`}
-        description={
-          role === "STUDENT"
-            ? "Resumen de tu aprendizaje, progreso y accesos rápidos a tus cursos."
-            : role === "CREATOR"
-              ? "Panel de control: ingresos, rendimiento y catálogo de productos."
-              : "Seguimiento de tus promociones, enlaces y comisiones en un solo lugar."
-        }
-        badge={<RoleBadge label={roleLabel(role)} tone={tone} />}
-      />
+      <DashboardHero firstName={firstName} role={role} tone={tone} level={level} xp={xp} />
 
       {role === "STUDENT" && (
         dataLoading ? (
           <div className="animate-pulse space-y-6">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="h-40 rounded-2xl bg-gray-200 dark:bg-white/10" />
+            <div className="grid gap-3 sm:grid-cols-3">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-28 rounded-xl bg-gray-200 dark:bg-white/10" />
               ))}
             </div>
-            <div className="grid gap-4 lg:grid-cols-2">
-              {[1, 2].map((i) => (
-                <div key={i} className="h-44 rounded-xl bg-gray-200 dark:bg-white/10" />
-              ))}
-            </div>
+            <div className="h-72 rounded-2xl bg-gray-200 dark:bg-white/10" />
           </div>
         ) : (
           <>
-            <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <StatCard
-                icon={FiBookOpen}
-                label="Cursos activos"
-                value={String(enrollments.length)}
-                hint={enrollments.length > 0 ? "Continúa tu aprendizaje" : "Explora el catálogo para empezar"}
-                tone="amber"
-              />
-              <StatCard
-                icon={FiAward}
-                label="Nivel actual"
-                value={`Nv. ${level}`}
-                hint={`${xpInLevel} / ${nextXp} XP hacia el siguiente nivel`}
-                tone="neutral"
-              />
-              <StatCard
-                icon={FiTarget}
-                label="Meta semanal"
-                value={`${xpPct}%`}
-                hint="Mantén el ritmo para desbloquear insignias"
-                tone="amber"
-              />
-            </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <StatCard
+              icon={FiBookOpen}
+              label="Cursos activos"
+              value={String(enrollments.length)}
+              hint={enrollments.length > 0 ? "Continúa tu aprendizaje" : "Explora el catálogo para empezar"}
+              tone="role"
+              aurora
+            />
+            <StatCard
+              icon={FiAward}
+              label="Nivel actual"
+              value={`Nv. ${level}`}
+              hint={`${xpInLevel} / ${nextXp} XP hacia el siguiente`}
+              tone="neutral"
+              aurora
+            />
+            <StatCard
+              icon={FiTarget}
+              label="Meta semanal"
+              value={`${xpPct}%`}
+              hint="Mantén el ritmo para desbloquear insignias"
+              tone="role"
+              aurora
+            />
+          </div>
+
+          <div>
+            <StudentRecommendations role={role} />
+          </div>
+
             <div className="grid gap-4 lg:grid-cols-2">
               <SectionCard
                 title="Continuar aprendiendo"
@@ -591,6 +671,8 @@ export default function UserDashboard() {
                 <QuickLink href="/user/explore" label="Explorar catálogo" variant="primary" />
               </SectionCard>
             </div>
+
+            <AchievementsCard achievements={achievements} onViewAll="/user/achievements" />
           </>
         )
       )}
@@ -598,25 +680,24 @@ export default function UserDashboard() {
       {role === "CREATOR" && (
         dataLoading ? (
           <div className="animate-pulse space-y-6">
+            <div className="h-40 rounded-2xl bg-gray-200 dark:bg-white/10" />
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-44 rounded-2xl bg-gray-200 dark:bg-white/10" />
-              ))}
-            </div>
-            <div className="grid gap-4 lg:grid-cols-2">
-              {[1, 2].map((i) => (
-                <div key={i} className="h-64 rounded-2xl bg-gray-200 dark:bg-white/10" />
+                <div key={i} className="h-28 rounded-2xl bg-gray-200 dark:bg-white/10" />
               ))}
             </div>
           </div>
         ) : (
-          <CreatorDashboard
-            products={products}
-            level={level}
-            xpInLevel={xpInLevel}
-            nextXp={nextXp}
-            onNewProduct={() => setProductModalOpen(true)}
-          />
+          <>
+            <CreatorDashboard
+              products={products}
+              level={level}
+              xpInLevel={xpInLevel}
+              nextXp={nextXp}
+              onNewProduct={() => setProductModalOpen(true)}
+            />
+            <AchievementsCard achievements={achievements} onViewAll="/user/achievements" />
+          </>
         )
       )}
 
@@ -624,6 +705,7 @@ export default function UserDashboard() {
         dataLoading ? (
           <div className="animate-pulse space-y-6">
             <div className="h-40 rounded-2xl bg-gray-200 dark:bg-white/10" />
+            <div className="h-32 rounded-2xl bg-gray-200 dark:bg-white/10" />
             <div className="grid gap-4 lg:grid-cols-2">
               {[1, 2].map((i) => (
                 <div key={i} className="h-48 rounded-2xl bg-gray-200 dark:bg-white/10" />
@@ -633,79 +715,18 @@ export default function UserDashboard() {
           </div>
         ) : (
           <>
-            {/* Stats bar — compacta, sin card wrapper */}
-            <div className="mb-6 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <FiDollarSign size={15} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                        Total generado
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setShowTotals((v) => !v)}
-                        className="text-muted-foreground/40 hover:text-foreground transition-colors cursor-pointer"
-                        title={showTotals ? "Ocultar monto" : "Mostrar monto"}
-                      >
-                        {showTotals ? <FiEye size={11} /> : <FiEyeOff size={11} />}
-                      </button>
-                    </div>
-                    <p className="text-sm font-bold text-foreground tabular-nums">
-                      {showTotals ? `$${((commissionStats?.pending.total ?? 0) + (commissionStats?.paid.total ?? 0)).toFixed(2)}` : "****"}
-                    </p>
-                  </div>
-                </div>
-                <div className="hidden sm:block h-8 w-px bg-border" />
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                    <FiClock size={14} />
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                      Pendientes
-                    </p>
-                    <p className="text-sm font-bold text-amber-600 dark:text-amber-400 tabular-nums">
-                      ${(commissionStats?.pending.total ?? 0).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-                <div className="hidden sm:block h-8 w-px bg-border" />
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                    <FiCheckCircle size={14} />
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                      Pagadas
-                    </p>
-                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                      ${(commissionStats?.paid.total ?? 0).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-                <div className="hidden sm:block h-8 w-px bg-border" />
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
-                    <FiLink size={14} />
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                      Programas
-                    </p>
-                    <p className="text-sm font-bold text-foreground tabular-nums">
-                      {affiliations.length}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <BankGlassCard
+              label="Comisiones generadas"
+              amount={(commissionStats?.pending.total ?? 0) + (commissionStats?.paid.total ?? 0)}
+              icon={FiDollarSign}
+              breakdown={[
+                { label: "Pagadas", value: commissionStats?.paid.total ?? 0, color: "#10B981" },
+                { label: "Pendientes", value: commissionStats?.pending.total ?? 0, color: "#F59E0B" },
+                { label: "Rechazadas", value: commissionStats?.rejected.total ?? 0, color: "#EF4444" },
+              ]}
+            />
 
-            {/* Charts */}
-            <div className="mb-6 grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2">
               <AreaChartCard
                 title="Historial mensual"
                 subtitle="Comisiones generadas en los últimos meses"
@@ -734,8 +755,7 @@ export default function UserDashboard() {
               />
             </div>
 
-            {/* Recomendados — carrusel */}
-            <div className="mb-6">
+            <div>
               <div className="mb-3 flex items-center justify-between">
                 <div>
                   <h2 className="text-base font-semibold text-foreground">Recomendados para ti</h2>
@@ -773,7 +793,6 @@ export default function UserDashboard() {
               })()}
             </div>
 
-            {/* Tus programas + Resumen rápido */}
             <div className="grid gap-4 lg:grid-cols-2">
               <SectionCard
                 title="Tus programas"
@@ -871,6 +890,8 @@ export default function UserDashboard() {
                 </div>
               </SectionCard>
             </div>
+
+            <AchievementsCard achievements={achievements} onViewAll="/user/achievements" />
           </>
         )
       )}

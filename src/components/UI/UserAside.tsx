@@ -83,18 +83,6 @@ const NAV_ITEMS: NavItem[] = [
     roles: ["AFFILIATE"],
   },
   {
-    label: "Logros",
-    icon: FiAward,
-    href: "/user/achievements",
-    roles: ["STUDENT", "AFFILIATE", "CREATOR"],
-  },
-  {
-    label: "Logros",
-    icon: FiAward,
-    href: "/admin/achievements",
-    roles: ["ADMIN"],
-  },
-  {
     label: "Revisiones",
     icon: FiShield,
     href: "/admin/reviews",
@@ -135,9 +123,9 @@ const ROLE_CONFIG: Record<
     label: "Estudiante",
     description: "Accede a cursos y contenido educativo.",
     icon: FiBookOpen,
-    colorClass: "bg-amber-500",
-    bgClass: "bg-amber-500/10 dark:bg-amber-500/10",
-    textClass: "text-amber-600 dark:text-amber-400",
+    colorClass: "bg-blue-600",
+    bgClass: "bg-blue-600/10 dark:bg-blue-500/10",
+    textClass: "text-blue-600 dark:text-blue-400",
   },
   CREATOR: {
     label: "Creador",
@@ -179,7 +167,10 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
   const role = (user?.role ?? "STUDENT") as Role;
 
   useEffect(() => {
-    if (role !== "ADMIN") { setPendingReviews(0); return; }
+    if (role !== "ADMIN") {
+      Promise.resolve().then(() => setPendingReviews(0));
+      return;
+    }
 
     const fetchPending = (signal: AbortSignal) => {
       fetch("/api/products/admin/pending-reviews", { signal })
@@ -237,17 +228,8 @@ export function UserAside({ isOpen, onToggle, asideRef, buttonRef }: UserAsidePr
       ref={asideRef}
       animate={{ width: isOpen ? 256 : 56 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="glass row-start-1 row-span-2 max-md:hidden bg-surface rounded-2xl overflow-hidden flex flex-col shadow-sm"
+      className="role-surface row-start-1 row-span-2 max-md:hidden rounded-2xl overflow-hidden flex flex-col shadow-sm"
     >
-      {/* Spotlight overlay */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background: `radial-gradient(ellipse 150% 100% at 0% 0%, var(--role-accent) 0%, transparent 65%)`,
-          opacity: 0.06,
-        }}
-        aria-hidden="true"
-      />
       <div className="flex flex-col flex-1 p-2 min-h-0 justify-between">
         {/* Top section */}
         <div className="space-y-1">

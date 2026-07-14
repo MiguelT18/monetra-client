@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { UserNavbar } from "@/components/UI/navbar/UserNavbar";
 import { UserAside } from "@/components/UI/UserAside";
-import { AuroraField } from "@/components/user/AuroraField";
+import { RoleLayoutOverlay } from "@/components/UI/RoleLayoutOverlay";
 import { useProfile } from "@/hooks/useProfile";
 
 const ADMIN_ROUTES = ["/admin"];
@@ -45,11 +45,8 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <main data-role={role?.toLowerCase()} className="relative min-h-dvh h-full w-full role-ambient-bg p-2 max-md:space-y-2 md:grid md:h-dvh md:min-h-0 md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr] md:gap-2 md:overflow-hidden">
-      {/* Role-tinted ambient aurora */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <AuroraField />
-      </div>
+    <main data-role={role?.toLowerCase()} className="relative min-h-dvh h-full w-full bg-background p-2 max-md:space-y-2 md:grid md:h-dvh md:min-h-0 md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr] md:gap-2 md:overflow-hidden">
+      <RoleLayoutOverlay />
 
       <UserNavbar
         isOpen={isOpen}
@@ -58,17 +55,10 @@ export function UserLayoutClient({ children }: { children: ReactNode }) {
       />
       <UserAside isOpen={isOpen} onToggle={() => setIsOpen((prev) => !prev)} asideRef={asideRef} buttonRef={buttonRef} />
 
-      <section className="app-scrollbar glass relative row-start-2 col-start-2 min-h-0 overflow-y-auto bg-surface rounded-2xl p-3 shadow-sm sm:p-4">
-        {/* Spotlight overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 -z-10 rounded-2xl"
-          style={{
-            background: `radial-gradient(ellipse 120% 100% at 50% 0%, var(--role-accent) 0%, transparent 60%)`,
-            opacity: 0.05,
-          }}
-          aria-hidden="true"
-        />
-        {children}
+      <section className="role-surface relative row-start-2 col-start-2 min-h-0 overflow-hidden rounded-2xl shadow-sm">
+        <div className="app-scrollbar h-full overflow-y-auto rounded-2xl p-3 sm:p-4">
+          {children}
+        </div>
       </section>
     </main>
   );

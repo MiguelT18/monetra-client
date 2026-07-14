@@ -25,16 +25,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
   const { theme, toggle } = useThemeContext();
 
   return (
-    <nav className="glass col-start-2 bg-surface rounded-2xl p-2 shadow-sm relative">
-      {/* Spotlight overlay */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 rounded-2xl"
-        style={{
-          background: `radial-gradient(ellipse 100% 100% at 100% 0%, var(--role-accent) 0%, transparent 65%)`,
-          opacity: 0.06,
-        }}
-        aria-hidden="true"
-      />
+    <nav className="role-surface col-start-2 rounded-2xl p-2 shadow-sm relative">
       {/* Desktop navbar */}
       <div className="max-md:hidden flex items-center gap-4">
         <UserSearch />
@@ -55,7 +46,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
           {/* Theme toggle */}
           <button
             onClick={toggle}
-            className="relative p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10 transition-all cursor-pointer group"
+            className="relative p-2 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-role-accent/50 dark:hover:border-role-accent/50 hover:bg-role-accent/5 dark:hover:bg-role-accent/10 transition-all cursor-pointer group"
           >
             <AnimatePresence mode="wait" initial={false}>
               {theme === "dark" ? (
@@ -65,11 +56,11 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
                   exit={{ opacity: 0, scale: 0.5, rotate: 45 }}
                   transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                  className="block"
+                   className="block"
                 >
                   <FiMoon
                     size={16}
-                    className="text-white/50 group-hover:text-primary transition-colors"
+                    className="text-white/50 group-hover:text-role-accent transition-colors"
                   />
                 </motion.span>
               ) : (
@@ -83,7 +74,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
                 >
                   <FiSun
                     size={16}
-                    className="text-gray-500 group-hover:text-primary transition-colors"
+                    className="text-gray-500 group-hover:text-role-accent transition-colors"
                   />
                 </motion.span>
               )}
@@ -105,7 +96,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
           ) : (
             <Link
               href={`/profile/${user.username}`}
-              className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
+              className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-role-accent/5 dark:hover:bg-role-accent/10"
             >
               <div className="relative shrink-0">
                 {user.avatar ? (
@@ -114,7 +105,7 @@ export function UserNavbar({ isOpen, onToggle, buttonRef }: UserNavbarProps) {
                     alt={`Foto de perfil de ${user.fullname}`}
                     width={36}
                     height={36}
-                    className="rounded-full size-9 object-cover ring-2 ring-gray-200 dark:ring-white/10 group-hover:ring-primary/40 dark:group-hover:ring-primary/60 transition-all"
+                    className="rounded-full size-9 object-cover ring-2 ring-gray-200 dark:ring-white/10 group-hover:ring-role-accent/40 dark:group-hover:ring-role-accent/60 transition-all"
                   />
                 ) : (
                   <div className="rounded-full size-9 flex items-center justify-center bg-gray-200 dark:bg-white/10 ring-2 ring-gray-200 dark:ring-white/10 group-hover:ring-primary/40 dark:group-hover:ring-primary/60 transition-all">

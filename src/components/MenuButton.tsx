@@ -20,11 +20,11 @@ export default function MenuButton({
         event.stopPropagation();
         onToggle();
       }}
-      className="relative flex items-center justify-center size-9 rounded-lg hover:bg-primary/15 transition-colors outline-none group cursor-pointer"
+      className="relative flex items-center justify-center size-9 rounded-lg hover:bg-role-accent/15 transition-colors outline-none group cursor-pointer"
     >
       <div className="grid place-items-center w-5 h-4">
         <motion.span
-          className="col-start-1 row-start-1 w-full h-0.5 rounded-full bg-gray-800 dark:bg-gray-400 group-hover:bg-primary origin-center"
+          className="col-start-1 row-start-1 w-full h-0.5 rounded-full bg-gray-800 dark:bg-gray-400 group-hover:bg-role-accent origin-center"
           animate={
             isOpen
               ? { rotate: 45, y: 0 }
@@ -33,7 +33,7 @@ export default function MenuButton({
           transition={{ duration: 0.2, ease: "easeInOut" }}
         />
         <motion.span
-          className="col-start-1 row-start-1 w-full h-0.5 rounded-full bg-gray-800 dark:bg-gray-400 group-hover:bg-primary"
+          className="col-start-1 row-start-1 w-full h-0.5 rounded-full bg-gray-800 dark:bg-gray-400 group-hover:bg-role-accent"
           animate={
             isOpen
               ? { opacity: 0, scaleX: 0 }
@@ -42,7 +42,7 @@ export default function MenuButton({
           transition={{ duration: 0.15 }}
         />
         <motion.span
-          className="col-start-1 row-start-1 w-full h-0.5 rounded-full bg-gray-800 dark:bg-gray-400 group-hover:bg-primary origin-center"
+          className="col-start-1 row-start-1 w-full h-0.5 rounded-full bg-gray-800 dark:bg-gray-400 group-hover:bg-role-accent origin-center"
           animate={
             isOpen
               ? { rotate: -45, y: 0 }

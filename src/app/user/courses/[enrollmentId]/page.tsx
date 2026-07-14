@@ -325,7 +325,7 @@ export default function CoursePlayerPage({
                   {mod.evaluationPassed ? (
                     <FiCheckCircle size={14} className="shrink-0 text-emerald-500" />
                   ) : mod.hasEvaluation ? (
-                    <FiClipboard size={14} className="shrink-0 text-amber-500" />
+                    <FiClipboard size={14} className="shrink-0 text-role-accent" />
                   ) : null}
                 </button>
                 {activeModule === mi && (
@@ -390,7 +390,7 @@ export default function CoursePlayerPage({
                         {mod.evaluationPassed ? (
                           <FiCheckCircle size={14} className="shrink-0 text-emerald-500" />
                         ) : (
-                          <FiClipboard size={14} className="shrink-0 text-amber-500" />
+                          <FiClipboard size={14} className="shrink-0 text-role-accent" />
                         )}
                         <span className="flex-1 truncate">
                           Evaluación
@@ -501,7 +501,7 @@ export default function CoursePlayerPage({
                     <button
                       onClick={handleStartEvaluation}
                       disabled={evaluationLoading}
-                      className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-amber-600 disabled:opacity-50 cursor-pointer"
+                      className="inline-flex items-center gap-2 rounded-xl bg-role-accent px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 disabled:opacity-50 cursor-pointer"
                     >
                       {evaluationLoading ? (
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

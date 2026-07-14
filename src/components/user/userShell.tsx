@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import type { IconType } from "react-icons";
-import { FiLock, FiTrendingUp, FiStar, FiClock, FiEye, FiThermometer, FiEdit3 } from "react-icons/fi";
+import { FiLock, FiTrendingUp, FiThermometer, FiEdit3, FiAward, FiChevronRight, FiEyeOff, FiEye as FiEyeIcon, FiClock, FiEye } from "react-icons/fi";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Role } from "@/types/user";
+import type { Achievement } from "@/types/user";
+import { achievementIcon } from "@/lib/achievement-icons";
 
 export function xpForNextLevel(level: number): number {
   const linear = 50 * level;
@@ -80,18 +83,43 @@ export function UserPageHeader({
   );
 }
 
+export function AuroraBackdrop({ className = "" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
+    >
+      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-role-accent/10 blur-3xl" />
+      <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-role-accent/6 blur-3xl" />
+      <div className="absolute right-1/4 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-role-accent/8 blur-3xl" />
+      <div className="absolute -top-20 left-1/4 h-72 w-72 rounded-full bg-role-accent/5 blur-3xl" />
+      <div className="absolute -bottom-16 right-1/3 h-48 w-48 rounded-full bg-role-accent/7 blur-3xl" />
+      <div
+        className="absolute inset-0 opacity-[0.10] dark:opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)",
+          backgroundSize: "20px 20px",
+        }}
+      />
+    </div>
+  );
+}
+
 export function StatCard({
   icon: Icon,
   label,
   value,
   hint,
   tone = "neutral",
+  aurora = false,
 }: {
   icon: IconType;
   label: string;
   value: string;
   hint?: string;
   tone?: "neutral" | "blue" | "emerald" | "violet" | "amber" | "red" | "role";
+  aurora?: boolean;
 }) {
   const toneRing =
     tone === "blue"
@@ -100,13 +128,13 @@ export function StatCard({
         ? "border-emerald-200/80 dark:border-emerald-500/20 bg-emerald-500/[0.04] dark:bg-emerald-500/10"
         : tone === "violet"
           ? "border-violet-200/80 dark:border-violet-500/20 bg-violet-500/[0.04] dark:bg-violet-500/10"
-        : tone === "amber"
-          ? "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10"
-        : tone === "red"
-          ? "border-red-200/80 dark:border-red-500/20 bg-red-500/[0.04] dark:bg-red-500/10"
-        : tone === "role"
-          ? "border-role-accent/20 bg-role-accent/[0.04] dark:bg-role-accent/10"
-          : "border-border bg-background/60 dark:bg-white/3";
+          : tone === "amber"
+            ? "border-amber-200/80 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/10"
+            : tone === "red"
+              ? "border-red-200/80 dark:border-red-500/20 bg-red-500/[0.04] dark:bg-red-500/10"
+              : tone === "role"
+                ? "border-role-accent/20 bg-role-accent/[0.04] dark:bg-role-accent/10"
+                : "border-border bg-background/60 dark:bg-white/3";
 
   const iconClass =
     tone === "blue"
@@ -115,13 +143,39 @@ export function StatCard({
         ? "text-emerald-600 dark:text-emerald-400"
         : tone === "violet"
           ? "text-violet-600 dark:text-violet-400"
-        : tone === "amber"
-          ? "text-amber-600 dark:text-amber-400"
-        : tone === "red"
-          ? "text-red-600 dark:text-red-400"
-        : tone === "role"
-          ? "text-role-accent"
-          : "text-gray-500 dark:text-white/50";
+          : tone === "amber"
+            ? "text-amber-600 dark:text-amber-400"
+            : tone === "red"
+              ? "text-red-600 dark:text-red-400"
+              : tone === "role"
+                ? "text-role-accent"
+                : "text-gray-500 dark:text-white/50";
+
+  if (aurora) {
+    return (
+      <div className="relative overflow-hidden rounded-2xl border border-role-accent/15 bg-role-accent/[0.03] p-5 shadow-md backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:shadow-xl dark:bg-role-accent/10">
+        <AuroraBackdrop />
+        <div className="relative flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
+            <p className="text-xs sm:text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
+              {label}
+            </p>
+            <p className="truncate text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
+              {value}
+            </p>
+            {hint ? (
+              <p className="text-xs text-gray-500 dark:text-white/40">{hint}</p>
+            ) : null}
+          </div>
+          <div
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-role-accent/20 bg-role-accent/10 shadow-sm ${iconClass}`}
+          >
+            <Icon size={16} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -153,20 +207,31 @@ export function SectionCard({
   title,
   action,
   children,
+  tone = "neutral",
+  aurora = false,
 }: {
   title: string;
   action?: ReactNode;
   children: ReactNode;
+  tone?: "neutral" | "role";
+  aurora?: boolean;
 }) {
+  const sectionCls =
+    tone === "role"
+      ? "rounded-2xl border border-role-accent/25 bg-role-accent/[0.03] shadow-sm dark:bg-role-accent/[0.06]"
+      : aurora
+        ? "relative overflow-hidden rounded-2xl border border-role-accent/20 bg-role-accent/[0.03] shadow-sm backdrop-blur-sm dark:bg-role-accent/10"
+        : "rounded-2xl border border-border bg-background/60 shadow-sm dark:bg-white/3";
   return (
-    <section className="rounded-2xl border border-border bg-background/60 shadow-sm dark:bg-white/3">
-      <div className="flex flex-col gap-2 border-b border-border px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <section className={sectionCls}>
+      {aurora ? <AuroraBackdrop className="opacity-70" /> : null}
+      <div className="relative flex flex-col gap-2 border-b border-border px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">
           {title}
         </h2>
         {action}
       </div>
-      <div className="p-5 sm:p-6">{children}</div>
+      <div className="relative p-5 sm:p-6">{children}</div>
     </section>
   );
 }
@@ -283,7 +348,7 @@ export function InfoProductCard({
     : undefined;
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/20">
+    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-role-accent/30 ring-1 ring-role-accent/0 group-hover:ring-role-accent/15">
       {/* Accent gradient bar at top */}
       <div
         className="absolute inset-x-0 top-0 z-10 h-1 shrink-0"
@@ -770,5 +835,203 @@ export function RoleBadge({
     >
       {label}
     </span>
+  );
+}
+
+export function rankForLevel(level: number): string {
+  if (level >= 50) return "Leyenda";
+  if (level >= 40) return "Campeón";
+  if (level >= 30) return "Experto";
+  if (level >= 20) return "Veterano";
+  if (level >= 10) return "Avanzado";
+  if (level >= 5) return "Aprendiz";
+  return "Novato";
+}
+
+const ACHIEVEMENT_TABS = [
+  { key: "unlocked", label: "Desbloqueados" },
+  { key: "in_progress", label: "En progreso" },
+  { key: "locked", label: "Próximos" },
+] as const;
+
+export function AchievementsCard({
+  achievements,
+  onViewAll,
+}: {
+  achievements: Achievement[];
+  onViewAll?: string;
+}) {
+  const [tab, setTab] = useState<(typeof ACHIEVEMENT_TABS)[number]["key"]>("unlocked");
+
+  const grouped = {
+    unlocked: achievements.filter((a) => a.status === "unlocked"),
+    in_progress: achievements.filter((a) => a.status === "in_progress"),
+    locked: achievements.filter((a) => a.status === "locked"),
+  };
+
+  const counts = {
+    unlocked: grouped.unlocked.length,
+    in_progress: grouped.in_progress.length,
+    locked: grouped.locked.length,
+  };
+
+  const visible = grouped[tab];
+  const accents: InfoProductAccent[] = [
+    "blue", "emerald", "violet", "amber", "rose", "cyan",
+  ];
+
+  return (
+    <section className="relative overflow-hidden rounded-2xl border border-border bg-background/60 shadow-sm dark:bg-white/3">
+      <AuroraBackdrop className="opacity-60" />
+      <div className="relative border-b border-border px-5 py-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <FiAward size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+                Logros
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-white/45">
+                {counts.unlocked} desbloqueados · {achievements.length} en total
+              </p>
+            </div>
+          </div>
+          {onViewAll && (
+            <Link
+              href={onViewAll}
+              className="inline-flex items-center gap-1 text-xs font-medium text-role-accent hover:underline"
+            >
+              Ver todos
+              <FiChevronRight size={12} />
+            </Link>
+          )}
+        </div>
+
+        <div className="mt-3 flex gap-1.5">
+          {ACHIEVEMENT_TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                tab === t.key
+                  ? "bg-role-accent/10 text-role-accent ring-1 ring-role-accent/30"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-white/50 dark:hover:bg-white/5"
+              }`}
+            >
+              {t.label}
+              <span
+                className={`rounded-full px-1.5 text-[10px] font-bold ${
+                  tab === t.key
+                    ? "bg-role-accent/15 text-role-accent"
+                    : "bg-gray-200 text-gray-500 dark:bg-white/10 dark:text-white/50"
+                }`}
+              >
+                {counts[t.key]}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative p-5 sm:p-6">
+        {visible.length === 0 ? (
+          <p className="py-6 text-center text-sm text-gray-500 dark:text-white/45">
+            {tab === "unlocked"
+              ? "Aún no has desbloqueado logros. ¡Sigue aprendiendo!"
+              : tab === "in_progress"
+                ? "No tienes logros en progreso por ahora."
+                : "No hay logros bloqueados."}
+          </p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {visible.map((item, i) => (
+              <AchievementBadgeCard
+                key={item.id}
+                title={item.title}
+                description={item.description}
+                icon={achievementIcon(item.icon)}
+                progress={item.progress}
+                xpReward={item.xpReward}
+                accent={accents[i % accents.length]}
+                unlockedLabel={item.status === "unlocked" ? "Desbloqueado" : undefined}
+                status={item.status}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+export function BankGlassCard({
+  label,
+  amount,
+  breakdown,
+  icon: Icon,
+  formatter = (v) => `$${v.toFixed(2)}`,
+  defaultHidden = false,
+}: {
+  label: string;
+  amount: number;
+  breakdown?: { label: string; value: number; color: string }[];
+  icon: IconType;
+  formatter?: (v: number) => string;
+  defaultHidden?: boolean;
+}) {
+  const [hidden, setHidden] = useState(defaultHidden);
+
+  const mask = (v: number) => (hidden ? "••••••" : formatter(v));
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-role-accent/30 bg-gradient-to-br from-role-accent/[0.08] via-background to-role-accent/[0.03] p-5 shadow-lg backdrop-blur-md dark:from-role-accent/15 dark:to-role-accent/[0.04] sm:p-6">
+      <AuroraBackdrop className="opacity-80" />
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-role-accent/15 text-role-accent shadow-sm">
+            <Icon size={18} />
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-white/45">
+              {label}
+            </p>
+            <p className="truncate text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+              {mask(amount)}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setHidden((v) => !v)}
+          className="shrink-0 text-foreground/30 transition-colors hover:text-foreground/70 cursor-pointer"
+          aria-label={hidden ? "Mostrar monto" : "Ocultar monto"}
+        >
+          {hidden ? <FiEyeIcon size={16} /> : <FiEyeOff size={16} />}
+        </button>
+      </div>
+
+      {breakdown && breakdown.length > 0 && (
+        <div className="relative mt-4 space-y-2 border-t border-role-accent/15 pt-4">
+          {breakdown.map((b) => (
+            <div
+              key={b.label}
+              className="flex items-center justify-between text-sm"
+            >
+              <span className="flex items-center gap-2 text-gray-500 dark:text-white/50">
+                <span
+                  className="inline-block h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: b.color }}
+                />
+                {b.label}
+              </span>
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {mask(b.value)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

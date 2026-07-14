@@ -58,7 +58,9 @@ export interface UpdateProductInput {
   duration?: number | null;
   rating?: number | null;
   modules?: ModuleData | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   draftChanges?: Record<string, any> | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   previousValues?: Record<string, any> | null;
 }
 
@@ -77,10 +79,12 @@ export interface ProductResponse {
   affiliateVideoUrl?: string | null;
   introVideoUrl?: string | null;
   category?: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   draftChanges?: Record<string, any> | null;
   duration?: number | null;
   rating?: number | null;
   modules?: ModuleData | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   previousValues?: Record<string, any> | null;
   createdAt: string;
   updatedAt: string;
@@ -164,10 +168,27 @@ export interface CatalogResult {
   totalPages: number;
 }
 
+export type RecommendationMode = "interests" | "best_sellers" | "recent";
+
+export interface RecommendationResult {
+  mode: RecommendationMode;
+  products: ProductResponse[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export async function listCatalog(page = 1, limit = 12) {
   const res = await fetch(`/api/products/catalog?page=${page}&limit=${limit}`);
   const {ok, result} = await res.json().then(r => ({ok: res.ok, result: r}));
   return { ok, result };
+}
+
+export async function getRecommendations(page = 1, limit = 10) {
+  const res = await fetch(`/api/products/recommendations?page=${page}&limit=${limit}`);
+  const { ok, result } = await res.json().then(r => ({ ok: res.ok, result: r }));
+  return { ok, result: (result?.data ?? result) as RecommendationResult };
 }
 
 export async function getProductPreview(productId: string) {

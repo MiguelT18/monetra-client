@@ -340,14 +340,14 @@ export default function ExplorePage() {
   const query = searchQuery.toLowerCase().trim();
   const searchedProducts = query
     ? products.filter((p) => {
-        const producer = (p as any).producer as { fullname?: string; username?: string } | undefined;
-        const producerName = producer?.fullname ?? producer?.username ?? "";
-        return (
-          p.title.toLowerCase().includes(query) ||
-          p.description.toLowerCase().includes(query) ||
-          producerName.toLowerCase().includes(query)
-        );
-      })
+      const producer = (p as any).producer as { fullname?: string; username?: string } | undefined;
+      const producerName = producer?.fullname ?? producer?.username ?? "";
+      return (
+        p.title.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query) ||
+        producerName.toLowerCase().includes(query)
+      );
+    })
     : products;
 
   const roleFiltered = role === "AFFILIATE"
@@ -418,20 +418,20 @@ export default function ExplorePage() {
       className="mx-auto flex max-w-6xl flex-col"
     >
       {/* Hero Header */}
-      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/[0.04] via-background to-primary/[0.02] p-5 sm:p-6 dark:from-primary/[0.06] dark:to-primary/[0.02]">
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-role-accent/[0.05] via-background to-role-accent/[0.02] p-5 sm:p-6">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl dark:bg-primary/10" />
-          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-amber-500/5 blur-3xl dark:bg-amber-500/10" />
-          <div className="absolute right-1/4 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-violet-500/5 blur-3xl dark:bg-violet-500/10" />
-          <div className="absolute -top-20 left-1/4 h-72 w-72 rounded-full bg-sky-500/5 blur-3xl dark:bg-sky-500/10" />
-          <div className="absolute -bottom-16 right-1/3 h-48 w-48 rounded-full bg-emerald-500/5 blur-3xl dark:bg-emerald-500/10" />
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-role-accent/8 blur-3xl" />
+          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-role-accent/5 blur-3xl" />
+          <div className="absolute right-1/4 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-role-accent/6 blur-3xl" />
+          <div className="absolute -top-20 left-1/4 h-72 w-72 rounded-full bg-role-accent/4 blur-3xl" />
+          <div className="absolute -bottom-16 right-1/3 h-48 w-48 rounded-full bg-role-accent/7 blur-3xl" />
         </div>
         <div className="pointer-events-none absolute inset-0 opacity-[0.10] dark:opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)", backgroundSize: "20px 20px" }} />
 
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-role-accent/10 text-role-accent">
                 <FiShoppingBag size={20} />
               </div>
               <div>
@@ -455,25 +455,25 @@ export default function ExplorePage() {
 
         {/* Promociones y descuentos de temporada */}
         <div className="relative mt-5 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-border bg-gradient-to-br from-amber-50/60 to-orange-50/60 p-4 dark:from-amber-500/5 dark:to-orange-500/5">
+          <div className="rounded-xl border border-border bg-gradient-to-br from-role-accent/[0.07] to-transparent p-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-role-accent/15 text-role-accent">
                 <FiZap size={14} />
               </div>
-              <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">Descuentos de temporada</span>
+              <span className="text-sm font-semibold text-role-accent">Descuentos de temporada</span>
             </div>
-            <p className="mt-2 text-xs leading-relaxed text-amber-600/80 dark:text-amber-400/70">
+            <p className="mt-2 text-xs leading-relaxed text-white/55">
               Aprovecha nuestras ofertas estacionales con hasta <strong>40% OFF</strong> en cursos seleccionados. Precios especiales por tiempo limitado.
             </p>
           </div>
-          <div className="rounded-xl border border-border bg-gradient-to-br from-blue-50/60 to-sky-50/60 p-4 dark:from-blue-500/5 dark:to-sky-500/5">
+          <div className="rounded-xl border border-border bg-gradient-to-br from-role-accent/[0.04] to-transparent p-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-role-accent/15 text-role-accent">
                 <FiClock size={14} />
               </div>
-              <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Oferta relámpago</span>
+              <span className="text-sm font-semibold text-role-accent">Oferta relámpago</span>
             </div>
-            <p className="mt-2 text-xs leading-relaxed text-blue-600/80 dark:text-blue-400/70">
+            <p className="mt-2 text-xs leading-relaxed text-white/55">
               <strong>3 días restantes</strong> para aprovechar los mejores precios en productos destacados. No te pierdas esta oportunidad.
             </p>
           </div>
@@ -500,7 +500,7 @@ export default function ExplorePage() {
 
       {/* Search + Filters */}
       <div className="relative mb-6 space-y-3">
-        <div className="flex items-center gap-2 rounded-xl border border-border bg-background/80 px-4 py-2.5 shadow-sm transition focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/30 dark:bg-white/[0.03]">
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-background/80 px-4 py-2.5 shadow-sm transition focus-within:border-role-accent/50 focus-within:ring-1 focus-within:ring-role-accent/30 dark:bg-white/[0.03]">
           <FiSearch className="shrink-0 text-gray-400 dark:text-white/40" size={15} />
           <input
             type="search"
@@ -526,11 +526,10 @@ export default function ExplorePage() {
           <div className="h-5 w-px bg-border" />
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`relative flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-              hasActiveFilters
-                ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-300"
-                : "text-gray-500 hover:bg-gray-100 dark:text-white/50 dark:hover:bg-white/10"
-            }`}
+            className={`relative flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${hasActiveFilters
+              ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-300"
+              : "text-gray-500 hover:bg-gray-100 dark:text-white/50 dark:hover:bg-white/10"
+              }`}
           >
             <FiSliders size={13} />
             Ordenar
@@ -539,15 +538,14 @@ export default function ExplorePage() {
         </div>
 
         {/* Hotmart-style category strip */}
-        <div className="overflow-x-auto scrollbar-none">
-          <div className="flex gap-1.5 pb-1">
+        <div className="overflow-x-auto">
+          <div className="flex gap-1.5 pb-2">
             <button
               onClick={() => setActiveFilters((prev) => ({ ...prev, selectedCategory: [] }))}
-              className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                activeFilters.selectedCategory.length === 0
-                  ? "bg-primary text-white shadow-sm"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
-              }`}
+              className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${activeFilters.selectedCategory.length === 0
+                ? "bg-primary text-white shadow-sm"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
+                }`}
             >
               Todas
             </button>
@@ -562,11 +560,10 @@ export default function ExplorePage() {
                       : [...prev.selectedCategory, cat.id],
                   }))
                 }
-                className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                  activeFilters.selectedCategory.includes(cat.id)
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
-                }`}
+                className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${activeFilters.selectedCategory.includes(cat.id)
+                  ? "bg-primary text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
+                  }`}
               >
                 {cat.label}
               </button>
@@ -651,11 +648,10 @@ export default function ExplorePage() {
                       <button
                         key={opt.value}
                         onClick={() => setActiveFilters((prev) => ({ ...prev, temperature: opt.value }))}
-                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                          activeFilters.temperature === opt.value
-                            ? "bg-primary/10 text-primary ring-1 ring-primary/30 dark:bg-primary/20 dark:text-primary-300"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
-                        }`}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${activeFilters.temperature === opt.value
+                          ? "bg-primary/10 text-primary ring-1 ring-primary/30 dark:bg-primary/20 dark:text-primary-300"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
+                          }`}
                       >
                         {opt.label}
                       </button>
@@ -673,11 +669,10 @@ export default function ExplorePage() {
                         <button
                           key={opt.value}
                           onClick={() => setActiveFilters((prev) => ({ ...prev, sortBy: opt.value }))}
-                          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                            activeFilters.sortBy === opt.value
-                              ? "bg-primary/10 text-primary ring-1 ring-primary/30 dark:bg-primary/20 dark:text-primary-300"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
-                          }`}
+                          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${activeFilters.sortBy === opt.value
+                            ? "bg-primary/10 text-primary ring-1 ring-primary/30 dark:bg-primary/20 dark:text-primary-300"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
+                            }`}
                         >
                           <Icon size={12} />
                           {opt.label}
@@ -699,7 +694,7 @@ export default function ExplorePage() {
           ))}
         </div>
       ) : products.length === 0 ? (
-        <SectionCard title="Productos disponibles">
+        <SectionCard title="Productos disponibles" tone="role">
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/5">
               <FiInbox size={20} className="text-gray-400 dark:text-white/40" />
@@ -715,7 +710,7 @@ export default function ExplorePage() {
           </div>
         </SectionCard>
       ) : catalogItems.length === 0 ? (
-        <SectionCard title="Sin resultados">
+        <SectionCard title="Sin resultados" tone="role">
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/5">
               <FiSearch size={20} className="text-gray-400 dark:text-white/40" />
@@ -740,6 +735,7 @@ export default function ExplorePage() {
         </SectionCard>
       ) : (
         <SectionCard
+          tone="role"
           title={query ? `Resultados para "${searchQuery}"` : "Productos disponibles"}
           action={
             <span className="text-xs text-gray-500 dark:text-white/45">
@@ -863,46 +859,46 @@ export default function ExplorePage() {
                     Sin descripción para afiliados
                   </p>
                 )}
-                  {affiliateError && (
-                    <p className="text-xs text-red-500 text-center">{affiliateError}</p>
+                {affiliateError && (
+                  <p className="text-xs text-red-500 text-center">{affiliateError}</p>
+                )}
+                <div className="flex items-center gap-2 pt-2">
+                  {affiliateDone ? (
+                    <>
+                      <div className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                        <FiCheck size={16} />
+                        ¡Afiliado exitosamente!
+                      </div>
+                      <button
+                        onClick={handleAffiliateClose}
+                        className="flex items-center justify-center gap-1.5 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 dark:text-white/70 dark:hover:bg-white/5 cursor-pointer"
+                      >
+                        Cerrar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleAffiliateConfirm}
+                        disabled={affiliating}
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                      >
+                        {affiliating ? (
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        ) : (
+                          <FiLink size={14} />
+                        )}
+                        Confirmar afiliación
+                      </button>
+                      <button
+                        onClick={handleAffiliateClose}
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 dark:text-white/70 dark:hover:bg-white/5 cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                    </>
                   )}
-                  <div className="flex items-center gap-2 pt-2">
-                    {affiliateDone ? (
-                      <>
-                        <div className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
-                          <FiCheck size={16} />
-                          ¡Afiliado exitosamente!
-                        </div>
-                        <button
-                          onClick={handleAffiliateClose}
-                          className="flex items-center justify-center gap-1.5 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 dark:text-white/70 dark:hover:bg-white/5 cursor-pointer"
-                        >
-                          Cerrar
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={handleAffiliateConfirm}
-                          disabled={affiliating}
-                          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 cursor-pointer"
-                        >
-                          {affiliating ? (
-                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                          ) : (
-                            <FiLink size={14} />
-                          )}
-                          Confirmar afiliación
-                        </button>
-                        <button
-                          onClick={handleAffiliateClose}
-                          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 dark:text-white/70 dark:hover:bg-white/5 cursor-pointer"
-                        >
-                          Cancelar
-                        </button>
-                      </>
-                    )}
-                  </div>
+                </div>
               </div>
             </motion.div>
           </motion.div>

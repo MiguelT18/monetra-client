@@ -49,9 +49,9 @@ function SettingsSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-border bg-surface shadow-sm">
+    <section className="role-solid rounded-2xl shadow-sm">
       <div className="flex items-center gap-3 border-b border-border px-5 py-4 sm:px-6">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-role-accent/10 text-role-accent">
           <Icon size={18} />
         </div>
         <div className="min-w-0">
@@ -370,7 +370,7 @@ export default function UserSettings() {
               <div className="flex flex-wrap gap-2">
                 <a
                   href="/admin/achievements"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-role-accent px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-role-accent/25 transition-all hover:opacity-90 hover:shadow-role-accent/40 cursor-pointer"
                 >
                   Gestionar logros
                   <FiArrowRight size={13} />
@@ -430,7 +430,7 @@ export default function UserSettings() {
               </a>
               <a
                 href="/user/dashboard"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-role-accent px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-role-accent/25 transition-all hover:opacity-90 hover:shadow-role-accent/40 cursor-pointer"
               >
                 Dashboard
                 <FiArrowRight size={13} />
@@ -490,7 +490,7 @@ export default function UserSettings() {
         )}
 
         {/* Save Bar */}
-        <div className="sticky bottom-0 z-9999 -mx-1 rounded-2xl border border-primary/20 bg-linear-to-r from-primary/5 via-surface to-primary/5 px-5 py-4 shadow-lg shadow-primary/5 backdrop-blur-md sm:px-6 dark:border-primary/10 dark:from-primary/10 dark:via-surface dark:to-primary/10">
+        <div className="sticky bottom-0 z-9999 -mx-1 rounded-2xl border border-role-accent/20 bg-linear-to-r from-role-accent/5 via-surface to-role-accent/5 px-5 py-4 shadow-lg shadow-role-accent/5 backdrop-blur-md sm:px-6 dark:border-role-accent/10 dark:from-role-accent/10 dark:via-surface dark:to-role-accent/10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               {feedback && (
@@ -540,7 +540,7 @@ export default function UserSettings() {
                 type="button"
                 onClick={handleSaveProfile}
                 disabled={saving || !profileDirty}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-role-accent px-4 py-2 text-sm font-semibold text-white shadow-md shadow-role-accent/25 transition-all hover:opacity-90 hover:shadow-role-accent/40 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
               >
                 {saving ? (
                   <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

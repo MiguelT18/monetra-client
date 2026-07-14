@@ -37,9 +37,9 @@
   --chart-4: #ef4444;
   --chart-5: #8b5cf6;
   --role-accent: #7c3aed;
-  --glass-bg: rgba(255,255,255,0.55);
+  --glass-bg: rgba(255,255,255,0.78);
   --glass-border: rgba(255,255,255,0.6);
-  --glass-blur: 12px;
+  --glass-blur: 20px;
 }
 
 html.dark,
@@ -75,9 +75,9 @@ html.dark,
   --chart-4: #ef4444;
   --chart-5: #8b5cf6;
   --role-accent: #8b5cf6;
-  --glass-bg: rgba(18,18,33,0.45);
-  --glass-border: rgba(255,255,255,0.08);
-  --glass-blur: 12px;
+  --glass-bg: rgba(18,18,33,0.70);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-blur: 20px;
 }
 
 @theme inline {
@@ -120,19 +120,30 @@ html.dark,
 /* ─── Role accent colors ─── */
 
 [data-role="affiliate"] { --role-accent: #059669; }
-[data-role="student"]   { --role-accent: #d97706; }
+[data-role="student"]   { --role-accent: #2563eb; }
 [data-role="creator"]   { --role-accent: #7c3aed; }
 [data-role="admin"]     { --role-accent: #ef4444; }
 
 .dark [data-role="affiliate"] { --role-accent: #34d399; }
-.dark [data-role="student"]   { --role-accent: #f59e0b; }
+.dark [data-role="student"]   { --role-accent: #60a5fa; }
 .dark [data-role="creator"]   { --role-accent: #8b5cf6; }
 .dark [data-role="admin"]     { --role-accent: #f87171; }
 
 .glass {
+  position: relative;
   background-color: var(--glass-bg);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(var(--glass-blur));
+}
+
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #000;
+  filter: url(#glass-noise);
+  pointer-events: none;
 }
 
 @layer base {
@@ -174,47 +185,45 @@ html, body, .app-scrollbar {
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-.app-scrollbar::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
   -webkit-appearance: none;
 }
 
-html::-webkit-scrollbar-track,
-body::-webkit-scrollbar-track,
-.app-scrollbar::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: var(--scrollbar-track);
   border-radius: 9999px;
 }
 
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb,
-.app-scrollbar::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-thumb);
   border-radius: 9999px;
-  border: 2px solid var(--scrollbar-track);
+  border: 1px solid transparent;
+  background-clip: padding-box;
   min-height: 40px;
   transition: background-color 0.2s ease;
 }
 
-html::-webkit-scrollbar-thumb:hover,
-body::-webkit-scrollbar-thumb:hover,
-.app-scrollbar::-webkit-scrollbar-thumb:hover {
+*::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-thumb-hover);
 }
 
-html::-webkit-scrollbar-thumb:active,
-body::-webkit-scrollbar-thumb:active,
-.app-scrollbar::-webkit-scrollbar-thumb:active {
+*::-webkit-scrollbar-thumb:active {
   background-color: var(--scrollbar-thumb-active);
 }
 
-html::-webkit-scrollbar-corner,
-body::-webkit-scrollbar-corner,
-.app-scrollbar::-webkit-scrollbar-corner {
+*::-webkit-scrollbar-corner {
   background: var(--scrollbar-track);
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 @keyframes role-ambient-drift {
@@ -235,6 +244,63 @@ body::-webkit-scrollbar-corner,
   background-size: 150% 150%;
   animation: role-ambient-drift 18s linear infinite;
 }
+
+/* ─── Neutral solid, granular surface with a faint corner role glow ───
+   (the subtle "before" look: opaque surface + grain + faint role accent) */
+.role-surface {
+  position: relative;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.role-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #000;
+  filter: url(#glass-noise);
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.role-surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(130% 120% at 100% 0%, color-mix(in srgb, var(--role-accent) 14%, transparent) 0%, transparent 55%);
+  opacity: 0.55;
+}
+
+/* ─── Subtly role-tinted, granular surface for cards ─── */
+.role-solid {
+  position: relative;
+  background-color: color-mix(in srgb, var(--role-accent) 6%, var(--surface));
+  background-image:
+    radial-gradient(ellipse 90% 70% at 50% 0%, color-mix(in srgb, var(--role-accent) 13%, transparent) 0%, transparent 72%);
+  border: 1px solid color-mix(in srgb, var(--role-accent) 12%, var(--border));
+}
+
+.role-solid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #000;
+  filter: url(#glass-noise);
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+/* Grain must be visible on dark surfaces too (black noise is invisible there) */
+.dark .role-surface::before,
+.dark .role-solid::before {
+  background: #ffffff;
+  opacity: 0.045;
+}
+
 
 html {
   font-size: 16px;

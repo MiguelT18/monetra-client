@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { FiPercent } from "react-icons/fi";
-import { RoleAurora } from "@/components/user/RoleAurora";
 
 export function AffiliationsHero({
   title,
@@ -15,10 +14,16 @@ export function AffiliationsHero({
 }) {
   return (
     <div className="relative mb-8 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-role-accent/[0.04] via-background to-role-accent/[0.02] p-6 sm:p-8 dark:from-role-accent/[0.06] dark:to-role-accent/[0.02]">
-      <div className="pointer-events-none absolute inset-0">
-        <RoleAurora position="top-left" intensity="soft" opacity={0.6} />
-        <RoleAurora position="bottom-right" intensity="soft" opacity={0.4} />
-      </div>
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: `
+            radial-gradient(ellipse 45% 60% at 5% 0%, color-mix(in srgb, var(--role-accent) 22%, transparent) 0%, transparent 60%),
+            radial-gradient(ellipse 40% 55% at 100% 100%, color-mix(in srgb, var(--role-accent) 18%, transparent) 0%, transparent 60%)
+          `,
+        }}
+        aria-hidden="true"
+      />
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.10] dark:opacity-[0.06]"
         style={{

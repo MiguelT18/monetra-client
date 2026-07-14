@@ -155,16 +155,16 @@ export function NotificationButton() {
       <button
         ref={buttonRef}
         onClick={() => setOpen((prev) => !prev)}
-        className={`relative p-2 rounded-lg border transition-all cursor-pointer group ${
+        className={`role-surface relative p-2 rounded-lg border transition-all cursor-pointer group ${
           unreadCount > 0 || pendingReviewCount > 0
             ? "bg-primary/10 border-primary/30 dark:bg-primary/15 dark:border-primary/40"
-            : "bg-gray-100 dark:bg-white/5 border-border hover:border-primary/50 dark:hover:border-primary/50"
+            : "hover:border-role-accent/50 dark:hover:border-role-accent/50"
         }`}
       >
         {unreadCount > 0 || pendingReviewCount > 0 ? (
-          <FiBell size={16} className="text-primary transition-colors" />
+          <FiBell size={16} className="text-role-accent transition-colors" />
         ) : (
-          <FiBellOff size={16} className="text-gray-400 dark:text-white/40 group-hover:text-primary transition-colors" />
+          <FiBellOff size={16} className="text-gray-400 dark:text-white/40 group-hover:text-role-accent transition-colors" />
         )}
         {(unreadCount > 0 || pendingReviewCount > 0) && (
           <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white shadow-sm">
@@ -190,7 +190,7 @@ export function NotificationButton() {
           </div>
           <button
             onClick={() => { setOpen(false); router.push("/user/inbox"); }}
-            className="text-xs font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+            className="text-xs font-medium text-role-accent hover:text-role-accent/80 transition-colors cursor-pointer"
           >
             Ver todas
           </button>
@@ -242,14 +242,14 @@ export function NotificationButton() {
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
                   className={`group relative flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-all last:border-b-0 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/[0.02] ${
-                    n.read ? "" : "bg-primary/[0.02]"
+                    n.read ? "" : "bg-role-accent/[0.03]"
                   }`}
                 >
                   <div
                     className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
                       n.read
                         ? "bg-gray-100 text-gray-400 dark:bg-white/5"
-                        : "bg-primary/10 text-primary"
+                        : "bg-role-accent/10 text-role-accent"
                     }`}
                   >
                     <FiBell size={13} />
@@ -269,7 +269,7 @@ export function NotificationButton() {
                     </div>
                   </div>
                   {!n.read ? (
-                    <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                    <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-role-accent" />
                   ) : (
                     <FiCheck size={12} className="mt-2 shrink-0 text-gray-300 dark:text-white/20" />
                   )}
@@ -279,7 +279,7 @@ export function NotificationButton() {
                 <button
                   onClick={() => fetchNotifications(false)}
                   disabled={loading}
-                  className="w-full border-t border-border px-4 py-2.5 text-center text-xs font-medium text-primary hover:bg-primary/5 transition-colors disabled:opacity-50 cursor-pointer"
+                   className="w-full border-t border-border px-4 py-2.5 text-center text-xs font-medium text-role-accent hover:bg-role-accent/5 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? "Cargando..." : `Cargar más (${notifications.length}/${total})`}
                 </button>

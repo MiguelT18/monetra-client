@@ -115,7 +115,7 @@ export function DropdownMenu({
             position: "fixed",
             zIndex: 50,
           }}
-          className={`bg-surface border border-border rounded-xl shadow-xl dark:shadow-black/40 overflow-hidden ${className}`}
+          className={`role-surface border border-border rounded-xl shadow-xl dark:shadow-black/40 overflow-hidden ${className}`}
         >
           {children}
         </motion.div>
